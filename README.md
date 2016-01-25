@@ -1,3 +1,4 @@
 # PLT2016Spring
-PLT Team Project \n
+PLT Team Project
+
 Team Github Repo
