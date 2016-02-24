@@ -17,4 +17,4 @@ PDFs we've handed in. eg:
 | Lanting | lh2756@barnard.edu     |  | kekeleila
 | Jon     | jz2648@columbia.edu    |  | jzacsh
 
-[Availability chart](http://www.when2meet.com/?4146526­JMFY
+[Availability chart](http://www.when2meet.com/?4146526­JMFYKY)
