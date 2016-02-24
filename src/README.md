@@ -1,12 +1,12 @@
-The EqualsEquals compiler
+The "EqualsEquals" compiler
 -------------------
 
 Coded in OCaml, the "EqualsEquals" (aka "eqeq") language is designed for simple
 mathematical equation evaluation. For more details, see its [Reference
 Manual](https://docs.google.com/document/d/1uHGe2qazuy-I7Vem7u8muxDnWaysDX49lKMbMmlDml4)
-(LRM in code and comments).
+_("LRM" for "Language [RM]" in code and comments)_.
 
-## Building Testing
+## Building & Testing
 
 To build and run end-to-end test suite:
 ```sh
