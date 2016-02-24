@@ -10,6 +10,10 @@ microc.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		microc.native
 
+.PHONY : test
+test: microc.native testall.sh
+	./testall.sh
+
 # "make clean" removes all generated files
 
 .PHONY : clean
