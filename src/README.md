@@ -1,9 +1,10 @@
-The MicroC compiler
+The EqualsEquals compiler
 -------------------
 
-Coded in OCaml, this takes a highly stripped-down subset of C (ints,
-bools, and void types, arithmetic, if-else, for, and while statements,
-and user-defined functions) and compiles it into LLVM IR.
+Coded in OCaml, the "EqualsEquals" (aka "eqeq") language is designed for simple
+mathematical equation evaluation. For more details, see its [Reference
+Manual](https://docs.google.com/document/d/1uHGe2qazuy-I7Vem7u8muxDnWaysDX49lKMbMmlDml4)
+(LRM in code and comments).
 
 ## Building Testing
 
