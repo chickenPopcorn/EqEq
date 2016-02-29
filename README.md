@@ -18,3 +18,7 @@ PDFs we've handed in. eg:
 | Jon     | jz2648@columbia.edu    |  | [jzacsh](https://github.com/jzacsh)
 
 [Availability chart](http://www.when2meet.com/?4146526­JMFYKY)
+
+### T.A. & Weekly Meeting
+We meet with our TA, Daniel Echikson (dje2125@columbia.edu), every Wednesday
+during his office hours in Mudd TA room, at 1:15.
