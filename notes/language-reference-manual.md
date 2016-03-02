@@ -5,10 +5,12 @@
 ### Phase 1 of 5: Scanning with `lex`
 
 #### What *Is* An `EqualsEquals` Program?
-A valid program is a series of 1 or more `find` expressions. A find expression
-is requires a "context" (aka "scope"), by default the global scope. Other than
-the global scope, a context is a block of curly brace enclosed code that defines
-explicit mathematical equations and functions (or multi-line equations).
+A valid program is a series of 1 or more `find` expressions. A `find` expression
+is authored with a particular "context" (aka "scope") in mind, by default the
+global scope. Other than the global scope, a context is a block of curly brace
+enclosed code that defines explicit mathematical equations and functions _(or
+multi-line equations)_.
+
 An important feature of `EqualsEquals` is that context need not make equations
 explicit _(that is, an equation can have multiple unknowns)_ until its
 convenient, at the time a `find` block is written. An example of a `find` block
