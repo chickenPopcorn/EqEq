@@ -1,13 +1,17 @@
 # `EqualsEquals` Language Reference Manual (LRM)
 
 TODO:s
-- move LRM into this doc
+- TODO(): move LRM google doc into this doc
   - refactor headers to look like (C LRM)[https://www.bell-labs.com/usr/dmr/www/cman.pdf]
-- address 'Keyword Meanings" TODO
-- address 'Reserved Keywords" TODO
-- start scanner.mll based on Keywords & Expressions sectinos
-  - update this doc based on what works
-- review TODOs with TA/edwards
+  - expand missing pieces
+- TODO(): "declarations" section
+- TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
+- TODO(nam): address 'Keyword Meanings" TODO
+- TODO(tianci): address 'Reserved Keywords" TODO
+- as group:
+  - start scanner.mll based on Keywords & Expressions sectinos
+    - update this doc based on what works
+- TODO(): review TODOs with TA/edwards (email Daniel)
 
 ## Compiler Phases
 
