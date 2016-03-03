@@ -33,6 +33,7 @@ Otherwise, a valid program may also include:
 
 #### Data Types & Syntax
 1. Floating point numbers, including integers:
+
   eg: `123`, `1.34e-4`, `0.23`, `.13`, `0e1`.
 
   Regular expression might be:
@@ -46,6 +47,7 @@ Otherwise, a valid program may also include:
   let flt = num | ((num | 0)? frac) | (num exp)
   ```
 2. Variables: numbes stored with user-defined nams:
+
   eg: `weight = 100 /*grams*/`
 
   Regular expression might be:
@@ -56,6 +58,7 @@ Otherwise, a valid program may also include:
   ```
 
 3. Contexts: blocks of symbols:
+
   eg: `Euclid: {/* any number of lines of EqualsEquals here */}`
 
   Regular Expression might be _(builds on variables' expressions)_:
