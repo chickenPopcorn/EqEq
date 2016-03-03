@@ -25,13 +25,15 @@ Euclid:find gcd {
 
 Otherwise, a valid program may also include:
 
-1. **variables** and their assignment operations;
+1. **variables** and their assignment operations
 2. **arithmetic** expressions: addition, subtraction, multiplication, division;
 3. **comments** characters ignored by the compiler
 4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a   = 3`)
+5. **strings** used for printing
+6. **equality** operators _(which evaluate to `1` or `0` if both operators are equal)_
 
 
-#### Data Types & Syntax
+#### Lexemes/Tokens
 1. Floating point numbers, including integers:
 
   eg: `123`, `1.34e-4`, `0.23`, `.13`, `0e1`.
@@ -69,6 +71,26 @@ Otherwise, a valid program may also include:
 
   (*note: starts with uppercase letter, ends with ':'*)
   ```
+
+4. Strings: mostly used for printing, results:
+
+  eg: `printf("result of my maths: %d\n", gcd)`
+
+  TODO: double check these regexp. from http://caml.infria.fr/pub/docs/manual-ocaml/lex.html
+  TODO: should lexeme include quotes or is that in this regexp?
+
+  Regular Expression might be _(builds on variables' expressions)_:
+  ```ocaml
+  let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
+  let spc = \(\| "| '| n| t| b| r| space)
+  let num = ['0' - '9']                   in 
+  let aph = ['a' - 'z'] | ['A' - 'Z']     in
+
+  let str = (aph | num | chr | spc)*
+
+  (*note: starts with uppercase letter, ends with ':'*)
+  ```
+  
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
