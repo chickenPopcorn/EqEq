@@ -152,7 +152,7 @@ TODO: explain each
   ```ocaml
   let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
   let spc = \(\| "| '| n| t| b| r| space)
-  let num = ['0' - '9']                   in 
+  let num = ['0' - '9']                   in
   let aph = ['a' - 'z'] | ['A' - 'Z']     in
 
   let str = (aph | num | chr | spc)*
