@@ -174,21 +174,15 @@ Order of precedence of expressions (`expr`), and their meanings:
    b * (4 + 5)
    b * 9 // same
    ```
- + id'['expr?']'           // TODO: maybe in scanner?
- + - expr
- + !exp   // eg: `if ((!(a % b))+2)) == (a % !b + 2)`
- + exp ^ exp // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
- + exp * exp
- + exp / exp
- + exp % exp
- + expr + expr
- + expr - expr
- + exp > exp
- + exp >= exp
- + exp < exp
- + exp <= exp
- + exp != exp
- + exp == exp
+ + `id'['expr?']'`           // TODO: maybe in scanner?
+ + `-expr`
+ + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)`
+ + `exp ^ exp` // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
+ + `exp * exp`, `exp / exp`, `exp % exp`
+ + `expr + expr`, `expr - expr`
+ + equality/inequality:
+   + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp`
+     `exp != exp`, `exp == exp`
  + exp && exp
  + expr || expr
  + expr = expr
