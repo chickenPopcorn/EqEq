@@ -3,6 +3,8 @@
 TODO:s
 - move LRM into this doc
   - refactor headers to look like (C LRM)[https://www.bell-labs.com/usr/dmr/www/cman.pdf]
+- address 'Keyword Meanings" TODO
+- address 'Reserved Keywords" TODO
 - start scanner.mll based on Keywords & Expressions sectinos
   - update this doc based on what works
 - review TODOs with TA/edwards
@@ -44,15 +46,26 @@ Otherwise, a valid program may also include:
 
 
 #### Keywords (Reserved words)
+TODO: explain each
 + `if`
 + `elif`
 + `else`
 + `return`
-+ `find`
++ `MyContext:find` and `find`
+  Means the following curly-brace enclosed set of statements should be evaluated
+  with access to previously declared expressions in an associated "context".
+  + `with` optionally specifies any missing identifiers in given context.
+      eg: with simple assignment
+      ```c
+      pendulum: find vector with length = 5 {...}
+      ```
+
+      eg:  with vector assignment (causing equiv. of `for` loop in other langs)
+      ```c
+      pendulum: find vector with length = range(0, 20) {
+      ```
 + `function`
 + `print`
-+ `with`
-+ `in`
 + `range`
 
 #### Lexemes/Tokens
@@ -114,12 +127,20 @@ Otherwise, a valid program may also include:
   Expressions are groups of lexemes/tokens (defined above), parenthesized `(` and `)` sub-expressions,
   and combinations of expressions and operators:
 
+##### Keyword Meanings:
 Each operator's meaning is defined below:
-  TODO someone have a blast! page 3+ of C LRM
+- TODO someone have a blast! page 3+ of C LRM
 
-Order of precedence of expressinos is:
- + ( exp )
- + id[expr?] // TODO: maybe in scanner?
+Order of precedence of expressions (`expr`), and their meanings:
+ + '(' exp ')'
+     eg: `( ...)`
+   exp here is evaluated before, at which point the parenthesis themselves lose
+   their meaning. eg:
+   ```
+   b * (4 + 5)
+   b * 9 // same
+   ```
+ + id'['expr?']'           // TODO: maybe in scanner?
  + - expr
  + !exp   // eg: `if ((!(a % b))+2)) == (a % !b + 2)`
  + exp ^ exp // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
