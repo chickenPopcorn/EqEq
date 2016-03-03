@@ -1,5 +1,12 @@
 # `EqualsEquals` Language Reference Manual (LRM)
 
+TODO:s
+- move LRM into this doc
+  - refactor headers to look like (C LRM)[https://www.bell-labs.com/usr/dmr/www/cman.pdf]
+- start scanner.mll based on Keywords & Expressions sectinos
+  - update this doc based on what works
+- review TODOs with TA/edwards
+
 ## Compiler Phases
 
 ### Phase 1 of 5: Scanning with `lex`
@@ -112,7 +119,7 @@ Each operator's meaning is defined below:
 
 Order of precedence of expressinos is:
  + ( exp )
- + expr[expr?]
+ + id[expr?] // TODO: maybe in scanner?
  + - expr
  + !exp   // eg: `if ((!(a % b))+2)) == (a % !b + 2)`
  + exp ^ exp // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
