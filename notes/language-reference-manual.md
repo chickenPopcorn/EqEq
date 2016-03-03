@@ -87,8 +87,6 @@ Otherwise, a valid program may also include:
   let aph = ['a' - 'z'] | ['A' - 'Z']     in
 
   let str = (aph | num | chr | spc)*
-
-  (*note: starts with uppercase letter, ends with ':'*)
   ```
   
 
