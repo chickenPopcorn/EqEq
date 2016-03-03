@@ -26,12 +26,27 @@ Euclid:find gcd {
 Otherwise, a valid program may also include:
 
 1. **variables** and their assignment operations
+
+ + **vectors**, like variables, but have a `<>` after their identifier, eg: `myVector<>`
+
 2. **arithmetic** expressions: addition, subtraction, multiplication, division;
 3. **comments** characters ignored by the compiler
 4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a   = 3`)
 5. **strings** used for printing
 6. **equality** operators _(which evaluate to `1` or `0` if both operators are equal)_
 
+
+#### Keywords (Reserved words)
++ `if`
++ `elif`
++ `else`
++ `return`
++ `find`
++ `function`
++ `print`
++ `with`
++ `in`
++ `range`
 
 #### Lexemes/Tokens
 1. Floating point numbers, including integers:
@@ -88,7 +103,39 @@ Otherwise, a valid program may also include:
 
   let str = (aph | num | chr | spc)*
   ```
-  
+#### Expressions
+  Expressions are groups of lexemes/tokens (defined above), parenthesized `(` and `)` sub-expressions,
+  and combinations of expressions and operators:
+
+Each operator's meaning is defined below:
+  TODO someone have a blast! page 3+ of C LRM
+
+Order of precedence of expressinos is:
+ + ( exp )
+ + expr[expr?]
+ + - expr
+ +  !exp
+ +  exp ^ exp // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
+ +  exp * exp
+ +  exp / exp
+ + exp % exp
+ + expr + expr
+ + expr - expr
+ + exp > exp
+ + exp >= exp
+ + exp < exp
+ + exp <= exp
+ + exp != exp
+ + exp == exp
+ + exp && exp
+ + expr || expr
+ + expr = expr
+
+
+
+
+
+
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
