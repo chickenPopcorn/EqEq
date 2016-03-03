@@ -23,10 +23,19 @@ Euclid:find gcd {
 }
 ```
 
-#### Data Types & Syntax
+Otherwise, a valid program may also include:
 
-Syntax includes:
+1. **variables** and their assignment operations;
+2. **arithmetic** expressions: addition, subtraction, multiplication, division;
+3. **comments** characters ignored by the compiler
+4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a   = 3`)
+
+
+#### Data Types & Syntax
 1. Floating point numbers, including integers:
+  eg: `123`, `1.34e-4`, `0.23`, `.13`, `0e1`.
+
+  Regular expression might be:
   ```ocaml
   let pos = ['1' - '9']                    in
   let dig = '0' | pos                      in
@@ -36,7 +45,27 @@ Syntax includes:
 
   let flt = num | ((num | 0)? frac) | (num exp)
   ```
-2. 
+2. Variables: numbes stored with user-defined nams:
+  eg: `weight = 100 /*grams*/`
+
+  Regular expression might be:
+  ```ocaml
+  let aph = ['a'-'z'] | ['A'-'Z']     in
+
+  let var = aph+ ('_' | ['0'-'9'])*
+  ```
+
+3. Contexts: blocks of symbols:
+  eg: `Euclid: {/* any number of lines of EqualsEquals here */}`
+
+  Regular Expression might be _(builds on variables' expressions)_:
+  ```ocaml
+  let aph = ['a'-'z'] | ['A'-'Z']     in
+
+  let ctx = ['A'-'Z'] var ':'
+
+  (*note: starts with uppercase letter, ends with ':'*)
+  ```
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
