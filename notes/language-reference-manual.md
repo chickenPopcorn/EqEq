@@ -114,10 +114,10 @@ Order of precedence of expressinos is:
  + ( exp )
  + expr[expr?]
  + - expr
- +  !exp
- +  exp ^ exp // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
- +  exp * exp
- +  exp / exp
+ + !exp   // eg: `if ((!(a % b))+2)) == (a % !b + 2)`
+ + exp ^ exp // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
+ + exp * exp
+ + exp / exp
  + exp % exp
  + expr + expr
  + expr - expr
@@ -130,12 +130,6 @@ Order of precedence of expressinos is:
  + exp && exp
  + expr || expr
  + expr = expr
-
-
-
-
-
-
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
