@@ -41,7 +41,7 @@ Otherwise, a valid program may also include:
 
 1. **variables** and their assignment operations
 
- + **vectors**, like variables, but have a `<>` after their identifier, eg: `myVector<>`
+ + **vectors**, like variables, but have a `[]` after their identifier, eg: `myVector[]`
 
 2. **arithmetic** expressions: addition, subtraction, multiplication, division;
 3. **comments** characters ignored by the compiler
@@ -102,6 +102,18 @@ TODO: explain each
       return range(from+1, to, vec, counter + 1);
     }
     ```
+
+#### Declarations
+1. A list of declarator are separated by comma. Formatted as below:Declarator-list:	declarator, declarator, ?2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable. Possible inherited data types:+int+double+String
+
+3. Vector:Vector_name[] // an array of zeroVector_name[i] =  newValue // change the ith value of the arrayi between the [] has to be an integer. 
+
+4. Function:declaration of function has the format as below: function_name = function (parameter, parameter, ?) {}
+5. Equations:Variable = expression / variableOnly variable will be allowed on the left side of the equal sign. 
+
+6. Scope?
+scope_name {	list of equation or list of function}
+scope_name: find ? {}
 
 #### Lexemes/Tokens
 1. Floating point numbers, including integers:
