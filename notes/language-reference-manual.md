@@ -3,8 +3,8 @@
 - [ ] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
   - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
    1. Copy/paste old-LRM's content:
-     - [ ] Introduction
-     - [ ] Motivation
+     - [x] Introduction
+     - [x] Motivation
      - [ ] Language Description
        - [ ] Target Language: Python
        - [ ] Syntax Overview
@@ -34,22 +34,18 @@
 
 EqualsEquals is a language designed for simple equation evaluation.
 EqualsEquals helps express mathematical equation in ASCII without straying too
-far from whiteboard-style notation. Users do not need to rearrange the equation
-by hand or reduce the formulas in order to get answers. It is similar to
-Wolfram Alpha that gives you information about an equation or expression. Our
-language can take multiple equations as input and it can evaluate the value of
-a certain variable of the equations when the values of other variables are
-given. It can also check if the set of equations have a valid solution. If not,
-it will throw exception and inform the user.
+far from whiteboard-style notation. Users do not need to be overly careful to
+perfectly reduce formulas behind. Leaving unknowns for later is possible,
+without encapsulating equations's unknowns as function parameters. EqualsEquals
+takes multiple equations as input and can evaluate the value of a certain
+variables of the equations when the values of other variables are given.
 
 ## Motivation
 
-Reducing mathematical formulas can be really painful and tedious. With our
-language you can type in the equations just as the way you write them down on
-paper, then the program will evaluate the equations and return the result for
-you. We want to simplify the process of evaluating equations. Our goal is that
-we can evaluate equations without manually defining many programming-specific
-variables, so that the mathematical calculation procedure can be facilitated.
+Reducing mathematical formulas can be really painful and tedious. We want to
+simplify the process of evaluating equations. With our language we take a step
+to help users leave their formula in a similar format to what they'd normally
+have on paper.
 
 ## Compiler Phases
 
