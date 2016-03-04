@@ -113,7 +113,7 @@ TODO: explain each
 4. Function:
 declaration of function has the format as below:
   ```
-  function_name = function (parameter, parameter, ... ) {    // some operations    return ...  }  ```  The contained identifier has the type ‘‘function returning ...’’, where ‘‘...’’ is the type which the identifier would have had. The function will be passed by value.
+  function_name = function (parameter, parameter, ... ) {    // some operations    return ...  }  ```  The 'function_name' has the type "function" with returned type "...", where "..." indicates the type which the returned variable have. The function will be passed by value.
 5. Equations:
   ```
   Variable = expression / variable
