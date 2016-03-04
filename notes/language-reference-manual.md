@@ -136,7 +136,7 @@ TODO: explain each
   `Variable = expression / variable`
   Only variable will be allowed on the left side of the equal sign.
 
-6. Scope?
+6. Scope:
   ```
   scope_name {
     /**list of equation or list of function**/
