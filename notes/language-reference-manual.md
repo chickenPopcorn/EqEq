@@ -56,7 +56,7 @@ TODO: explain each
 + `elif`
 + `else`
 + `return`
-+ `MyContext:find` and `find`
++ `find`
   Means the following curly-brace enclosed set of statements should be evaluated
   with access to previously declared expressions in an associated "context".
   + `with` optionally specifies any missing identifiers in given context.
