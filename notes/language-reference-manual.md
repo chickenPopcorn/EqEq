@@ -147,26 +147,51 @@ TODO: explain each
     ```
 
 #### Declarations
-1. A list of declarator are separated by comma. Formatted as below:  ```  Declarator-list:	 declarator, declarator, ...  ```2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.Possible inherited data types: + Integer + Double + String
+1. A list of declarator are separated by comma. Formatted as below:
+  ```
+  Declarator-list:
+   declarator, declarator, ...
+  ```
 
-3. Vector:  ```c
-  V[ ]      V[constant-expression]    
-  ```In the first case, the expression will declare an array with length 1 and initialized with zero, as `[ 0 ]`. In the second case, the expression will declare an array with length that evaluated result of the constant expression and initialized with zeros, as `[ 0, 0, ... , 0]`. The constant expression need to be evaluated to an integer. Such a declarator makes the contained identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional array with rank i of objects of type `double`. To declare a vector of vectors, the notation would be like `V[i][j]`.
+2. Variable:
+
+ To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.
+
+ Possible inherited data types:
+ + Integer
+ + Double
+ + String
+
+3. Vector:
+  ```c
+  V[ ]
+  V[constant-expression]
+  ```
+In the first case, the expression will declare an array with length 1 and initialized with zero, as `[ 0 ]`. In the second case, the expression will declare an array with length that evaluated result of the constant expression and initialized with zeros, as `[ 0, 0, ... , 0]`. The constant expression need to be evaluated to an integer. Such a declarator makes the contained identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional array with rank i of objects of type `double`. To declare a vector of vectors, the notation would be like `V[i][j]`.
 
 4. Function:
 declaration of function has the format as below:
   ```
-  function_name = function (parameter, parameter, ... ) {    // some operations    return ...  }  ```  The 'function_name' has the type "function" with returned type "...", where "..." indicates the type which the returned variable have. The function will be passed by value.
+  function_name = function (parameter, parameter, ... ) {
+    // some operations
+    return ...
+  }
+  ```
+  The 'function_name' has the type "function" with returned type "...", where "..." indicates the type which the returned variable have. The function will be passed by value.
 5. Equations:
   ```
-  Variable = expression / variable
+  variable = expression / variable
   ```
   Only variable will be allowed on the left side of the equal sign.
 
 6. Scope:
   ```
-  scope_name {	  list of equation or list of function  }
-  scope_name: find ... {  }
+  Scope_name {
+    list of equation or list of function
+  }
+
+  Scope_name: find ... {
+  }
   ```
 
 #### Lexemes/Tokens
@@ -266,7 +291,7 @@ if the specified relation is false and 1 if it is true. Operand conversion is ex
 
  + `expr = expr`  It require an lvalue as their left operand, and the type of an assignment expression is that of its left operand. The value is the value stored in the left operand after the assignment has taken place.
 
- + `expression , expression` A pair of expressions separated by a comma is evaluated left-to-right and the value of the left expression is discarded. The type and value of the result are the type and value of the right operand. 
+ + `expression , expression` A pair of expressions separated by a comma is evaluated left-to-right and the value of the left expression is discarded. The type and value of the result are the type and value of the right operand.
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
