@@ -1,18 +1,55 @@
-# `EqualsEquals` Language Reference Manual (LRM)
-
-TODO:s
-- TODO(jon): review TODOs with TA/edwards (email Daniel)
-- TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
+# TODO:s
+- [ ] TODO(jon): review TODOs with TA/edwards (email Daniel)
+- [ ] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
   - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
+   1. Copy/paste old-LRM's content:
+     - [ ] Introduction
+     - [ ] Motivation
+     - [ ] Language Description
+       - [ ] Target Language: Python
+       - [ ] Syntax Overview
+         - [ ] Data Types
+         - [ ] Comments
+         - [ ] Code block format
+         - [ ] Declaration
+         - [ ] Flow control
+       - [ ] Language Features
+         - [ ] Mathematical Equations
+       - [ ] Sample program
+   2. refactor *this* LRM's existing content
+
   - expand missing pieces
-- TODO(tianci): "declarations" section: "explain *how* users declare each thing
+- [ ] TODO(tianci): "declarations" section: "explain *how* users declare each thing
     in our language (functions, variables, equations - like things should be
     single-variable on left-side)
-- TODO(nam): address 'Keyword Meanings" TODO
-- TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
-- TODO(jimmy): address 'Reserved Keywords" TODO
-- as group: start scanner.mll based on "Keywords & Expressions" sectinos
-    - update this doc based on what works
+- [ ] TODO(nam): address 'Keyword Meanings" TODO
+- [ ] TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
+- [ ] TODO(jimmy): address 'Reserved Keywords" TODO
+- [ ] as group: start scanner.mll based on "Keywords & Expressions" sectinos
+    - [ ] update this doc based on what works
+
+---
+
+# `EqualsEquals` Language Reference Manual (LRM)
+
+EqualsEquals is a language designed for simple equation evaluation.
+EqualsEquals helps express mathematical equation in ASCII without straying too
+far from whiteboard-style notation. Users do not need to rearrange the equation
+by hand or reduce the formulas in order to get answers. It is similar to
+Wolfram Alpha that gives you information about an equation or expression. Our
+language can take multiple equations as input and it can evaluate the value of
+a certain variable of the equations when the values of other variables are
+given. It can also check if the set of equations have a valid solution. If not,
+it will throw exception and inform the user.
+
+## Motivation
+
+Reducing mathematical formulas can be really painful and tedious. With our
+language you can type in the equations just as the way you write them down on
+paper, then the program will evaluate the equations and return the result for
+you. We want to simplify the process of evaluating equations. Our goal is that
+we can evaluate equations without manually defining many programming-specific
+variables, so that the mathematical calculation procedure can be facilitated.
 
 ## Compiler Phases
 
