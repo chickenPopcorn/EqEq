@@ -173,7 +173,7 @@ declaration of function has the format as below:
     return ...
   }
   ```
-  The 'function_name' has the type "...", where "..." indicates the type which the returned variable have. The function will be passed by value.
+  The 'function_name' has the type "...", where "..." indicates the type which the returned variable has. The function will be passed by value.
 5. Equations:
   ```
   variable =  variable (value assigned?)
@@ -184,9 +184,9 @@ declaration of function has the format as below:
   
   e.g: 
        ```
-       a = 3; b=a; (return b=3)
-       a = 3; b=a*2+1 (return 7)
-       a = 3; b=6; c=gcd(a,b) (return 3).
+       a = 3; b = a; (return b=3)
+       a = 3; b = a*2+1 (return 7)
+       a = 3; b = 6; c=gcd(a,b) (return 3).
        ```
   The return type will be checked. If the return type is not floating points numbers (including interger). Then return 0, standing for ERROR. 
   
