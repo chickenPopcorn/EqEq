@@ -104,31 +104,23 @@ TODO: explain each
     ```
 
 #### Declarations
-1. A list of declarator are separated by comma. Formatted as below:
-  Declarator-list: declarator, declarator, ?2. Variable:To declare a variable,
-  only name of the variable is needed. The data types of the variables are
-  inheritable.Possible inherited data types: + int + double + String
+1. A list of declarator are separated by comma. Formatted as below:Declarator-list:	declarator, declarator, ...2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.Possible inherited data types: + int + double + String
 
-3. Vector:
-  ```c
-  Vector_name[ ]    // an array of zero
-  Vector_name[i] =  newValue     // change the ith value of the array
-  ```
-  i between the [ ] has to be an integer.
+3. Vector:  ```c
+  V[ ]      V[constant-expression]    
+  ```In the first case, the expression will declare an array with length 1 and initialized with zero, as `[ 0 ]`. In the second case, the expression will declare an array with length that evaluated result of the constant expression and initialized with zeros, as `[ 0, 0, ... , 0]`. The constant expression need to be evaluated to an integer. Such a declarator makes the contained identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional array with rank i of objects of type `double`. To declare a vector of vectors, the notation would be like `V[i][j]`.
 
 4. Function:
-  declaration of function has the format as below:
-
-  `function_name = function (parameter, parameter, ... ) { }`
-
-5. Equations:
-  Variable = expression / variable
-  Only variable will be allowed on the left side of the equal sign.
-
-6. Scope?
+declaration of function has the format as below:
   ```
-  scope_name {   list of equation or list of function  }
-  scope_name: find ... {  }
+  function_name = function (parameter, parameter, ... ) {    // some operations    return ...  }  ```  The contained identifier has the type ‘‘function returning ...’’, where ‘‘...’’ is the type which the identifier would have had. The function is passed by value. 
+5. Equations:
+Variable = expression / variableOnly variable will be allowed on the left side of the equal sign.
+
+6. Scope:
+  ```
+  scope_name {	  list of equation or list of function  }
+  scope_name: find ... {  }
   ```
 
 #### Lexemes/Tokens
@@ -224,13 +216,9 @@ if the specified relation is false and 1 if it is true. Operand conversion is ex
 
    + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to) operators are exactly analogous to the relational operators except for their lower precedence. (Thus ‘‘a<b == c<d’’ is 1 whenever a<b and c<d have the same truth-value)
 
- + `exp && exp` The && operator returns 1 if both its operands are non-zero, 0 otherwise. it guarantees left-to-right evaluation; it is not evaluated if the first operand is 0.
-
- + `expr || expr` The || operator returns 1 if either of its operands is non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover, the second operand is not evaluated if the value of the first operand is non-zero.
-
- + `expr = expr`  It require an lvalue as their left operand, and the type of an assignment expression is that of its left operand. The value is the value stored in the left operand after the assignment has taken place.
-
- + `expression , expression` A pair of expressions separated by a comma is evaluated left-to-right and the value of the left expression is discarded. The type and value of the result are the type and value of the right operand. 
+ + exp && exp
+ + expr || expr
+ + expr = expr
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
