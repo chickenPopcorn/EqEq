@@ -2,7 +2,7 @@
 
 TODO:s
 - TODO(jon): review TODOs with TA/edwards (email Daniel)
-- TODO(jon): move LRM google doc into this doc
+- TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
   - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
   - expand missing pieces
 - TODO(tianci): "declarations" section: "explain *how* users declare each thing
