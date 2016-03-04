@@ -62,13 +62,19 @@ TODO: explain each
   + `with` optionally specifies any missing identifiers in given context.
       eg: with simple assignment
       ```c
-      pendulum: find vector with length = 5 {...}
+      pendulum:find vector with length = 5 {...}
       ```
 
       eg:  with vector assignment (causing equiv. of `for` loop in other langs)
       ```c
-      pendulum: find vector with length = range(0, 20) {
+      pendulum:find vector with length = range(0, 20) {
+        /**
+         * statements here executed once for each item in `range`'s resulting
+         * vector
+         */
+      }
       ```
+
 + `function` keyword used to indicate define multi-line equations.
 
     An identifier followed by the assignment of a `function` keyword indicates
