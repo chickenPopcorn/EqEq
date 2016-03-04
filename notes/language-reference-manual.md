@@ -104,18 +104,18 @@ TODO: explain each
     ```
 
 #### Declarations
-1. A list of declarator are separated by comma. Formatted as below:Declarator-list:	declarator, declarator, ?2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable. Possible inherited data types: +` int +` double +` String
+1. A list of declarator are separated by comma. Formatted as below:Declarator-list:	declarator, declarator, ?2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.Possible inherited data types: + int + double + String
 
 3. Vector:  ```c
   Vector_name[ ]    // an array of zero  Vector_name[i] =  newValue     // change the ith value of the array
-  ```i between the [ ] has to be an integer. 
+  ```i between the [ ] has to be an integer.
 
 
 4. Function:
-declaration of function has the format as below: 
+declaration of function has the format as below:
   `function_name = function (parameter, parameter, ... ) { }`
 5. Equations:
-Variable = expression / variableOnly variable will be allowed on the left side of the equal sign. 
+Variable = expression / variableOnly variable will be allowed on the left side of the equal sign.
 
 6. Scope?
   ```
@@ -187,7 +187,7 @@ Each operator's meaning is defined below:
 - TODO someone have a blast! page 3+ of C LRM
 
 Order of precedence of expressions (`expr`), and their meanings:
- + '(' exp ')'
+ + `'(' exp ')'`
      eg: `( ...)`
    exp here is evaluated before, at which point the parenthesis themselves lose
    their meaning. eg:
@@ -196,14 +196,26 @@ Order of precedence of expressions (`expr`), and their meanings:
    b * 9 // same
    ```
  + `id'['expr?']'`           // TODO: maybe in scanner?
- + `-expr`
- + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)`
+
+ + `-expr` The result is the negative of the expression with the same type. The type of the expression must be int, or double.
+
+ + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the logical negation operator ! is 1 if the value of the expression is 0, 0 if the value of the expression
+ is non-zero. The type of the result is int. This operator is applicable only to ints.
+
  + `exp ^ exp` // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
- + `exp * exp`, `exp / exp`, `exp % exp`
- + `expr + expr`, `expr - expr`
+
+ + `exp * exp`, `exp / exp` The binary operator * / indicates multiplication and division operation. If both operands are int, the result is int; if one is int and one double, the former is converted to double, and the result is double; if both are double, the result is double. No other combinations are allowed.
+
+ + `exp % exp` The binary % operator yields the remainder from the division of the first expression by the second. Both operands must be int, and the result is int.
+
+ + `expr + expr`, `expr - expr` The result is the sum or different of the expressions. If both operands are int, the result is int. If both are double, the result is double. If one is int and one is double, the former is converted to double and the result is double.
+
  + equality/inequality:
-   + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp`
-     `exp != exp`, `exp == exp`
+   + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators < (less than), > (greater than), <= (less than or equal to) and >= (greater than or equal to) all yield 0
+if the specified relation is false and 1 if it is true. Operand conversion is exactly the same as for the + operator.
+
+   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to) operators are exactly analogous to the relational operators except for their lower precedence. (Thus ‘‘a<b == c<d’’ is 1 whenever a<b and c<d have the same truth-value)
+   
  + exp && exp
  + expr || expr
  + expr = expr
