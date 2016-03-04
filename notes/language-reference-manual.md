@@ -104,7 +104,7 @@ TODO: explain each
     ```
 
 #### Declarations
-1. A list of declarator are separated by comma. Formatted as below:Declarator-list:	declarator, declarator, ...2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.Possible inherited data types: + int + double + String
+1. A list of declarator are separated by comma. Formatted as below:  ```  Declarator-list:	 declarator, declarator, ...  ```2. Variable:To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.Possible inherited data types: + Integer + Double + String
 
 3. Vector:  ```c
   V[ ]      V[constant-expression]    
@@ -113,9 +113,12 @@ TODO: explain each
 4. Function:
 declaration of function has the format as below:
   ```
-  function_name = function (parameter, parameter, ... ) {    // some operations    return ...  }  ```  The contained identifier has the type ‘‘function returning ...’’, where ‘‘...’’ is the type which the identifier would have had. The function is passed by value. 
+  function_name = function (parameter, parameter, ... ) {    // some operations    return ...  }  ```  The contained identifier has the type ‘‘function returning ...’’, where ‘‘...’’ is the type which the identifier would have had. The function is passed by value.
 5. Equations:
-Variable = expression / variableOnly variable will be allowed on the left side of the equal sign.
+  ```
+  Variable = expression / variable
+  ```
+  Only variable will be allowed on the left side of the equal sign.
 
 6. Scope:
   ```
