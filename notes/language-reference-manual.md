@@ -312,12 +312,13 @@ Expression statements are statement that includes an expression and a semicolon 
 expression;
 ```
 ##### Conditional Statement
+Statements that are used in conditional statements:
 ```
 // if_statement
-if (expression) statement
+if ( expression ) statement
 
 // elif_statement
-elif (expression) statement
+elif ( expression ) statement
 
 // else_statement
 else statement
@@ -337,70 +338,52 @@ return;
 return expression;
 ```
 
-#### Combining Statements
-A statement can be the multiple of other statements. `{` and `}` are used to group multiple statements as one statement. So the form of a compound statement is:
+##### Combining Statements
+A statement can be the multiple of other statements. `{` and `}` are used to group multiple statements as one statement. So the form of compound statements is:
 ```
 { statement+ }
 ```
 
-, which means that a compound statement has an opening curly bracket, one or more statements, and a closing curly bracket
+, which means that a compound statement has an opening curly bracket, one or more statements, and a closing curly bracket.
+
+##### Context statement
+A context statement include a context name and a compound statement:
+```
+context_name compound_statement
+```
+
+The statement after the colon will be evaluated in the context given by `context_name`.
 
 ##### Find Statement
-Find statements have the following form:
+Statements that are used in find statements:
 ```
-context
+// with_statement
+with statement
 ```
-Means the following curly-brace enclosed set of statements should be evaluated
-with access to previously declared expressions in an associated "context".
-+ `with` optionally specifies any missing identifiers in given context.
-    eg: with simple assignment
-    ```c
-    pendulum:find vector with length = 5 {...}
-    ```
 
-    eg:  with vector assignment (causing equiv. of `for` loop in other langs)
-    ```c
-    pendulum:find vector with length = range(0, 20) {
-      /**
-       * statements here executed once for each item in `range`'s resulting
-       * vector
-       */
-    }
-    ```
+Find statements start with keyword `find`, an expression, optional with_statements, and a statement:
+```
+find expression with_statement* statement
+```
 
-##### `function` keyword used to indicate define multi-line equations.
+In a find statement, the last statement should be evaluated with access to previously declared expressions.
 
-    An identifier followed by the assignment of a `function` keyword indicates
-    the remaining expressions will be:
-    1. a list of zero or more formal parameters
-    2. set of curly brace enclosed statements definiting the equation
-    eg:
-    ```c
-    range = function() {/* definition */}
-    ```
-##### `print` built-in function that mirrors the C printf API, eg:
-    ```
-    printf("words here %f.0 and %f here\n", 4, myvar)
-    // words here 4 and 3.14159 here
-    ```
-    Note: we have a subset of the identifier C's printf has, as we only
-    use floats.
-##### `for` // TODO: not sure yet, decide on this:
-##### `range`
-    TODO: define this as builtin or stdlib, like this:
-    ```c
-    range = function(from, to) {
-      return range(from, to, vec[to-from], 0);
-    }
+Examples of find statements:
+```c
+// a simple example
+pendulum {
+  velocity = length + 1
+}
+pendulum:find velocity with length = 5 {
+  print(velocity)
+} // print 6
 
-    range = function(from, to, vec, counter) {
-      vec[counter] = from;
-      if (from == to) {
-        return;
-      }
-      return range(from+1, to, vec, counter + 1);
-    }
-    ```
+// with vector assignment (causing equivalence of `for` loop in other languages)
+pendulum:find vector with length = range(0, 5) {
+  print(velocity)
+} // print from 1 to 6
+```
+
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
 
