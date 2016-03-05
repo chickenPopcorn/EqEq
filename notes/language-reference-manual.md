@@ -6,7 +6,7 @@
      - [x] Introduction
      - [x] Motivation
      - [ ] Language Description
-       - [ ] Target Language: Python
+       - [x] Target Language: Python
        - [ ] Syntax Overview
          - [ ] Data Types
          - [ ] Comments
@@ -47,16 +47,27 @@ simplify the process of evaluating equations. With our language we take a step
 to help users leave their formula in a similar format to what they'd normally
 have on paper.
 
-## Compiler Phases
+## Overview
 
-### Phase 1 of 5: Scanning with `lex`
+Valid source programs will compile down to
+[C](https://www.bell-labs.com/usr/dmr/www/cman.pdf).
 
-#### What *Is* An `EqualsEquals` Program?
-A valid program is a series of 1 or more `find` expressions. A `find` expression
-is authored with a particular "context" (aka "scope") in mind, by default the
-global scope. Other than the global scope, a context is a block of curly brace
-enclosed code that defines explicit mathematical equations and functions _(or
-multi-line equations)_.
+### Definition of a Program
+A valid program is a series of one or more `find` expressions. A `find`
+expression is authored with a particular "context" (aka "scope") in mind, by
+default the global scope. The simplest - though contrived - valid program is:
+```c
+find { printf("Hello, all %.0f readers!\n", 21 * 2); }
+```
+
+Which prints the following to standard out:
+```
+Hello, all 42 readers!
+```
+
+Other than the global context, users will generall define contexsts manually,
+much like `find` blocks - curly-brace enclosed equations and statements - but
+with capitalized names.
 
 An important feature of `EqualsEquals` is that context need not make equations
 explicit _(that is, an equation can have multiple unknowns)_ until its
@@ -81,6 +92,11 @@ Otherwise, a valid program may also include:
 4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a   = 3`)
 5. **strings** used for printing
 6. **equality** operators _(which evaluate to `1` or `0` if both operators are equal)_
+
+# Implementation
+
+### Phase 1 of 5: Scanning with `lex`
+
 
 
 #### Reserved Keywords
