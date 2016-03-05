@@ -22,7 +22,17 @@
 - [ ] TODO(tianci): "declarations" section: "explain *how* users declare each thing
     in our language (functions, variables, equations - like things should be
     single-variable on left-side)
-- [ ] TODO(nam): address 'Keyword Meanings" TODO
+- [o] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
+- [o] TODO(nam): builtin functions
+  - [o] range: declared as built-in func
+- [ ] TODO(nam): issues to address to the group
+  - [ ] what types of argument does range() accept?
+  - [ ] what's the format of a vector? [2 3 5]
+  - [ ] should we have for loop?
+  - [ ] while loop?
+  - [ ] `continue` and `break` inside with range statement?
+  - [ ] null statement?
+  - [ ] what else?
 - [ ] TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
 - [ ] TODO(jimmy): address 'Reserved Keywords" TODO
 - [ ] as group: start scanner.mll based on "Keywords & Expressions" sectinos
@@ -106,24 +116,6 @@ TODO: explain each
 + `else`
 + `return`
 + `find`
-  Means the following curly-brace enclosed set of statements should be evaluated
-  with access to previously declared expressions in an associated "context".
-  + `with` optionally specifies any missing identifiers in given context.
-      eg: with simple assignment
-      ```c
-      pendulum:find vector with length = 5 {...}
-      ```
-
-      eg:  with vector assignment (causing equiv. of `for` loop in other langs)
-      ```c
-      pendulum:find vector with length = range(0, 20) {
-        /**
-         * statements here executed once for each item in `range`'s resulting
-         * vector
-         */
-      }
-      ```
-
 + `function` keyword used to indicate define multi-line equations.
 
     An identifier followed by the assignment of a `function` keyword indicates
@@ -193,19 +185,19 @@ declaration of function has the format as below:
 5. Equations:
   ```
   variable =  variable (value assigned?)
-  variable =  some airthmetic expression 
+  variable =  some airthmetic expression
   variable =  a function call that return a number
   ```
-  Only variable will be allowed on the left side of the equal sign. The expression on the right side can be declared variable, arithmetic expression that returns a number, or a function call that return a number: 
-  
-  e.g: 
+  Only variable will be allowed on the left side of the equal sign. The expression on the right side can be declared variable, arithmetic expression that returns a number, or a function call that return a number:
+
+  e.g:
        ```
        a = 3; b = a; (return b=3)
        a = 3; b = a*2+1 (return 7)
        a = 3; b = 6; c=gcd(a,b) (return 3).
        ```
-  The return type will be checked. If the return type is not floating points numbers (including interger). Then return 0, standing for ERROR. 
-  
+  The return type will be checked. If the return type is not floating points numbers (including interger). Then return 0, standing for ERROR.
+
 
 6. Scope:
   ```
@@ -216,12 +208,12 @@ declaration of function has the format as below:
   Scope_name: find ... (with x in range(), ... ,...) {
   }
   ```
-  Scope_name is like an object of equations. Equations are put inside the bracket follow Scope_name. 
-  
-  Scope_name: find... is the evaluation part. A 'with' clause is optional. 'find' will evaluate the following variable using the equations inside the Scope_name part. Once a Scope_name is defined, mutiple 'find...' are allowed to use the equations inside it. 
-  
+  Scope_name is like an object of equations. Equations are put inside the bracket follow Scope_name.
+
+  Scope_name: find... is the evaluation part. A 'with' clause is optional. 'find' will evaluate the following variable using the equations inside the Scope_name part. Once a Scope_name is defined, mutiple 'find...' are allowed to use the equations inside it.
+
   'with' part is optional. 'with' allow users to specify the values for the variables using to evaluate unknown x. User can define more than one varibale, seperated by comma. If a variable in 'find' or 'with' part is not found in Scope_name {}, 0 will be returned to show ERROR. If insufficent values are provided for the equations (there are remaining variable on the right side of a equation), 0 will be returned for ERROR.
-  
+
 #### Lexemes/Tokens
 1. Floating point numbers, including integers:
 
@@ -313,13 +305,124 @@ Order of precedence of expressions (`expr`), and their meanings:
    + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators < (less than), > (greater than), <= (less than or equal to) and >= (greater than or equal to) all yield 0
 if the specified relation is false and 1 if it is true. Operand conversion is exactly the same as for the + operator.
 
-   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to) operators are exactly analogous to the relational operators except for their lower precedence. (Thus ‘‘a<b == c<d’’ is 1 whenever a<b and c<d have the same truth-value)
+   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to) operators are exactly analogous to the relational operators except for their lower precedence. (Thus `a < b == c < d` is 1 whenever a < b and c < d have the same truth-value)
 
  + `expr || expr` The || operator returns 1 if either of its operands is non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover, the second operand is not evaluated if the value of the first operand is non-zero.
 
  + `expr = expr`  It require an lvalue as their left operand, and the type of an assignment expression is that of its left operand. The value is the value stored in the left operand after the assignment has taken place.
 
  + `expression , expression` A pair of expressions separated by a comma is evaluated left-to-right and the value of the left expression is discarded. The type and value of the result are the type and value of the right operand.
+
+#### Statements
+##### Expression Statement
+Expression statements are statement that includes an expression and a semicolon at the end:
+```
+expression;
+```
+##### Conditional Statement
+Statements that are used in conditional statements:
+```
+// if_statement
+if ( expression ) statement
+
+// elif_statement
+elif ( expression ) statement
+
+// else_statement
+else statement
+```
+
+Conditional statements have the following form:
+```
+if_statement elif_statement* else_statement?
+```
+
+, which means that it contains a required if_statement, any number of elif_statement, and an optional else_statement.
+
+##### Return Statement
+Return statements are used inside functions. It has two possible forms:
+```
+return;
+return expression;
+```
+
+##### Combining Statements
+A statement can be the multiple of other statements. `{` and `}` are used to group multiple statements as one statement. So the form of compound statements is:
+```
+{ statement+ }
+```
+
+, which means that a compound statement has an opening curly bracket, one or more statements, and a closing curly bracket.
+
+##### Context statement
+A context statement include a context name and a compound statement:
+```
+context_name compound_statement
+```
+
+The statement after the colon will be evaluated in the context given by `context_name`.
+
+##### Find Statement
+Statements that are used in find statements:
+```
+// with_statement
+with statement
+```
+
+Find statements start with keyword `find`, an expression, optional with_statements, and a statement:
+```
+find expression with_statement* statement
+```
+
+In a find statement, the last statement should be evaluated with access to previously declared expressions.
+
+Examples of find statements:
+```c
+// a simple example
+pendulum {
+  velocity = length + 1
+}
+pendulum:find velocity with length = 5 {
+  print(velocity)
+} // print 6
+
+// with vector assignment (causing equivalence of `for` loop in other languages)
+pendulum:find vector with length = range(0, 5) {
+  print(velocity)
+} // print from 1 to 6
+```
+
+#### Built-in Functions
+##### `print()`
+`print()` is built-in function that mirrors the C `printf()` API. `print()`'s arguments include a string, and optional expressions:
+```
+print( a_string_with_formatters [, expressions]* )
+```
+
+<!-- TODO What does print() returns? -->
+`print()` prints the formatted string to the screen.
+
+Users can format strings in `print()` with `%f` and `%s` formatter (and but not `%d`, since `eqeq` only uses float). For example,
+```
+print("words here %f.0 and %f here\n", 4, myvar)
+// words here 4 and 3.14159 here
+```
+
+##### `range()`
+`range()` mimics Python's `range()` function. It takes an optional expression `start`, an expression `stop`, and an optional expression `step`. It returns a vector from `stat` to `stop - 1`, with distance `step` between each member of the vector:
+<!-- TODO what types of argument does range() accept? -->
+```
+range([start,] stop [,step])
+```
+
+<!-- TODO what's the format of a vector? [2 3 5]  -->
+For examples,
+```python
+range(3)
+range(2, 5)
+range(2, 8, 3)
+```
+
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
