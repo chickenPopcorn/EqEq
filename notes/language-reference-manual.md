@@ -23,13 +23,15 @@
     in our language (functions, variables, equations - like things should be
     single-variable on left-side)
 - [o] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
+- [o] TODO(nam): builtin functions
+  - [o] range: declared as built-in func
+- [ ] TODO(nam): issues to address to the group
+  - [ ] what types of argument does range() accept?
+  - [ ] what's the format of a vector? [2 3 5]
   - [ ] should we have for loop?
   - [ ] while loop?
   - [ ] `continue` and `break` inside with range statement?
   - [ ] null statement?
-- [ ] TODO(nam): builtin functions
-  - [ ] range
-  - [ ] print
   - [ ] what else?
 - [ ] TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
 - [ ] TODO(jimmy): address 'Reserved Keywords" TODO
@@ -375,6 +377,35 @@ pendulum:find vector with length = range(0, 5) {
 ```
 
 #### Built-in Functions
+##### `print()`
+`print()` is built-in function that mirrors the C `printf()` API. `print()`'s arguments include a string, and optional expressions:
+```
+print( a_string_with_formatters [, expressions]* )
+```
+
+<!-- TODO What does print() returns? -->
+`print()` prints the formatted string to the screen.
+
+Users can format strings in `print()` with `%f` and `%s` formatter (and but not `%d`, since `eqeq` only uses float). For example,
+```
+print("words here %f.0 and %f here\n", 4, myvar)
+// words here 4 and 3.14159 here
+```
+
+##### `range()`
+`range()` mimics Python's `range()` function. It takes an optional expression `start`, an expression `stop`, and an optional expression `step`. It returns a vector from `stat` to `stop - 1`, with distance `step` between each member of the vector:
+<!-- TODO what types of argument does range() accept? -->
+```
+range([start,] stop [,step])
+```
+
+<!-- TODO what's the format of a vector? [2 3 5]  -->
+For examples,
+```python
+range(3)
+range(2, 5)
+range(2, 8, 3)
+```
 
 
 ### Phase 2 of 4: Parser with `yacc`
