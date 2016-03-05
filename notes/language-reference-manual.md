@@ -22,9 +22,9 @@
 - [ ] TODO(tianci): "declarations" section: "explain *how* users declare each thing
     in our language (functions, variables, equations - like things should be
     single-variable on left-side)
-- [o] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
-- [o] TODO(nam): builtin functions
-  - [o] range: declared as built-in func
+- [x] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
+- [x] TODO(nam): builtin functions
+  - [x] range: declared as built-in func
 - [ ] TODO(nam): issues to address to the group
   - [ ] what types of argument does range() accept?
   - [ ] what's the format of a vector? [2 3 5]
