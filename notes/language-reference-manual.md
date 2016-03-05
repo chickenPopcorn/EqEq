@@ -22,7 +22,15 @@
 - [ ] TODO(tianci): "declarations" section: "explain *how* users declare each thing
     in our language (functions, variables, equations - like things should be
     single-variable on left-side)
-- [ ] TODO(nam): address 'Keyword Meanings" TODO
+- [o] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
+  - [ ] should we have for loop?
+  - [ ] while loop?
+  - [ ] `continue` and `break` inside with range statement?
+  - [ ] null statement?
+- [ ] TODO(nam): builtin functions
+  - [ ] range
+  - [ ] print
+  - [ ] what else?
 - [ ] TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
 - [ ] TODO(jimmy): address 'Reserved Keywords" TODO
 - [ ] as group: start scanner.mll based on "Keywords & Expressions" sectinos
@@ -90,24 +98,6 @@ TODO: explain each
 + `else`
 + `return`
 + `find`
-  Means the following curly-brace enclosed set of statements should be evaluated
-  with access to previously declared expressions in an associated "context".
-  + `with` optionally specifies any missing identifiers in given context.
-      eg: with simple assignment
-      ```c
-      pendulum:find vector with length = 5 {...}
-      ```
-
-      eg:  with vector assignment (causing equiv. of `for` loop in other langs)
-      ```c
-      pendulum:find vector with length = range(0, 20) {
-        /**
-         * statements here executed once for each item in `range`'s resulting
-         * vector
-         */
-      }
-      ```
-
 + `function` keyword used to indicate define multi-line equations.
 
     An identifier followed by the assignment of a `function` keyword indicates
@@ -383,6 +373,9 @@ pendulum:find vector with length = range(0, 5) {
   print(velocity)
 } // print from 1 to 6
 ```
+
+#### Built-in Functions
+
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
