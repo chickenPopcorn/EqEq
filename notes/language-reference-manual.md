@@ -8,10 +8,10 @@
      - [ ] Language Description
        - [x] Target Language: Python
        - [ ] Syntax Overview
-         - [ ] Data Types
-         - [ ] Comments
+         - [x] Data Types
+         - [x] Comments
          - [ ] Code block format
-         - [ ] Declaration
+         - [x] Declaration
          - [ ] Flow control
        - [ ] Language Features
          - [ ] Mathematical Equations
@@ -26,6 +26,8 @@
 - [x] TODO(nam): builtin functions
   - [x] range: declared as built-in func
 - [ ] TODO(nam): issues to address to the group
+  - [ ] can contexts be combined? how does one make use of equations from
+        different contexts in one `find` block?
   - [ ] what types of argument does range() accept?
   - [ ] what's the format of a vector? [2 3 5]
   - [ ] should we have for loop?
@@ -40,7 +42,7 @@
 
 ---
 
-# `EqualsEquals` Language Reference Manual (LRM)
+# `EqualsEquals` Language Reference Manual
 
 EqualsEquals is a language designed for simple equation evaluation.
 EqualsEquals helps express mathematical equation in ASCII without straying too
@@ -100,29 +102,93 @@ Euclid:find gcd {
 }
 ```
 
-### Common C-Like Features
+## Design Implementation
 
-Within contexts and `find` blocks, a valid program looks like many C-style
-languages, where statemetns are semi-colon (`;`) separated, and each might
-involved:
+Within contexts and `find` blocks, a valid statements look like many C-style
+languages, where expressions are semi-colon (`;`) separated, may be have
+sub-expessions using parenthesis (`(`, `)`) and the lexemes of an expressio may
+be made up of any one of:
 
-1. **variables** and their assignment operations
+1. **variables** to which floating-point numbers are assigned
 
- + **vectors**, like variables, but have a `[]` after their identifier, eg: `myVector[]`
+ + **vectors**, like variables, but have square brackets (`[]`) after their
+   identifier is indeed a _vector_ of numbers, eg: `myVector[]`
 
-2. **arithmetic** expressions: addition, subtraction, multiplication, division;
+2. **arithmetic** expressions: addition, subtraction, multiplication, division
 3. **comments** characters ignored by the compiler
 4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a   = 3`)
-5. **strings** used for printing
-6. **equality** operators _(which evaluate to `1` or `0` if both operators are equal)_
+5. **string** literals used for printing
+6. **equality** operations in `if`/`else` expressions _(which evaluate to `1` or
+   `0` if both operators are equal)_
 
-# Implementation
+### Expressions' Lexemes or Tokens
 
-### Phase 1 of 5: Scanning with `lex`
+The syntactic description of each expression is described here. Note for
+semantic description of each, see the section further below titled,
+["Declarations"](#declrations).
 
+1. Floating point numbers, including integers:
 
+  eg: `123`, `1.34e-4`, `0.23`, `.13`, `0e1`.
 
-#### Reserved Keywords
+  Regular expression might be:
+  ```ocaml
+  let pos = ['1' - '9']                    in
+  let dig = '0' | pos                      in
+  let exp = ('e' | 'E') ('-' | '+')? pos+  in
+  let fra = '.' dig+ exp?                  in
+  let num = pos dig*                       in
+
+  let flt = num | ((num | 0)? frac) | (num exp)
+  ```
+2. Variable Assignment: numbes stored with user-defined nams:
+
+  eg: `weight = 100 /*grams*/`
+
+  Regular expression might be:
+  ```ocaml
+  let aph = ['a'-'z'] | ['A'-'Z']     in
+
+  let var = aph+ ('_' | ['0'-'9'])*
+  ```
+
+3. Contexts: blocks of symbols:
+
+  eg: `Euclid: {/* any number of lines of EqualsEquals here */}`
+
+  Regular Expression might be _(builds on variables' expressions)_:
+  ```ocaml
+  let aph = ['a'-'z'] | ['A'-'Z']     in
+
+  let ctx = ['A'-'Z'] var ':'
+
+  (*note: starts with uppercase letter, ends with ':'*)
+  ```
+
+4. Strings: mostly used for printing, results:
+
+  eg: `printf("result of my maths: %d\n", gcd)`
+
+  TODO: double check these regexp. from http://caml.infria.fr/pub/docs/manual-ocaml/lex.html
+  - maybe just simplify hex to a readable list of "special" chars
+  TODO: should lexeme include quotes or is that in this regexp?
+
+  Regular Expression might be _(builds on variables' expressions)_:
+  ```ocaml
+  let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
+  let spc = \(\| "| '| n| t| b| r| space)
+  let num = ['0' - '9']                   in
+  let aph = ['a' - 'z'] | ['A' - 'Z']     in
+
+  let str = (aph | num | chr | spc)*
+  ```
+
+### Reserved Keywords
+
+TODO: merge this list's content with "Declrations" (perhaps leave only `range`,
+`print`, and `find` listed in this section _(to indicate it is "special"
+reservation of our language specifically)_.
+
 TODO: explain each
 + `if`
 + `elif`
@@ -163,7 +229,7 @@ TODO: explain each
     }
     ```
 
-#### Declarations
+### Declarations
 1. A list of declarator are separated by comma. Formatted as below:
   ```
   Declarator-list:
@@ -227,66 +293,11 @@ declaration of function has the format as below:
 
   'with' part is optional. 'with' allow users to specify the values for the variables using to evaluate unknown x. User can define more than one varibale, seperated by comma. If a variable in 'find' or 'with' part is not found in Scope_name {}, 0 will be returned to show ERROR. If insufficent values are provided for the equations (there are remaining variable on the right side of a equation), 0 will be returned for ERROR.
 
-#### Lexemes/Tokens
-1. Floating point numbers, including integers:
+#### Precedence of Expressions
+TODO: rip out the "keyword meaning" descriptinos next to each of these and and
+them as sub-bullets elsewhere (eg: many of them here might be moved to the
+"arithmetic" bullet in previous section).
 
-  eg: `123`, `1.34e-4`, `0.23`, `.13`, `0e1`.
-
-  Regular expression might be:
-  ```ocaml
-  let pos = ['1' - '9']                    in
-  let dig = '0' | pos                      in
-  let exp = ('e' | 'E') ('-' | '+')? pos+  in
-  let fra = '.' dig+ exp?                  in
-  let num = pos dig*                       in
-
-  let flt = num | ((num | 0)? frac) | (num exp)
-  ```
-2. Variables: numbes stored with user-defined nams:
-
-  eg: `weight = 100 /*grams*/`
-
-  Regular expression might be:
-  ```ocaml
-  let aph = ['a'-'z'] | ['A'-'Z']     in
-
-  let var = aph+ ('_' | ['0'-'9'])*
-  ```
-
-3. Contexts: blocks of symbols:
-
-  eg: `Euclid: {/* any number of lines of EqualsEquals here */}`
-
-  Regular Expression might be _(builds on variables' expressions)_:
-  ```ocaml
-  let aph = ['a'-'z'] | ['A'-'Z']     in
-
-  let ctx = ['A'-'Z'] var ':'
-
-  (*note: starts with uppercase letter, ends with ':'*)
-  ```
-
-4. Strings: mostly used for printing, results:
-
-  eg: `printf("result of my maths: %d\n", gcd)`
-
-  TODO: double check these regexp. from http://caml.infria.fr/pub/docs/manual-ocaml/lex.html
-  TODO: should lexeme include quotes or is that in this regexp?
-
-  Regular Expression might be _(builds on variables' expressions)_:
-  ```ocaml
-  let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
-  let spc = \(\| "| '| n| t| b| r| space)
-  let num = ['0' - '9']                   in
-  let aph = ['a' - 'z'] | ['A' - 'Z']     in
-
-  let str = (aph | num | chr | spc)*
-  ```
-#### Expressions
-  Expressions are groups of lexemes/tokens (defined above), parenthesized `(` and `)` sub-expressions,
-  and combinations of expressions and operators:
-
-##### Keyword Meanings:
 Each operator's meaning is defined below:
 - TODO someone have a blast! page 3+ of C LRM
 
@@ -318,7 +329,7 @@ Order of precedence of expressions (`expr`), and their meanings:
    + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators < (less than), > (greater than), <= (less than or equal to) and >= (greater than or equal to) all yield 0
 if the specified relation is false and 1 if it is true. Operand conversion is exactly the same as for the + operator.
 
-   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to) operators are exactly analogous to the relational operators except for their lower precedence. (Thus `a < b == c < d` is 1 whenever a < b and c < d have the same truth-value)
+   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to) operators are exactly analogous to the relational operators except for their lower precedence. (Thus `a < b == c < d` is `1` whenever `a < b` and `c < d` have the same truth-value)
 
  + `expr || expr` The || operator returns 1 if either of its operands is non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover, the second operand is not evaluated if the value of the first operand is non-zero.
 
