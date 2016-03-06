@@ -105,10 +105,10 @@ Euclid:find gcd {
 
 ## Design Implementation
 
-Within contexts and `find` blocks, a valid statements look like many C-style
+Within contexts and `find` blocks, valid statements look like many C-style
 languages, where expressions are semi-colon (`;`) separated, may be have
-sub-expessions using parenthesis (`(`, `)`) and the lexemes of an expressio may
-be made up of any one of:
+sub-expessions using parenthesis (`(`, `)`) and the lexemes of an expression
+may be made up of:
 
 1. **variables** to which floating-point numbers are assigned
 
