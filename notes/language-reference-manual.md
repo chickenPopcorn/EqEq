@@ -80,7 +80,7 @@ Formally, a valid program is a series of:
 - one or more `find` blocks.
 - zero or more "context" blocks _(aside from the automatic, global context)_
 
-### "Context"s' equations & `find` Blocks
+### "Context"s & `find` Blocks
 
 While both types of blocks of code are simply curly brace enclosed listings of
 sequential statements, contexts and `find` blocks differ in their use:
@@ -93,8 +93,9 @@ It follows then that `find` expressions _apply_ to contexts. Where a context
 might be shared for re-use, `find` expressions are designed to make local use of
 equations in a given context.
 
-Though the above "Hello World" `find`s on the global context, users will
-generally define them, for example a "Euclid" context, where `gcd` is defined:
+Though the above "Hello World" example executes a `find` on the global context,
+users will generally define contexts manually. For example a "Euclid" context,
+where `gcd` might be defined:
 ```c
 Euclid = { gcd = /*... defined here ...*/ }
 Euclid:find gcd {
