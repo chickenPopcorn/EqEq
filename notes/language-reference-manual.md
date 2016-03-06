@@ -241,7 +241,6 @@ TODO: explain each
  the variables are inheritable.
 
  Possible inherited data types:
- + Integer
  + Double
  + String
 
@@ -263,15 +262,35 @@ TODO: explain each
   the array with the elements in the "{}". The elements have to be either Double
   or String and could not be fixed of both.
 
-4. Function: declaration of function has the format:
+4. Multi-line equation: declaration of multi-line equation has the format:
   ```
-  function_name = function (parameter, parameter, ... ) {
+  equation_name = {
     // some operations
-    return ...
+    ... // some return value
   }
   ```
-  The 'function_name' has the type "...", where "..." indicates the type which
-  the returned variable has. The function will be passed by value.
+  The 'equation_name' has the type Double, where "..." indicates
+  the returned variable. The equation will be passed by value. The multi-line
+  equation can only return one variable.
+  
+  For example:
+    ```
+      gcd = {
+        if (0 == b) {
+          a
+        } elif (a == 0) {
+          b
+        }
+
+        if (a > b) {
+            a = b, b = a % b  // note: multiple assignments on single line
+        } else {
+            a = b % a, b = a
+        }
+        gcd // call gcd() with the current values of a and b
+      }
+    ```
+  “gcd” is similar to a function in C with parameter a and b. 
 
 5. Equations:
   ```
