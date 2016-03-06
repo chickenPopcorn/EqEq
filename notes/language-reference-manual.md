@@ -251,6 +251,7 @@ TODO: explain each
   ```c
   V[ ]
   V[constant-expression]
+  V = {a, b, c, ...}
   ```
   In the first case, the expression will declare an array with length 1 and
   initialized with zero, as `[ 0 ]`. In the second case, the expression will
@@ -259,7 +260,10 @@ TODO: explain each
   need to be evaluated to an integer. Such a declarator makes the contained
   identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional
   array with rank i of objects of type `double`. To declare a vector of vectors,
-  the notation would be like `V[i][j]`.
+  the notation would be like `V[i][j]`. In the third case, the expression will declare 
+  an array with length, the number of elements inside the "{}". It will initialize 
+  the array with the elements in the "{}". The elements have to be either Double
+  or String and could not be fixed of both.
 
 4. Function: declaration of function has the format:
   ```
