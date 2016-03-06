@@ -260,40 +260,35 @@ The following keywords are, and have special meaning in the language. See
 
   For analysis of equation arithmetic, see "Expression Precedence & Meaning", below.
 
-6. Scope:
+6. Scopes (access to variables):
 
-```
-Variable =
+  ```
+  VAR = EXPR
 
-Scope_name {
-  list of equation or list of function
-}
+  Scope_name {
+    list of equation or list of function
 
-Scope_name: find ... (with x in range(), ... ,...) {
-}
-```
+    // VAR = EXPR // overwrites global `VAR`
+  }
 
-Here, `Scope_name` is like an object of equations. Equations are put inside
-the bracket follow `Scope_name`.
+  Scope_name: find VAR [with VARB in range()]* ] {
+  }
+  ```
 
-Any varibale declared outside of a `Scope_name` is a global variable that can be
-accessed from anywhere within the program.
-If a variable declared in some `Scope_name` has the same name as some global variable,
-it will overwite the value within the Scope_name.
-After getting out of the Scope_name, the variable will restore its value.
+  Here, `Scope_name` is like an object of equations. Equations are put inside
+  the bracket follow `Scope_name`.
 
-`Scope_name: find [...]` is the evaluation part. A `with` clause is optional.
-`find` will evaluate the following variable using the equations inside the
-`Scope_name` part. Once a `Scope_name` is defined, mutiple `find...` are
-allowed to use the equations inside it.
+  Any varibale declared outside of a `Scope_name` is a global variable that can
+  be accessed from anywhere within the program. If a variable declared in some
+  `Scope_name` has the same name as some global variable, it will overwite the
+  value within the `Scope_name`.  After getting out of the `Scope_name`, the
+  variable will restore its value.
 
-`with` part is optional. `with` allow users to specify the values for the
-variables using to evaluate unknown x. User can define more than one varibale,
-seperated by comma. If a variable in `find` or `with` part is not found in
-`Scope_name {}`, `0` will be returned to show ERROR. If insufficent values are
-provided for the equations (there are remaining variable on the right side of
-a equation), 0 will be returned for ERROR.
-
+  `Scope_name: find VAR [...]` is the evaluation part. A `with` clause is
+  optional. See "With Statement" section below. `find` will evaluate the
+  variable following it using the equations inside the `Scope_name` block. Once
+  a `Scope_name` is defined, mutiple `find` are
+  allowed to use the equations inside it.
 
 
 #### Statements
@@ -379,7 +374,7 @@ mycontext: print(x) // prints 5
 ##### With Statement
 With statements have the form
 ```
-with [variable in expression]+ compound_statement
+with [variable in expression, ]+ compound_statement
 ```
 , which means that with takes one ore more expressiosn, and a compound substatement.
 
@@ -534,4 +529,4 @@ Order of precedence of expressions (`expr`), and their meanings:
    evaluated left-to-right and the value of the left expression is discarded.
    The type and value of the result are the type and value of the right operand.
 
-##### Sample program 
+##### Sample Program
