@@ -57,12 +57,12 @@ simplify the process of evaluating equations. With our language we take a step
 to help users leave their formula in a similar format to what they'd normally
 have on paper.
 
-## Overview
+# Overview
 
 Valid source programs will compile down to
 [C](https://www.bell-labs.com/usr/dmr/www/cman.pdf).
 
-### Definition of a Program
+## Definition of a Program
 
 The simplest - though contrived - valid program is:
 ```c
@@ -101,7 +101,7 @@ Euclid:find gcd {
 }
 ```
 
-## Design Implementation
+# Design Implementation
 
 Within contexts and `find` blocks, valid statements look like many C-style
 languages, where expressions are semi-colon (`;`) separated, may be have
@@ -275,7 +275,7 @@ TODO: explain each
 
 5. Equations:
   ```
-  variable =  variable (value assigned?)
+  variable =  variable 
   variable =  some airthmetic expression
   variable =  a function call that return a number
   ```
@@ -290,7 +290,7 @@ TODO: explain each
        a = 3; b = 6; c=gcd(a,b) (return 3).
        ```
   The return type will be checked. If the return type is not floating points
-  numbers (including interger). Then return 0, standing for ERROR.
+  numbers (including interger), 0 will be returned, standing for ERROR.
 
 6. Scope:
   ```
