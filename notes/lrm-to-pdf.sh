@@ -27,6 +27,7 @@ cat > ./lrm.html <<-EOF_STYLES
     padding: 5em;
     font-family: serif;
   }
+  h1:nth-of-type(1) { text-align: center; }
 </style>
 <script>
 window.onload = function() {
