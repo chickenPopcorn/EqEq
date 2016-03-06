@@ -26,6 +26,7 @@ cat > ./lrm.html <<-EOF_STYLES
   body {
     padding: 5em;
     font-family: serif;
+    font-size: 21pt;
   }
   h1:nth-of-type(1) { text-align: center; }
 </style>
