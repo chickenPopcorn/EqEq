@@ -234,6 +234,11 @@ TODO: explain each
   Declarator-list:
    declarator, declarator, ...
   ```
+  For example:
+  ```
+  a = 2, b = 3 
+  a = b, b = a % b
+  ```
 
 2. Variable:
 
@@ -277,20 +282,20 @@ TODO: explain each
     ```
       gcd = {
         if (0 == b) {
-          a
+          a   // as 'return a' in C
         } elif (a == 0) {
-          b
+          b   // as 'return b' in C
         }
 
         if (a > b) {
-            a = b, b = a % b  // note: multiple assignments on single line
+            a = b, b = a % b  
         } else {
             a = b % a, b = a
         }
-        gcd // call gcd() with the current values of a and b
+        gcd // call 'gcd' with the current values of a and b
       }
     ```
-  “gcd” is similar to a function in C with parameter a and b. 
+  “gcd” is similar to a function in C with parameter a and b as gcd(a, b). 
 
 5. Equations:
   ```
