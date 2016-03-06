@@ -246,7 +246,6 @@ TODO: explain each
  the variables are inheritable.
 
  Possible inherited data types:
- + Integer
  + Double
  + String
 
@@ -493,6 +492,7 @@ Order of precedence of expressions (`expr`), and their meanings:
    the first expression by the second. Both operands are double, and only integer portion of the double will be used for modular operation, and the result is a double with fraction equals to zero. eg:
    ```
    12.0 % 7.0 = 5.0
+   12.3 % 7.5 = 5.0
    ```
 
  + `expr + expr`, `expr - expr` The result is the sum or different of the
