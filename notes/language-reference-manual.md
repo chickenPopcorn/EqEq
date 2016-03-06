@@ -57,12 +57,12 @@ simplify the process of evaluating equations. With our language we take a step
 to help users leave their formula in a similar format to what they'd normally
 have on paper.
 
-# Overview
+## Overview
 
 Valid source programs will compile down to
 [C](https://www.bell-labs.com/usr/dmr/www/cman.pdf).
 
-## Definition of a Program
+### Definition of a Program
 
 The simplest - though contrived - valid program is:
 ```c
@@ -101,7 +101,7 @@ Euclid:find gcd {
 }
 ```
 
-# Design Implementation
+## Design Implementation
 
 Within contexts and `find` blocks, valid statements look like many C-style
 languages, where expressions are semi-colon (`;`) separated, may be have
@@ -257,8 +257,8 @@ TODO: explain each
   need to be evaluated to an integer. Such a declarator makes the contained
   identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional
   array with rank i of objects of type `double`. To declare a vector of vectors,
-  the notation would be like `V[i][j]`. In the third case, the expression will declare 
-  an array with length, the number of elements inside the "{}". It will initialize 
+  the notation would be like `V[i][j]`. In the third case, the expression will declare
+  an array with length, the number of elements inside the "{}". It will initialize
   the array with the elements in the "{}". The elements have to be either Double
   or String and could not be fixed of both.
 
@@ -294,7 +294,7 @@ TODO: explain each
 
 5. Equations:
   ```
-  variable =  variable 
+  variable =  variable (value assigned?)
   variable =  some airthmetic expression
   variable =  a function call that return a number
   ```
@@ -309,7 +309,7 @@ TODO: explain each
        a = 3; b = 6; c=gcd(a,b) (return 3).
        ```
   The return type will be checked. If the return type is not floating points
-  numbers (including interger), 0 will be returned, standing for ERROR.
+  numbers (including interger). Then return 0, standing for ERROR.
 
 6. Scope:
   ```
@@ -461,29 +461,27 @@ Order of precedence of expressions (`expr`), and their meanings:
  + `id'['expr?']'`    // TODO: maybe in scanner?
 
  + `-expr` The result is the negative of the expression with the same type. The
-   type of the expression must be int, or double.
+   type of the expression must be double.
 
  + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the
    logical negation operator ! is 1 if the value of the expression is 0, 0 if
-   the value of the expression is non-zero. The type of the result is int. This
-   operator is applicable only to ints.
+   the value of the expression is non-zero. The type of the result is double. This
+   operator is applicable only to double.
 
  + `exp ^ exp` // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
 
  + `exp * exp`, `exp / exp` The binary operator * / indicates multiplication and
-   division operation. If both operands are int, the result is int; if one is
-   int and one double, the former is converted to double, and the result is
-   double; if both are double, the result is double. No other combinations are
-   allowed.
+   division operation. If both operands are double, the result is double.
 
  + `exp % exp` The binary `%` operator yields the remainder from the division of
-   the first expression by the second. Both operands must be int, and the result
-   is int.
+   the first expression by the second. Both operands are double, and only integer portion of the double will be used for modular operation, and the result is a double with fraction equals to zero. eg:
+   ```
+   12.0 % 7.0 = 5.0
+   12.3 % 7.5 = 5.0
+   ```
 
  + `expr + expr`, `expr - expr` The result is the sum or different of the
-   expressions. If both operands are int, the result is int. If both are double,
-   the result is double. If one is int and one is double, the former is
-   converted to double and the result is double.
+   expressions. Both are double, the result is double.
 
  + equality/inequality:
    + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators `<`
