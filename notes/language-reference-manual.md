@@ -317,6 +317,8 @@ TODO: explain each
   The return type will be checked. If the return type is not floating points
   numbers (including interger). Then return 0, standing for ERROR.
 
+  For analysis of equation arithmetic, see "Expression Precedence & Meaning", below.
+
 6. Scope:
   ```
   Variable =
@@ -521,7 +523,7 @@ range(3)
 range(2, 5)
 range(2, 8, 3)
 ```
-##### Precedence of Expressions
+##### Expression Precedence & Meaning
 
 Order of precedence of expressions (`expr`), and their meanings:
  + `'(' exp ')'`
