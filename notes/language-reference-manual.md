@@ -157,49 +157,15 @@ below.
 
 ### Reserved Keywords
 
-TODO: merge this list's content with "Declrations" (perhaps leave only `range`,
-`print`, and `find` listed in this section _(to indicate it is "special"
-reservation of our language specifically)_.
+The following keywords are, and have special meaning in the language. See
+"Statements" and "Declarations" sections elsewhere for each of their meanings.
 
-TODO: explain each
 + `if`
 + `elif`
 + `else`
-+ `return`
 + `find`
-+ `function` keyword used to indicate define multi-line equations.
++ `print`
 
-    An identifier followed by the assignment of a `function` keyword indicates
-    the remaining expressions will be:
-    1. a list of zero or more formal parameters
-    2. set of curly brace enclosed statements definiting the equation
-    eg:
-    ```c
-    range = function() {/* definition */}
-    ```
-+ `print` built-in function that mirrors the C printf API, eg:
-    ```
-    printf("words here %f.0 and %f here\n", 4, myvar)
-    // words here 4 and 3.14159 here
-    ```
-    Note: we have a subset of the identifier C's printf has, as we only
-    use floats.
-+ `for` // TODO: not sure yet, decide on this:
-+ `range`
-    TODO: define this as builtin or stdlib, like this:
-    ```c
-    range = function(from, to) {
-      return range(from, to, vec[to-from], 0);
-    }
-
-    range = function(from, to, vec, counter) {
-      vec[counter] = from;
-      if (from == to) {
-        return;
-      }
-      return range(from+1, to, vec, counter + 1);
-    }
-    ```
 
 ### Declarations
 1. A list of declarator are separated by comma. Formatted as below:
