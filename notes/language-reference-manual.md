@@ -3,8 +3,12 @@
 - [ ] TODO(jon): render PDF:
     - [ ] ensure we have page numbers
     - [ ] ensure title is before TOC
+       - [ ] ensure title has lots of padding
     - [ ] ensure new-page break after TOC
+    - [ ] ensure padding between print-breaks (so content isn't cut off)
+    - [ ] line-height needs increase
     - [ ] ensure code snippet formatting isn't screwed up
+      - [ ] ensure code snippet is colored
 - [ ] TODO(jon): review TODOs with TA/edwards (email Daniel)
 - [ ] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
   - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
