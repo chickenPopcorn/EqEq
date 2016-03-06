@@ -57,12 +57,12 @@ simplify the process of evaluating equations. With our language we take a step
 to help users leave their formula in a similar format to what they'd normally
 have on paper.
 
-## Overview
+# Overview
 
 Valid source programs will compile down to
 [C](https://www.bell-labs.com/usr/dmr/www/cman.pdf).
 
-### Definition of a Program
+## Definition of a Program
 
 The simplest - though contrived - valid program is:
 ```c
@@ -101,7 +101,7 @@ Euclid:find gcd {
 }
 ```
 
-## Design Implementation
+# Design Implementation
 
 Within contexts and `find` blocks, valid statements look like many C-style
 languages, where expressions are semi-colon (`;`) separated, may be have
