@@ -123,9 +123,9 @@ be made up of any one of:
 
 ### Expressions' Lexemes or Tokens
 
-The syntactic description of each expression is described here. Note for
-semantic description of each, see the section further below titled,
-["Declarations"](#declrations).
+Below the syntax of each type of expression is provided. For the semantic
+description of each, refer to the ["Declarations"](#declrations) section,
+below.
 
 1. Floating point numbers, including integers:
 
