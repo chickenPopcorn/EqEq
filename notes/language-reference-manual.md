@@ -63,9 +63,8 @@ Valid source programs will compile down to
 [C](https://www.bell-labs.com/usr/dmr/www/cman.pdf).
 
 ### Definition of a Program
-A valid program is a series of one or more `find` expressions. A `find`
-expression is authored with a particular "context" (aka "scope") in mind, by
-default the global scope. The simplest - though contrived - valid program is:
+
+The simplest - though contrived - valid program is:
 ```c
 find { printf("Hello, all %.0f readers!\n", 21 * 2); }
 ```
@@ -75,19 +74,29 @@ Which prints the following to standard out:
 Hello, all 42 readers!
 ```
 
-Other than the global context, users will generall define contexsts manually,
-much like `find` blocks - curly-brace enclosed equations and statements - but
-with capitalized names.
+Formally, a valid program is a series of:
+- one or more `find` blocks.
+- zero or more "context" blocks _(aside from the automatic, global context)_
 
-An important feature of `EqualsEquals` is that context need not make equations
-explicit _(that is, an equation can have multiple unknowns)_ until its
-convenient, at the time a `find` block is written. An example of a `find` block
-executed on the user-defined `Euclid` context _(where `gcd` is defined as a
-multi-line function, or equation)_:
+### "Context"s' equations & `find` Blocks
+
+While both types of blocks of code are simply curly brace enclosed listings of
+sequential statements, contexts and `find` blocks differ in their use:
+- **context**s are expected to layout and define equations for use later.
+  Thus they're allowed semantic gaps in their equations; eg: missing solutions.
+- `find` blocks on the other hand are expected to be the resolution to "find"
+  missing said pieces, or simply apply completed solutions to new inputs.
+
+It follows then that `find` expressions _apply_ to contexts. Where a context
+might be shared for re-use, `find` expressions are designed to make local use of
+equations in a given context.
+
+Though the above "Hello World" `find`s on the global context, users will
+generally define them, for example a "Euclid" context, where `gcd` is defined:
 ```c
-Euclid = { /*... gcd defined here ...*/ }
+Euclid = { gcd = /*... defined here ...*/ }
 Euclid:find gcd {
-  a = 20; b = 10; print("%d\n", gcd);
+  a = 20; b = 10; print("%.0f\n", gcd);
 }
 ```
 
