@@ -218,9 +218,9 @@ The following keywords are, and have special meaning in the language. See
     ```
       gcd = {
         if (0 == b) {
-          a
+          a;
         } elif (a == 0) {
-          b
+          b;
         }
 
         if (a > b) {
@@ -228,10 +228,10 @@ The following keywords are, and have special meaning in the language. See
         } else {
             a = b % a, b = a
         }
-        gcd // call gcd() with the current values of a and b
+        gcd; // call gcd with the current values of a and b
       }
     ```
-  “gcd” is similar to a function in C with parameter a and b.
+  `gcd` is similar to a function in C with parameter a and b.
 
 
 5. Equations:
@@ -256,38 +256,38 @@ The following keywords are, and have special meaning in the language. See
   For analysis of equation arithmetic, see "Expression Precedence & Meaning", below.
 
 6. Scope:
-  ```
-  Variable =
 
-  Scope_name {
-    list of equation or list of function
-  }
+```
+Variable =
 
-  Scope_name: find ... (with x in range(), ... ,...) {
-  }
+Scope_name {
+  list of equation or list of function
+}
 
+Scope_name: find ... (with x in range(), ... ,...) {
+}
+```
 
-  ```
-  Here, `Scope_name` is like an object of equations. Equations are put inside
-  the bracket follow `Scope_name`.
+Here, `Scope_name` is like an object of equations. Equations are put inside
+the bracket follow `Scope_name`.
 
-  Any varibale declared outside of a `Scope_name` is a global variable that can be
-  accessed from anywhere within the program.
-  If a variable declared in some `Scope_name` has the same name as some global variable,
-  it will overwite the value within the Scope_name.
-  After getting out of the Scope_name, the variable will restore its value.
+Any varibale declared outside of a `Scope_name` is a global variable that can be
+accessed from anywhere within the program.
+If a variable declared in some `Scope_name` has the same name as some global variable,
+it will overwite the value within the Scope_name.
+After getting out of the Scope_name, the variable will restore its value.
 
-  `Scope_name: find [...]` is the evaluation part. A `with` clause is optional.
-  `find` will evaluate the following variable using the equations inside the
-  `Scope_name` part. Once a `Scope_name` is defined, mutiple `find...` are
-  allowed to use the equations inside it.
+`Scope_name: find [...]` is the evaluation part. A `with` clause is optional.
+`find` will evaluate the following variable using the equations inside the
+`Scope_name` part. Once a `Scope_name` is defined, mutiple `find...` are
+allowed to use the equations inside it.
 
-  `with` part is optional. `with` allow users to specify the values for the
-  variables using to evaluate unknown x. User can define more than one varibale,
-  seperated by comma. If a variable in `find` or `with` part is not found in
-  `Scope_name {}`, `0` will be returned to show ERROR. If insufficent values are
-  provided for the equations (there are remaining variable on the right side of
-  a equation), 0 will be returned for ERROR.
+`with` part is optional. `with` allow users to specify the values for the
+variables using to evaluate unknown x. User can define more than one varibale,
+seperated by comma. If a variable in `find` or `with` part is not found in
+`Scope_name {}`, `0` will be returned to show ERROR. If insufficent values are
+provided for the equations (there are remaining variable on the right side of
+a equation), 0 will be returned for ERROR.
 
 
 
