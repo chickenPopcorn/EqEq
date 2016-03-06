@@ -246,6 +246,7 @@ TODO: explain each
  the variables are inheritable.
 
  Possible inherited data types:
+ + Integer
  + Double
  + String
 
@@ -277,25 +278,26 @@ TODO: explain each
   The 'equation_name' has the type Double, where "..." indicates
   the returned variable. The equation will be passed by value. The multi-line
   equation can only return one variable.
-  
+
   For example:
     ```
       gcd = {
         if (0 == b) {
-          a   // as 'return a' in C
+          a
         } elif (a == 0) {
-          b   // as 'return b' in C
+          b
         }
 
         if (a > b) {
-            a = b, b = a % b  
+            a = b, b = a % b  // note: multiple assignments on single line
         } else {
             a = b % a, b = a
         }
-        gcd // call 'gcd' with the current values of a and b
+        gcd // call gcd() with the current values of a and b
       }
     ```
-  “gcd” is similar to a function in C with parameter a and b as gcd(a, b). 
+  “gcd” is similar to a function in C with parameter a and b. 
+
 
 5. Equations:
   ```
@@ -318,21 +320,30 @@ TODO: explain each
 
 6. Scope:
   ```
+  Variable = 
+  
   Scope_name {
     list of equation or list of function
   }
 
   Scope_name: find ... (with x in range(), ... ,...) {
   }
+  
+  
   ```
-
   Here, `Scope_name` is like an object of equations. Equations are put inside
   the bracket follow `Scope_name`.
+  
+  Any varibale declared outside of a Scope_name is a global variable that can be 
+  accessed from anywhere within the program. 
+  If a variable declared in some Scope_name has the same name as some global variable,
+  it will overwite the value within the Scope_name.   
+  After getting out of the Scope_name, the variable will restore its value.
 
   `Scope_name: find [...]` is the evaluation part. A `with` clause is optional.
   `find` will evaluate the following variable using the equations inside the
   `Scope_name` part. Once a `Scope_name` is defined, mutiple `find...` are
-  allowed to use the equations inside it.
+  allowed to use the equations inside it. 
 
   `with` part is optional. `with` allow users to specify the values for the
   variables using to evaluate unknown x. User can define more than one varibale,
@@ -482,7 +493,6 @@ Order of precedence of expressions (`expr`), and their meanings:
    the first expression by the second. Both operands are double, and only integer portion of the double will be used for modular operation, and the result is a double with fraction equals to zero. eg:
    ```
    12.0 % 7.0 = 5.0
-   12.3 % 7.5 = 5.0
    ```
 
  + `expr + expr`, `expr - expr` The result is the sum or different of the
