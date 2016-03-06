@@ -387,8 +387,17 @@ Order of precedence of expressions (`expr`), and their meanings:
 ##### Expression Statement
 Expression statements are statement that includes an expression and a semicolon at the end:
 ```
-expression;
+expression ;
 ```
+
+##### Combining Statements
+A statement can be the multiple of other statements. `{` and `}` are used to group multiple statements as one statement. So the form of compound statements is:
+```
+{ statement+ }
+```
+
+, which means that a compound statement has an opening curly bracket, one or more statements, and a closing curly bracket.
+
 ##### Conditional Statement
 Statements that are used in conditional statements:
 ```
@@ -409,20 +418,27 @@ if_statement elif_statement* else_statement?
 
 , which means that it contains a required if_statement, any number of elif_statement, and an optional else_statement.
 
-##### Return Statement
-Return statements are used inside functions. It has two possible forms:
+##### While Statement
+While statements have the form:
 ```
-return;
-return expression;
-```
-
-##### Combining Statements
-A statement can be the multiple of other statements. `{` and `}` are used to group multiple statements as one statement. So the form of compound statements is:
-```
-{ statement+ }
+while ( expression ) statement
 ```
 
-, which means that a compound statement has an opening curly bracket, one or more statements, and a closing curly bracket.
+The substatement is executed repeatedly so long as the value of the expression remains non-zero.
+
+##### Break Statement
+The statement
+```
+break ;
+```
+causes termination of the smallest enclosing `while`, or `with` statement.
+
+##### Continue Statement
+The statement
+```
+continue ;
+```
+causes control to pass to the loop-continuation portion of the smallest enclosing `while` or `with` statement; that is to the end of the loop. More precisely, in each of the statements.
 
 ##### Context statement
 A context statement include a context name and a compound statement:
@@ -430,18 +446,57 @@ A context statement include a context name and a compound statement:
 context_name compound_statement
 ```
 
-The statement after the colon will be evaluated in the context given by `context_name`.
+To access a context, we use a statement with the following form:
+```
+context_name: statement
+```
+
+The substatement will be evaluated in the context given by `context_name`.
+
+Examples:
+```
+mycontext {
+  x = 5
+}
+
+print(x) // throw an exception because x in not defined
+mycontext: print(x) // prints 5
+```
+
+##### With Statement
+With statements have the form
+```
+with [variable in expression]+ compound_statement
+```
+, which means that with takes one ore more expressiosn, and a compound substatement.
+
+If the expressions have type double, then with will evaluate the expression and execute the compound substatement:
+```c
+with x in 5 {
+  print(x)
+}  // 5
+
+with x in 5, y in 6 {
+  print(x + y)
+}  // 11
+```
+
+If the expressions have type vectors, we will execute the compound substatement with all the combinations of values avaiable. Basically, it mirrors multiple `for` loop in Python:
+```c
+// with vector assignment (causing equivalence of `for` loop in other languages)
+with x in {1, 2, 3} {
+  print(x)
+}  // print 1, 2, 3 on 3 separate lines
+
+with x in {1, 2}, y in {4, 6} {
+  print(x, y)
+}  // print 5, 7, 6, 8 on 4 separate lines
+```
 
 ##### Find Statement
-Statements that are used in find statements:
+Find statements start with keyword `find` and an expression, followed by a substatement:
 ```
-// with_statement
-with statement
-```
-
-Find statements start with keyword `find`, an expression, optional with_statements, and a statement:
-```
-find expression with_statement* statement
+find expression statement
 ```
 
 In a find statement, the last statement should be evaluated with access to previously declared expressions.
@@ -449,17 +504,21 @@ In a find statement, the last statement should be evaluated with access to previ
 Examples of find statements:
 ```c
 // a simple example
-pendulum {
-  velocity = length + 1
-}
-pendulum:find velocity with length = 5 {
+velocity = length + 1
+
+find velocity {
+  length = 5
   print(velocity)
 } // print 6
 
-// with vector assignment (causing equivalence of `for` loop in other languages)
-pendulum:find vector with length = range(0, 5) {
+// this block is the same as the one above
+find velocity with length in 5 {
   print(velocity)
-} // print from 1 to 6
+} // print 6
+
+pendulum:find vector with length in range(0, 5) {
+  print(velocity)
+} // print 1 to 6
 ```
 
 #### Built-in Functions
