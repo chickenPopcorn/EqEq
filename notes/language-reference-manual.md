@@ -275,7 +275,7 @@ TODO: explain each
 
 5. Equations:
   ```
-  variable =  variable (value assigned?)
+  variable =  variable 
   variable =  some airthmetic expression
   variable =  a function call that return a number
   ```
@@ -290,7 +290,7 @@ TODO: explain each
        a = 3; b = 6; c=gcd(a,b) (return 3).
        ```
   The return type will be checked. If the return type is not floating points
-  numbers (including interger). Then return 0, standing for ERROR.
+  numbers (including interger), 0 will be returned, standing for ERROR.
 
 6. Scope:
   ```
