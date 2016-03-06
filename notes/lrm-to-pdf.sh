@@ -50,7 +50,7 @@ window.onload = function() {
 EOF_STYLES
 
 cp -v "$srcLrm" ./lrm.md
-"$docTocExec" --title '# EqualsEquals Language Manual' --github ./lrm.md
+"$docTocExec" --notitle --github ./lrm.md
 "$markedExec" < ./lrm.md >> ./lrm.html
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
