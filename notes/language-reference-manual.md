@@ -530,3 +530,49 @@ Order of precedence of expressions (`expr`), and their meanings:
    The type and value of the result are the type and value of the right operand.
 
 ##### Sample program 
+```
+/** START: Example of equations' `evaluate` use-cases */
+
+sum = 0  // init a number called sum
+vecs[]  // init a vector of numbers called vecs
+pendulum {
+    /**
+     * Spell out equation for our compiler:
+     *   m * g * h = m * v^2 / 2
+     */
+    m = 10
+    theta = pi / 2
+    g = 9.8
+    h = l - l * cos(theta)  
+    v = sqrt( 2 * g * h)
+    // note: relying on existing libraries for cos
+}
+
+// evaluate v in pendulum's equations given that g = 9.8 and l in range(20)
+pendulum: find v with l in range(0, 20) {
+    // Our compiler now has solutions to: m, g, l (and indirectly h), so v can be solved:
+    print("velocity: %d", v)  // v is automatically evaluated when it's referred to
+}
+
+// evaluate v in pendulum's equations given that g in range(4, 15) and l = 10
+// take the average of values of v
+pendulum: find v with g in range(4, 15), m = 100 {  
+    l = 10
+    sum += v  // scope of sum: global (b/c it's not in the scope of pendulum but would be overwritten by pendulum)
+
+   
+}
+
+average = sum / (15 - 4) 
+
+pendulum: find v with v in range(20) { // throw a compiler error b/c can't find v with v's value
+}
+
+// Example: tries l = 10, v = 20 in context of pendulum, to see its equations are still true.
+// If equations are inconsistent, the program will throw an exception.
+pendulum: find v {
+    l = 10  // by now, v will be calculated
+    print(v == 20)  // print 1
+    v = 20 // throws an error
+}
+```
