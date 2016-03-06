@@ -475,6 +475,8 @@ Order of precedence of expressions (`expr`), and their meanings:
    b * (4 + 5)
    b * 9 // same
    ```
+ + `id '[' expr? ']'`: for vector access.
+
  + `-expr` The result is the negative of the expression with the same type. The
    type of the expression must be double.
 
@@ -497,8 +499,6 @@ Order of precedence of expressions (`expr`), and their meanings:
 
  + `expr + expr`, `expr - expr` The result is the sum or different of the
    expressions. Both are double, the result is double.
-
- + `id '[' expr? ']'`: for vector access.
 
  + equality/inequality:
    + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators `<`
