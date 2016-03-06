@@ -236,7 +236,7 @@ TODO: explain each
   ```
   For example:
   ```
-  a = 2, b = 3 
+  a = 2, b = 3
   a = b, b = a % b
   ```
 
@@ -295,7 +295,7 @@ TODO: explain each
         gcd // call gcd() with the current values of a and b
       }
     ```
-  “gcd” is similar to a function in C with parameter a and b. 
+  “gcd” is similar to a function in C with parameter a and b.
 
 
 5. Equations:
@@ -319,30 +319,30 @@ TODO: explain each
 
 6. Scope:
   ```
-  Variable = 
-  
+  Variable =
+
   Scope_name {
     list of equation or list of function
   }
 
   Scope_name: find ... (with x in range(), ... ,...) {
   }
-  
-  
+
+
   ```
   Here, `Scope_name` is like an object of equations. Equations are put inside
   the bracket follow `Scope_name`.
-  
-  Any varibale declared outside of a Scope_name is a global variable that can be 
-  accessed from anywhere within the program. 
-  If a variable declared in some Scope_name has the same name as some global variable,
-  it will overwite the value within the Scope_name.   
+
+  Any varibale declared outside of a `Scope_name` is a global variable that can be
+  accessed from anywhere within the program.
+  If a variable declared in some `Scope_name` has the same name as some global variable,
+  it will overwite the value within the Scope_name.
   After getting out of the Scope_name, the variable will restore its value.
 
   `Scope_name: find [...]` is the evaluation part. A `with` clause is optional.
   `find` will evaluate the following variable using the equations inside the
   `Scope_name` part. Once a `Scope_name` is defined, mutiple `find...` are
-  allowed to use the equations inside it. 
+  allowed to use the equations inside it.
 
   `with` part is optional. `with` allow users to specify the values for the
   variables using to evaluate unknown x. User can define more than one varibale,
