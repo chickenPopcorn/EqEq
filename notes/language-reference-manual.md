@@ -315,75 +315,7 @@ TODO: explain each
   provided for the equations (there are remaining variable on the right side of
   a equation), 0 will be returned for ERROR.
 
-#### Precedence of Expressions
 
-TODO: rip out the "keyword meaning" descriptinos next to each of these and and
-them as sub-bullets elsewhere (eg: many of them here might be moved to the
-"arithmetic" bullet in previous section).
-
-Each operator's meaning is defined below:
-- TODO someone have a blast! page 3+ of C LRM
-
-Order of precedence of expressions (`expr`), and their meanings:
- + `'(' exp ')'`
-     eg: `( ...)`
-   exp here is evaluated before, at which point the parenthesis themselves lose
-   their meaning. eg:
-   ```
-   b * (4 + 5)
-   b * 9 // same
-   ```
- + `id'['expr?']'`           // TODO: maybe in scanner?
-
- + `-expr` The result is the negative of the expression with the same type. The
-   type of the expression must be int, or double.
-
- + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the
-   logical negation operator ! is 1 if the value of the expression is 0, 0 if
-   the value of the expression is non-zero. The type of the result is int. This
-   operator is applicable only to ints.
-
- + `exp ^ exp` // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
-
- + `exp * exp`, `exp / exp` The binary operator * / indicates multiplication and
-   division operation. If both operands are int, the result is int; if one is
-   int and one double, the former is converted to double, and the result is
-   double; if both are double, the result is double. No other combinations are
-   allowed.
-
- + `exp % exp` The binary `%` operator yields the remainder from the division of
-   the first expression by the second. Both operands must be int, and the result
-   is int.
-
- + `expr + expr`, `expr - expr` The result is the sum or different of the
-   expressions. If both operands are int, the result is int. If both are double,
-   the result is double. If one is int and one is double, the former is
-   converted to double and the result is double.
-
- + equality/inequality:
-   + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators `<`
-     (less than), `>` (greater than), `<=` (less than or equal to) and `>=`
-     (greater than or equal to) all yield 0 if the specified relation is false
-     and 1 if it is true. Operand conversion is exactly the same as for the `+`
-     operator.
-
-   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to)
-     operators are exactly analogous to the relational operators except for
-     their lower precedence. (Thus `a < b == c < d` is `1` whenever `a < b` and
-     `c < d` have the same truth-value)
-
- + `expr || expr` The `||` operator returns 1 if either of its operands is
-   non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover,
-   the second operand is not evaluated if the value of the first operand is
-   non-zero.
-
- + `expr = expr`  It require an lvalue as their left operand, and the type of an
-   assignment expression is that of its left operand. The value is the value
-   stored in the left operand after the assignment has taken place.
-
- + `expression , expression` A pair of expressions separated by a comma is
-   evaluated left-to-right and the value of the left expression is discarded.
-   The type and value of the result are the type and value of the right operand.
 
 #### Statements
 ##### Expression Statement
@@ -464,7 +396,7 @@ pendulum:find vector with length = range(0, 5) {
 } // print from 1 to 6
 ```
 
-#### Built-in Functions
+#### Built-ins
 ##### `print()`
 `print()` is built-in function that mirrors the C `printf()` API. `print()`'s arguments include a string, and optional expressions:
 ```
@@ -494,7 +426,68 @@ range(3)
 range(2, 5)
 range(2, 8, 3)
 ```
+##### Precedence of Expressions
 
+Order of precedence of expressions (`expr`), and their meanings:
+ + `'(' exp ')'`
+     eg: `( ...)`
+   exp here is evaluated before, at which point the parenthesis themselves lose
+   their meaning. eg:
+   ```
+   b * (4 + 5)
+   b * 9 // same
+   ```
+ + `id'['expr?']'`           // TODO: maybe in scanner?
+
+ + `-expr` The result is the negative of the expression with the same type. The
+   type of the expression must be int, or double.
+
+ + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the
+   logical negation operator ! is 1 if the value of the expression is 0, 0 if
+   the value of the expression is non-zero. The type of the result is int. This
+   operator is applicable only to ints.
+
+ + `exp ^ exp` // TODO: is this possible to do in our lang, or do we `C's math.h sqrt(...)`?
+
+ + `exp * exp`, `exp / exp` The binary operator * / indicates multiplication and
+   division operation. If both operands are int, the result is int; if one is
+   int and one double, the former is converted to double, and the result is
+   double; if both are double, the result is double. No other combinations are
+   allowed.
+
+ + `exp % exp` The binary `%` operator yields the remainder from the division of
+   the first expression by the second. Both operands must be int, and the result
+   is int.
+
+ + `expr + expr`, `expr - expr` The result is the sum or different of the
+   expressions. If both operands are int, the result is int. If both are double,
+   the result is double. If one is int and one is double, the former is
+   converted to double and the result is double.
+
+ + equality/inequality:
+   + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators `<`
+     (less than), `>` (greater than), `<=` (less than or equal to) and `>=`
+     (greater than or equal to) all yield 0 if the specified relation is false
+     and 1 if it is true. Operand conversion is exactly the same as for the `+`
+     operator.
+
+   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to)
+     operators are exactly analogous to the relational operators except for
+     their lower precedence. (Thus `a < b == c < d` is `1` whenever `a < b` and
+     `c < d` have the same truth-value)
+
+ + `expr || expr` The `||` operator returns 1 if either of its operands is
+   non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover,
+   the second operand is not evaluated if the value of the first operand is
+   non-zero.
+
+ + `expr = expr`  It require an lvalue as their left operand, and the type of an
+   assignment expression is that of its left operand. The value is the value
+   stored in the left operand after the assignment has taken place.
+
+ + `expression , expression` A pair of expressions separated by a comma is
+   evaluated left-to-right and the value of the left expression is discarded.
+   The type and value of the result are the type and value of the right operand.
 
 ### Phase 2 of 4: Parser with `yacc`
 TODO!
