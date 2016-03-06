@@ -141,10 +141,6 @@ below.
 
   eg: `printf("result of my maths: %d\n", gcd)`
 
-  TODO: double check these regexp. from http://caml.infria.fr/pub/docs/manual-ocaml/lex.html
-  - maybe just simplify hex to a readable list of "special" chars
-  TODO: should lexeme include quotes or is that in this regexp?
-
   Regular Expression might be _(builds on variables' expressions)_:
   ```ocaml
   let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
@@ -154,6 +150,7 @@ below.
 
   let str = (aph | num | chr | spc)*
   ```
+  <!-- note this means we have to convet UTF-8 chars to escaped ascii strings -->
 
 ### Reserved Keywords
 
