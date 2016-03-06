@@ -1,44 +1,17 @@
+<!--
 # TODO:s
 - [ ] TODO(jon): review TODOs with TA/edwards (email Daniel)
 - [ ] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
   - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
    1. Copy/paste old-LRM's content:
-     - [x] Introduction
-     - [x] Motivation
-     - [ ] Language Description
-       - [x] Target Language: Python
-       - [ ] Syntax Overview
-         - [x] Data Types
-         - [x] Comments
-         - [ ] Code block format
-         - [x] Declaration
-         - [ ] Flow control
-       - [ ] Language Features
-         - [ ] Mathematical Equations
        - [ ] Sample program
    2. refactor *this* LRM's existing content
 
   - expand missing pieces
-- [ ] TODO(tianci): "declarations" section: "explain *how* users declare each thing
-    in our language (functions, variables, equations - like things should be
-    single-variable on left-side)
-- [x] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
-- [x] TODO(nam): builtin functions
-  - [x] range: declared as built-in func
-- [x] TODO(nam): issues to address to the group
-  - [x] what types of argument does range() accept? double
-  - [x] what's the format of a vector? {2, 3, 4}
-  - [x] should we have for loop? no
-  - [x] while loop? yes
-  - [x] `continue` and `break` inside with range statement?
-  - [x] semicolon at the end? yes
-  - [x] null statement? no
-- [ ] TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
-- [ ] TODO(jimmy): address 'Reserved Keywords" TODO
 - [ ] as group: start scanner.mll based on "Keywords & Expressions" sectinos
     - [ ] update this doc based on what works
 
----
+-->
 
 # `EqualsEquals` Language Reference Manual
 
@@ -587,12 +560,3 @@ Order of precedence of expressions (`expr`), and their meanings:
  + `expression , expression` A pair of expressions separated by a comma is
    evaluated left-to-right and the value of the left expression is discarded.
    The type and value of the result are the type and value of the right operand.
-
-### Phase 2 of 4: Parser with `yacc`
-TODO!
-
-### Phase 3 of 4: Static Semantic Analysis
-TODO!
-
-### Phase 4 of 4: Code Generation
-TODO!
