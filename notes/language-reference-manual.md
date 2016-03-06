@@ -435,7 +435,7 @@ Order of precedence of expressions (`expr`), and their meanings:
    b * (4 + 5)
    b * 9 // same
    ```
- + `id'['expr?']'`  // TODO: maybe in scanner?
+ + `id'['expr?']'`    // TODO: maybe in scanner?
 
  + `-expr` The result is the negative of the expression with the same type. The
    type of the expression must be int, or double.
@@ -478,6 +478,10 @@ Order of precedence of expressions (`expr`), and their meanings:
    non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover,
    the second operand is not evaluated if the value of the first operand is
    non-zero.
+
+ + `expr && expr` The `&&` operator returns 1 if both of its operands is
+    non-zero, and 0 if either is 0. It guarantees left-to-right evaluation; moreover,
+    the second operand is not evaluated if the value of the first operand is 0.
 
  + `expr = expr`  It require an lvalue as their left operand, and the type of an
    assignment expression is that of its left operand. The value is the value
