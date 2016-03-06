@@ -148,7 +148,7 @@ below.
   Regular Expression might be _(builds on variables' expressions)_:
   ```ocaml
   let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
-  let spc = \(\| "| '| n| t| b| r| space)
+  let spc = \(\| "| '| n| t| b| r| ' ')
   let num = ['0' - '9']                   in
   let aph = ['a' - 'z'] | ['A' - 'Z']     in
 
