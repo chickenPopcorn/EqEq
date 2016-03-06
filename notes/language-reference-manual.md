@@ -25,16 +25,14 @@
 - [x] TODO(nam): address 'Keyword Meanings" TODO i.e. statements
 - [x] TODO(nam): builtin functions
   - [x] range: declared as built-in func
-- [ ] TODO(nam): issues to address to the group
-  - [ ] can contexts be combined? how does one make use of equations from
-        different contexts in one `find` block?
-  - [ ] what types of argument does range() accept?
-  - [ ] what's the format of a vector? [2 3 5]
-  - [ ] should we have for loop?
-  - [ ] while loop?
-  - [ ] `continue` and `break` inside with range statement?
-  - [ ] null statement?
-  - [ ] what else?
+- [x] TODO(nam): issues to address to the group
+  - [x] what types of argument does range() accept? double
+  - [x] what's the format of a vector? {2, 3, 4}
+  - [x] should we have for loop? no
+  - [x] while loop? yes
+  - [x] `continue` and `break` inside with range statement?
+  - [x] semicolon at the end? yes
+  - [x] null statement? no
 - [ ] TODO(jimmy): cleanup/collapse/whatever 'Keyword Meanings" precedence
 - [ ] TODO(jimmy): address 'Reserved Keywords" TODO
 - [ ] as group: start scanner.mll based on "Keywords & Expressions" sectinos
