@@ -239,7 +239,8 @@ TODO: explain each
 
 2. Variable:
 
- To declare a variable, only name of the variable is needed. The data types of the variables are inheritable.
+ To declare a variable, only name of the variable is needed. The data types of
+ the variables are inheritable.
 
  Possible inherited data types:
  + Integer
@@ -251,33 +252,43 @@ TODO: explain each
   V[ ]
   V[constant-expression]
   ```
-In the first case, the expression will declare an array with length 1 and initialized with zero, as `[ 0 ]`. In the second case, the expression will declare an array with length that evaluated result of the constant expression and initialized with zeros, as `[ 0, 0, ... , 0]`. The constant expression need to be evaluated to an integer. Such a declarator makes the contained identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional array with rank i of objects of type `double`. To declare a vector of vectors, the notation would be like `V[i][j]`.
+  In the first case, the expression will declare an array with length 1 and
+  initialized with zero, as `[ 0 ]`. In the second case, the expression will
+  declare an array with length that evaluated result of the constant expression
+  and initialized with zeros, as `[ 0, 0, ... , 0]`. The constant expression
+  need to be evaluated to an integer. Such a declarator makes the contained
+  identifier have type `vector`. The declarator `V[ i ]` yields a 1-dimensional
+  array with rank i of objects of type `double`. To declare a vector of vectors,
+  the notation would be like `V[i][j]`.
 
-4. Function:
-declaration of function has the format as below:
+4. Function: declaration of function has the format:
   ```
   function_name = function (parameter, parameter, ... ) {
     // some operations
     return ...
   }
   ```
-  The 'function_name' has the type "...", where "..." indicates the type which the returned variable has. The function will be passed by value.
+  The 'function_name' has the type "...", where "..." indicates the type which
+  the returned variable has. The function will be passed by value.
+
 5. Equations:
   ```
   variable =  variable (value assigned?)
   variable =  some airthmetic expression
   variable =  a function call that return a number
   ```
-  Only variable will be allowed on the left side of the equal sign. The expression on the right side can be declared variable, arithmetic expression that returns a number, or a function call that return a number:
+  Only variable will be allowed on the left side of the equal sign. The
+  expression on the right side can be declared variable, arithmetic expression
+  that returns a number, or a function call that return a number:
 
-  e.g:
+  For example:
        ```
        a = 3; b = a; (return b=3)
        a = 3; b = a*2+1 (return 7)
        a = 3; b = 6; c=gcd(a,b) (return 3).
        ```
-  The return type will be checked. If the return type is not floating points numbers (including interger). Then return 0, standing for ERROR.
-
+  The return type will be checked. If the return type is not floating points
+  numbers (including interger). Then return 0, standing for ERROR.
 
 6. Scope:
   ```
@@ -288,13 +299,24 @@ declaration of function has the format as below:
   Scope_name: find ... (with x in range(), ... ,...) {
   }
   ```
-  Scope_name is like an object of equations. Equations are put inside the bracket follow Scope_name.
 
-  Scope_name: find... is the evaluation part. A 'with' clause is optional. 'find' will evaluate the following variable using the equations inside the Scope_name part. Once a Scope_name is defined, mutiple 'find...' are allowed to use the equations inside it.
+  Here, `Scope_name` is like an object of equations. Equations are put inside
+  the bracket follow `Scope_name`.
 
-  'with' part is optional. 'with' allow users to specify the values for the variables using to evaluate unknown x. User can define more than one varibale, seperated by comma. If a variable in 'find' or 'with' part is not found in Scope_name {}, 0 will be returned to show ERROR. If insufficent values are provided for the equations (there are remaining variable on the right side of a equation), 0 will be returned for ERROR.
+  `Scope_name: find [...]` is the evaluation part. A `with` clause is optional.
+  `find` will evaluate the following variable using the equations inside the
+  `Scope_name` part. Once a `Scope_name` is defined, mutiple `find...` are
+  allowed to use the equations inside it.
+
+  `with` part is optional. `with` allow users to specify the values for the
+  variables using to evaluate unknown x. User can define more than one varibale,
+  seperated by comma. If a variable in `find` or `with` part is not found in
+  `Scope_name {}`, `0` will be returned to show ERROR. If insufficent values are
+  provided for the equations (there are remaining variable on the right side of
+  a equation), 0 will be returned for ERROR.
 
 #### Precedence of Expressions
+
 TODO: rip out the "keyword meaning" descriptinos next to each of these and and
 them as sub-bullets elsewhere (eg: many of them here might be moved to the
 "arithmetic" bullet in previous section).
