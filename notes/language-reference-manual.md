@@ -434,34 +434,39 @@ pendulum:find vector with length in range(0, 5) {
 
 #### Built-ins
 ##### `print()`
-`print()` is built-in function that mirrors the C `printf()` API. `print()`'s arguments include a string, and optional expressions:
+
+`print()` is built-in function that mirrors the C `printf()` API. `print()`'s
+arguments include a string, and optional expressions:
 ```
 print( a_string_with_formatters [, expressions]* )
 ```
 
-<!-- TODO What does print() returns? -->
 `print()` prints the formatted string to the screen.
 
-Users can format strings in `print()` with `%f` and `%s` formatter (and but not `%d`, since `eqeq` only uses float). For example,
+Users can format strings in `print()` with `%f` and `%s` formatter (and but not
+`%d`, since `eqeq` only uses float). For example,
 ```
 print("words here %f.0 and %f here\n", 4, myvar)
 // words here 4 and 3.14159 here
 ```
 
+
 ##### `range()`
-`range()` mimics Python's `range()` function. It takes an optional expression `start`, an expression `stop`, and an optional expression `step`. It returns a vector from `stat` to `stop - 1`, with distance `step` between each member of the vector:
-<!-- TODO what types of argument does range() accept? -->
-```
+`range()` mimics Python's `range()` function. It takes an optional expression
+`start`, an expression `stop`, and an optional expression `step`. It returns a
+vector from `stat` to `stop - 1`, with distance `step` between each member of
+the vector:
+```c
 range([start,] stop [,step])
 ```
 
-<!-- TODO what's the format of a vector? [2 3 5]  -->
 For examples,
 ```python
-range(3)
-range(2, 5)
-range(2, 8, 3)
+range(3)       // same as writing: {0, 1, 2}
+range(2, 5)    // same as writing: {2, 3, 4}
+range(2, 8, 3) // same as writing: {2, 5, 8}
 ```
+
 ##### Expression Precedence & Meaning
 
 Order of precedence of expressions (`expr`), and their meanings:
