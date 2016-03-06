@@ -529,10 +529,13 @@ Order of precedence of expressions (`expr`), and their meanings:
    evaluated left-to-right and the value of the left expression is discarded.
    The type and value of the result are the type and value of the right operand.
 
-##### Sample program
-```c
-/** START: Example of equations' `evaluate` use-cases */
+## Sample program
 
+Below are example programs in EqualsEquals.
+
+### Example of equations' `evaluate` Use-cases
+
+```c
 sum = 0  // init a number called sum
 vecs[]  // init a vector of numbers called vecs
 pendulum {
@@ -550,26 +553,34 @@ pendulum {
 
 // evaluate v in pendulum's equations given that g = 9.8 and l in range(20)
 pendulum: find v with l in range(0, 20) {
-    // Our compiler now has solutions to: m, g, l (and indirectly h), so v can be solved:
-    print("velocity: %d", v)  // v is automatically evaluated when it's referred to
+    // Our compiler now has solutions to: m, g, l (and indirectly h), so v can
+    // be solved:
+
+    print("velocity: %d", v)
+
+    // v is automatically evaluated when it's referred to
 }
 
 // evaluate v in pendulum's equations given that g in range(4, 15) and l = 10
 // take the average of values of v
 pendulum: find v with g in range(4, 15), m = 100 {  
     l = 10
-    sum += v  // scope of sum: global (b/c it's not in the scope of pendulum but would be overwritten by pendulum)
+    sum += v
+    // scope of sum: global (b/c it's not in the scope of pendulum but would be
+    // overwritten by pendulum)
 
    
 }
 
 average = sum / (15 - 4) 
 
-pendulum: find v with v in range(20) { // throw a compiler error b/c can't find v with v's value
+pendulum: find v with v in range(20) {
+   // throw a compiler error because can't find v with v's value
 }
 
-// Example: tries l = 10, v = 20 in context of pendulum, to see its equations are still true.
-// If equations are inconsistent, the program will throw an exception.
+// Example: tries l = 10, v = 20 in context of pendulum, to see its equations
+// are still true. If equations are inconsistent, the program will throw an
+// exception.
 pendulum: find v {
     l = 10  // by now, v will be calculated
     print(v == 20)  // print 1
@@ -577,8 +588,8 @@ pendulum: find v {
 }
 ```
 
+### Example of a multi-line equation to find `gcd` of `a` and `b`
 ```
-/* START: Example of a function (multi-line equations) to find gcd of a and b */
 myGCD {
     gcd = {  // this is a multi-line equation
         if (0 == b) {
