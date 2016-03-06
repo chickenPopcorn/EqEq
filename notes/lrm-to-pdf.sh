@@ -24,7 +24,7 @@ markedExec="$(readlink -f node_modules/marked/bin/marked)"; [ -x "$markedExec" ]
 cat > ./lrm.html <<-EOF_STYLES
 <style type="text/css">
   body {
-    padding: 5em;
+    padding: 14em;
     font-family: serif;
     font-size: 21pt;
   }
