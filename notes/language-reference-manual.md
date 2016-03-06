@@ -100,7 +100,11 @@ Euclid:find gcd {
 }
 ```
 
-Otherwise, a valid program may also include:
+### Common C-Like Features
+
+Within contexts and `find` blocks, a valid program looks like many C-style
+languages, where statemetns are semi-colon (`;`) separated, and each might
+involved:
 
 1. **variables** and their assignment operations
 
