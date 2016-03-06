@@ -576,3 +576,46 @@ pendulum: find v {
     v = 20 // throws an error
 }
 ```
+
+```
+/* START: Example of a function (multi-line equations) to find gcd of a and b */
+myGCD {
+    gcd = {  // this is a multi-line equation
+        if (0 == b) {
+            a
+        } elif (a == 0) {
+            b
+        }
+
+        if (a > b) {
+            a = b, b = a % b  // note: multiple assignments on single line
+        } else {
+            a = b % a, b = a
+        }
+        gcd // call gcd() with the current values of a and b
+    }
+}
+
+// evaluate gcd(10, 20)
+myGCD: find gcd{
+    a = 10
+    b = 20
+
+    print("gcd of %d and %d is %d", a, b, gcd)
+}
+/* END: Example of a function (multi-line equations) to find gcd of a and b */
+
+
+/* This works too. In this case, gcd is not in any special scope */
+gcd = {  // this is a function
+    ...  // same as the above example
+}
+
+// evaluate gcd(10, 20)
+find gcd {
+    a = 10
+    b = 20
+    print("gcd of %d and %d is %d", a, b, gcd)
+}
+/* END: Example of a function (multi-line equations) to find gcd of a and b */
+```
