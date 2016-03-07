@@ -62,8 +62,8 @@ window.onload = function() {
 <script>hljs.initHighlightingOnLoad();</script>
 EOF_STYLES
 
-cp -v "$srcLrm" ./lrm.md
-"$docTocExec" --notitle --github ./lrm.md
+cp "$srcLrm" ./lrm.md
+"$docTocExec" --notitle --github ./lrm.md >/dev/null
 "$markedExec" < ./lrm.md >> ./lrm.html
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
