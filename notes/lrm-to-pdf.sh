@@ -6,7 +6,8 @@ USE_PANDOC=0 # toggle this as `1` or `0` without quotes
 
 set -e
 declare -r lrmToPdfDir="$(mktemp --directory --tmpdir  "$(basename "$0")"_XXXXXX.d)"
-declare -r srcLrm="$(printf '%s/%s' "$(git rev-parse --show-toplevel)" notes/language-reference-manual.md)"
+declare -r srcDir="$(git rev-parse --show-toplevel)"
+declare -r srcLrm="$(printf '%s/%s' "$srcDir" notes/language-reference-manual.md)"
 
 cleanup() { [ -d "$lrmToPdfDir" ] && rm -rf "$lrmToPdfDir"; }
 trap cleanup SIGINT
@@ -101,6 +102,8 @@ lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
 
 # Step 1: Inject table of contents & Title
 cp "$srcLrm" ./lrm.md
+# Step 0.5: Inject authors table:
+sed -i "1 i\ $(grep '^|' "$srcDir"/README.md)" ./lrm.md
 "$docTocExec" \
   --title='<h1>EqualsEquals Language Reference Manual</h1>' \
   --github \
