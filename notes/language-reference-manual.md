@@ -25,12 +25,13 @@
 # `EqualsEquals` Language Reference Manual
 
 EqualsEquals is a language designed for simple equation evaluation. EqualsEquals
-helps express mathematical equation in ASCII without straying too far from
-whiteboard-style notation. Users do not need to be overly careful to perfectly
-reduce formulas behind. Leaving unknowns for later is possible, without
-encapsulating equations's unknowns as function parameters. EqualsEquals takes
-multiple equations as input and can evaluate the value of a certain variables of
-the equations when the values of other variables are given.
+helps express mathematical equation in ASCII (though UTF-8 string literals are
+allowed) without straying too far from whiteboard-style notation. Users do not
+need to be overly careful to perfectly reduce formulas behind. Leaving unknowns
+for later is possible, without encapsulating equations's unknowns as function
+parameters. EqualsEquals takes multiple equations as input and can evaluate the
+value of a certain variables of the equations when the values of other variables
+are given.
 
 ## Motivation
 
@@ -227,17 +228,18 @@ The following keywords are, and have special meaning in the language. See
     ```
       gcd = {
         if (0 == b) {
-          a;
+          a;  // solution is a
         } elif (a == 0) {
-          b;
+          b;  // solution is b
         }
 
         if (a > b) {
-            a = b, b = a % b  // note: multiple assignments on single line
+          a = b, b = a % b
+          // note: multiple assignments on single line
         } else {
-            a = b % a, b = a
+          a = b % a, b = a
         }
-        gcd; // call gcd with the current values of a and b
+        gcd; // solution is gcd w/the current a and b
       }
     ```
   `gcd` is similar to a function in C with parameter a and b.
@@ -553,7 +555,7 @@ Order of precedence of expressions (`expr`), and their meanings:
 
 Below are example programs in EqualsEquals.
 
-### Example of equations' `evaluate` Use-cases
+### Example of equations' `find` Use-cases
 
 ```c
 sum = 0  // init a number called sum
@@ -611,30 +613,31 @@ pendulum: find v {
 ### Example of a multi-line equation to find `gcd` of `a` and `b`
 ```
 myGCD {
-    gcd = {  // this is a multi-line equation
-        if (0 == b) {
-            a
-        } elif (a == 0) {
-            b
-        }
-
-        if (a > b) {
-            a = b, b = a % b  // note: multiple assignments on single line
-        } else {
-            a = b % a, b = a
-        }
-        gcd // call gcd() with the current values of a and b
+  gcd = {
+    if (0 == b) {
+      a;  // solution is a
+    } elif (a == 0) {
+      b;  // solution is b
     }
+
+    if (a > b) {
+      a = b, b = a % b
+      // note: multiple assignments on single line
+    } else {
+      a = b % a, b = a
+    }
+    gcd; // solution is gcd w/the current a and b
+  }
 }
 
-// evaluate gcd(10, 20)
-myGCD: find gcd{
+// evaluate gcd of 10 and 20
+myGCD: find gcd {
     a = 10
     b = 20
 
     print("gcd of %d and %d is %d", a, b, gcd)
 }
-/* END: Example of a function (multi-line equations) to find gcd of a and b */
+/* END: Example of a multi-line equations to find gcd of a and b */
 
 
 /* This works too. In this case, gcd is not in any special scope */
@@ -642,11 +645,11 @@ gcd = {  // this is a function
     ...  // same as the above example
 }
 
-// evaluate gcd(10, 20)
+// evaluate gcd of 10 and 20
 find gcd {
     a = 10
     b = 20
     print("gcd of %d and %d is %d", a, b, gcd)
 }
-/* END: Example of a function (multi-line equations) to find gcd of a and b */
+/* END: Example of a multi-line equations to find gcd of a and b */
 ```
