@@ -51,7 +51,7 @@ Though the above "Hello World" example executes a `find` on the global context,
 users will generally define contexts manually. For example a "Euclid" context,
 where `gcd` might be defined:
 ```c
-Euclid = { gcd = /*... defined here ...*/ }
+Euclid = { gcd = /*... defined here ...*/; }
 Euclid:find gcd {
   a = 20; b = 10; print("%.0f\n", gcd);
 }
@@ -151,8 +151,8 @@ Following are reserved keywords, and have special meaning in the language. See
   ```
   For example:
   ```c
-  a = 2, b = 3
-  a = b, b = a % b
+  a = 2, b = 3;
+  a = b, b = a % b;
   ```
 
 2. Variable:
@@ -203,10 +203,10 @@ Following are reserved keywords, and have special meaning in the language. See
      }
 
      if (a > b) {
-       a = b, b = a % b
+       a = b, b = a % b;
        // note: multiple assignments on single line
      } else {
-       a = b % a, b = a
+       a = b % a, b = a;
      }
      gcd; // solution is gcd w/the current a and b
    }
@@ -228,8 +228,8 @@ Following are reserved keywords, and have special meaning in the language. See
   For example:
   ```c
   a = 3; b = a;          // b == 3
-  a = 3; b = a * 2 + 1   // b == 7
-  a = 3; b = 6; c = gcd  // c == 3
+  a = 3; b = a * 2 + 1;  // b == 7
+  a = 3; b = 6; c = gcd; // c == 3
   ```
 
   For analysis of equation arithmetic, see "Expression Precedence & Meaning",
@@ -348,11 +348,13 @@ The substatement will be evaluated in the context given by `context_name`.
 Examples:
 ```c
 mycontext {
-  x = 5
+  x = 5;
 }
 
-print(x) // throw an exception because x in not defined
-mycontext: print(x) // prints 5
+print(x); // throw an exception because x in not defined
+mycontext: find x {
+  print(x); // prints 5
+}
 ```
 
 #### With Statement
@@ -367,11 +369,11 @@ If the expressions have type double, then with will evaluate the expression and
 execute the compound substatement:
 ```c
 with x in 5 {
-  print(x)
+  print(x);
 }  // 5
 
 with x in 5, y in 6 {
-  print(x + y)
+  print(x + y);
 }  // 11
 ```
 
@@ -381,11 +383,11 @@ with all the combinations of values avaiable. Basically, it mirrors multiple
 ```c
 // with vector assignment (causing equivalence of `for` loop in other languages)
 with x in {1, 2, 3} {
-  print(x)
+  print(x);
 }  // print 1, 2, 3 on 3 separate lines
 
 with x in {1, 2}, y in {4, 6} {
-  print(x, y)
+  print(x, y);
 }  // print 5, 7, 6, 8 on 4 separate lines
 ```
 
@@ -402,20 +404,20 @@ previously declared expressions.
 Examples of find statements:
 ```c
 // a simple example
-velocity = length + 1
+velocity = length + 1;
 
 find velocity {
-  length = 5
-  print(velocity)
+  length = 5;
+  print(velocity);
 } // print 6
 
 // this block is the same as the one above
 find velocity with length in 5 {
-  print(velocity)
+  print(velocity);
 } // print 6
 
 pendulum:find vector with length in range(0, 5) {
-  print(velocity)
+  print(velocity);
 } // print 1 to 6
 ```
 
@@ -433,7 +435,7 @@ print( a_string_with_formatters [, expressions]* )
 Users can format strings in `print()` with `%f` and `%s` formatter (and but not
 `%d`, since `eqeq` only uses float). For example,
 ```c
-print("words here %f.0 and %f here\n", 4, myvar)
+print("words here %f.0 and %f here\n", 4, myvar);
 // words here 4 and 3.14159 here
 ```
 
@@ -444,14 +446,14 @@ print("words here %f.0 and %f here\n", 4, myvar)
 vector from `stat` to `stop - 1`, with distance `step` between each member of
 the vector:
 ```c
-range([start,] stop [,step])
+range([start,] stop [,step]);
 ```
 
 For examples,
 ```python
-range(3)       // same as writing: {0, 1, 2}
-range(2, 5)    // same as writing: {2, 3, 4}
-range(2, 8, 3) // same as writing: {2, 5, 8}
+range(3);        // same as writing: {0, 1, 2}
+range(2, 5);     // same as writing: {2, 3, 4}
+range(2, 8, 3);  // same as writing: {2, 5, 8}
 ```
 
 #### Expression Precedence & Meaning
@@ -459,8 +461,8 @@ range(2, 8, 3) // same as writing: {2, 5, 8}
 Order of precedence of expressions (`expr`), and their meanings:
  + `'(' expr ')'`: for sub-expressions. For example, `expr` of `4 + 5` here:
    ```c
-   b * (4 + 5)  // `expr` should be considered first
-   b *  9       // same as above; note absense of parenthesis
+   b * (4 + 5); // `expr` should be considered first
+   b *  9;      // same as above; note absense of parenthesis
    ```
  + `id '[' expr? ']'`: for vector access.
 
@@ -485,8 +487,8 @@ Order of precedence of expressions (`expr`), and their meanings:
    integer portion of the double will be used for modular operation, and the
    result is a double with fraction equals to zero. eg:
    ```c
-   12.0 % 7.0 = 5.0
-   12.3 % 7.5 = 5.0
+   12.0 % 7.0 = 5.0;
+   12.3 % 7.5 = 5.0;
    ```
 
  + `expr + expr`, `expr - expr` The result is the sum or different of the
@@ -538,11 +540,11 @@ pendulum {
    * Spell out equation for our compiler:
    *   m * g * h = m * v^2 / 2
    */
-  m = 10
-  theta = pi / 2
-  g = 9.8
-  h = l - l * cos(theta)
-  v = sqrt( 2 * g * h)
+  m = 10;
+  theta = pi / 2;
+  g = 9.8;
+  h = l - l * cos(theta);
+  v = sqrt( 2 * g * h);
   // note: relying on existing libraries for cos
 }
 
@@ -551,7 +553,7 @@ pendulum: find v with l in range(0, 20) {
   // Our compiler now has solutions to: m, g, l (and indirectly h), so v can
   // be solved:
 
-  print("velocity: %d", v)
+  print("velocity: %d", v);
 
   // v is automatically evaluated when it's referred to
 }
@@ -559,14 +561,14 @@ pendulum: find v with l in range(0, 20) {
 // evaluate v in pendulum's equations given that g in range(4, 15) and l = 10
 // take the average of values of v
 pendulum: find v with g in range(4, 15), m = 100 {
-  l = 10
+  l = 10;
 
-  sum += v
+  sum += v;
   // scope of sum: global (b/c it's not in the scope of pendulum but would be
   // overwritten by pendulum)
 }
 
-average = sum / (15 - 4)
+average = sum / (15 - 4);
 
 pendulum: find v with v in range(20) {
   // throw a compiler error because can't find v with v's value
@@ -576,9 +578,9 @@ pendulum: find v with v in range(20) {
 // are still true. If equations are inconsistent, the program will throw an
 // exception.
 pendulum: find v {
-  l = 10  // by now, v will be calculated
-  print(v == 20)  // print 1
-  v = 20 // throws an error
+  l = 10; // by now, v will be calculated
+  print(v == 20);  // print 1
+  v = 20; // throws an error
 }
 ```
 
@@ -593,10 +595,10 @@ myGCD {
     }
 
     if (a > b) {
-      a = b, b = a % b
+      a = b, b = a % b;
       // note: multiple assignments on single line
     } else {
-      a = b % a, b = a
+      a = b % a, b = a;
     }
     gcd; // solution is gcd w/the current a and b
   }
@@ -604,10 +606,10 @@ myGCD {
 
 // evaluate gcd of 10 and 20
 myGCD: find gcd {
-    a = 10
-    b = 20
+  a = 10;
+  b = 20;
 
-    print("gcd of %d and %d is %d", a, b, gcd)
+  print("gcd of %d and %d is %d", a, b, gcd);
 }
 /* END: Example of a multi-line equations to find gcd of a and b */
 
@@ -619,9 +621,9 @@ gcd = {
 
 // evaluate gcd of 10 and 20
 find gcd {
-  a = 10
-  b = 20
-  print("gcd of %d and %d is %d", a, b, gcd)
+  a = 10;
+  b = 20;
+  print("gcd of %d and %d is %d", a, b, gcd);
 }
 /* END: Example of a multi-line equations to find gcd of a and b */
 ```
