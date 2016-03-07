@@ -24,13 +24,13 @@
 
 # `EqualsEquals` Language Reference Manual
 
-EqualsEquals is a language designed for simple equation evaluation.
-EqualsEquals helps express mathematical equation in ASCII without straying too
-far from whiteboard-style notation. Users do not need to be overly careful to
-perfectly reduce formulas behind. Leaving unknowns for later is possible,
-without encapsulating equations's unknowns as function parameters. EqualsEquals
-takes multiple equations as input and can evaluate the value of a certain
-variables of the equations when the values of other variables are given.
+EqualsEquals is a language designed for simple equation evaluation. EqualsEquals
+helps express mathematical equation in ASCII without straying too far from
+whiteboard-style notation. Users do not need to be overly careful to perfectly
+reduce formulas behind. Leaving unknowns for later is possible, without
+encapsulating equations's unknowns as function parameters. EqualsEquals takes
+multiple equations as input and can evaluate the value of a certain variables of
+the equations when the values of other variables are given.
 
 ## Motivation
 
