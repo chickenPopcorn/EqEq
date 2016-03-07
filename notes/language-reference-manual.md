@@ -471,7 +471,9 @@ Order of precedence of expressions (`expr`), and their meanings:
    is `0`. If the value of `expr` is anything other than `0`, then `!expr`
    results in `0`.
 
- + `expr ^ expr`
+ + `left_expr ^ right_expr`: exponentiation. Mathematically raises `left_expr`
+    to the power, `right_expr`. Note: uses underlying C standard library's
+    corresponding power API, eg: `double pow (double base, double power)`.
 
  + `expr * expr`, `expr / expr` The binary operator * / indicates multiplication
    and division operation. If both operands are double, the result is double.
