@@ -1,4 +1,4 @@
-# `EqualsEquals` Language Reference Manual
+# Introduction
 
 EqualsEquals is a language designed for simple equation evaluation. EqualsEquals
 helps express mathematical equation in ASCII (though UTF-8 string literals are
@@ -9,19 +9,19 @@ parameters. EqualsEquals takes multiple equations as input and can evaluate the
 value of a certain variables of the equations when the values of other variables
 are given.
 
-## Motivation
+# Motivation
 
 Reducing mathematical formulas can be really painful and tedious. We want to
 simplify the process of evaluating equations. With our language we take a step
 to help users leave their formula in a similar format to what they'd normally
 have on paper.
 
-## Overview
+# Overview
 
 Valid source programs will compile down to
 [C](https://www.bell-labs.com/usr/dmr/www/cman.pdf).
 
-### Definition of a Program
+## Definition of a Program
 
 The simplest - though contrived - valid program is:
 ```c
@@ -34,7 +34,7 @@ Formally, a valid program is a series of:
 - one or more `find` blocks.
 - zero or more "context" blocks _(aside from the automatic, global context)_
 
-### "Context"s & `find` Blocks
+## "Context"s & `find` Blocks
 
 While both types of blocks of code are simply curly brace enclosed listings of
 sequential statements, contexts and `find` blocks differ in their use:
@@ -57,7 +57,7 @@ Euclid:find gcd {
 }
 ```
 
-## Design Implementation
+# Design Implementation
 
 Within contexts and `find` blocks, valid statements look like many C-style
 languages, where expressions are semi-colon (`;`) separated, may be have
@@ -76,7 +76,7 @@ may be made up of:
 6. **equality** operations in `if`/`else` expressions _(which evaluate to `1` or
    `0` if both operators are equal)_
 
-### Expressions' Lexemes or Tokens
+## Expressions' Lexemes or Tokens
 
 Below the syntax of each type of expression is provided. For the semantic
 description of each, refer to the ["Declarations"](#declrations) section,
@@ -132,7 +132,7 @@ below.
   ```
   <!-- note this means we have to convet UTF-8 chars to escaped ascii strings -->
 
-### Reserved Keywords
+## Reserved Keywords
 
 Following are reserved keywords, and have special meaning in the language. See
 "Statements" and "Declarations" sections elsewhere for each of their meanings.
@@ -144,7 +144,7 @@ Following are reserved keywords, and have special meaning in the language. See
 + `print`
 
 
-### Declarations
+## Declarations
 1. A list of declarator are separated by comma. Formatted as below:
   ```
   Declarator-list:
@@ -266,15 +266,15 @@ Following are reserved keywords, and have special meaning in the language. See
   allowed to use the equations inside it.
 
 
-#### Statements
-##### Expression Statement
+### Statements
+#### Expression Statement
 Expression statements are statement that includes an expression and a semicolon
 at the end:
 ```
 expression ;
 ```
 
-##### Combining Statements
+#### Combining Statements
 A statement can be the multiple of other statements. `{` and `}` are used to
 group multiple statements as one statement. So the form of compound statements
 is:
@@ -285,7 +285,7 @@ is:
 , which means that a compound statement has an opening curly bracket, one or
 more statements, and a closing curly bracket.
 
-##### Conditional Statement
+#### Conditional Statement
 Statements that are used in conditional statements:
 ```c
 // if_statement
@@ -306,7 +306,7 @@ if_statement elif_statement* else_statement?
 , which means that it contains a required if_statement, any number of
 elif_statement, and an optional else_statement.
 
-##### While Statement
+#### While Statement
 While statements have the form:
 ```c
 while ( expression ) statement
@@ -315,14 +315,14 @@ while ( expression ) statement
 The substatement is executed repeatedly so long as the value of the expression
 remains non-zero.
 
-##### Break Statement
+#### Break Statement
 The statement
 ```
 break ;
 ```
 causes termination of the smallest enclosing `while`, or `with` statement.
 
-##### Continue Statement
+#### Continue Statement
 The statement
 ```
 continue ;
@@ -331,7 +331,7 @@ causes control to pass to the loop-continuation portion of the smallest
 enclosing `while` or `with` statement; that is to the end of the loop. More
 precisely, in each of the statements.
 
-##### Context statement
+#### Context statement
 A context statement include a context name and a compound statement:
 ```
 context_name compound_statement
@@ -354,7 +354,7 @@ print(x) // throw an exception because x in not defined
 mycontext: print(x) // prints 5
 ```
 
-##### With Statement
+#### With Statement
 With statements have the form
 ```
 with [variable in expression, ]+ compound_statement
@@ -388,7 +388,7 @@ with x in {1, 2}, y in {4, 6} {
 }  // print 5, 7, 6, 8 on 4 separate lines
 ```
 
-##### Find Statement
+#### Find Statement
 Find statements start with keyword `find` and an expression, followed by a
 substatement:
 ```
@@ -418,8 +418,8 @@ pendulum:find vector with length in range(0, 5) {
 } // print 1 to 6
 ```
 
-#### Built-ins
-##### `print()`
+### Built-ins
+#### `print()`
 
 `print()` is built-in function that mirrors the C `printf()` API. `print()`'s
 arguments include a string, and optional expressions:
@@ -437,7 +437,7 @@ print("words here %f.0 and %f here\n", 4, myvar)
 ```
 
 
-##### `range()`
+#### `range()`
 `range()` mimics Python's `range()` function. It takes an optional expression
 `start`, an expression `stop`, and an optional expression `step`. It returns a
 vector from `stat` to `stop - 1`, with distance `step` between each member of
@@ -453,7 +453,7 @@ range(2, 5)    // same as writing: {2, 3, 4}
 range(2, 8, 3) // same as writing: {2, 5, 8}
 ```
 
-##### Expression Precedence & Meaning
+#### Expression Precedence & Meaning
 
 Order of precedence of expressions (`expr`), and their meanings:
  + `'(' exp ')'`
@@ -521,11 +521,11 @@ Order of precedence of expressions (`expr`), and their meanings:
    evaluated left-to-right and the value of the left expression is discarded.
    The type and value of the result are the type and value of the right operand.
 
-## Sample program
+# Sample program
 
 Below are example programs in EqualsEquals.
 
-### Example of equations' `find` Use-cases
+## Example of equations' `find` Use-cases
 
 ```c
 sum = 0  // init a number called sum
@@ -580,7 +580,7 @@ pendulum: find v {
 }
 ```
 
-### Example of a multi-line equation to find `gcd` of `a` and `b`
+## Example of a multi-line equation to find `gcd` of `a` and `b`
 ```c
 myGCD {
   gcd = {

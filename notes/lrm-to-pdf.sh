@@ -42,16 +42,18 @@ cat > ./lrm.html <<-EOF_STYLES
       font-family: LiberationSerif, serif;
       font-size: 12pt;
     }
-    #toc {
-      margin: 1em auto 9em auto;
+    #toc,
+    body > ul:first-of-type {
+      margin: 3em auto 10em auto;
     }
-    #toc a {
+    #toc a,
+    body > ul:first-of-type a {
       text-decoration: none;
       color: inherit;
     }
     h1:nth-of-type(1) {
       text-align: center;
-      margin: 3em 0 0 0;
+      margin: 2em 0;
     }
     a {
       /** since we're not inserting foot-notes, this is just strange */
@@ -97,9 +99,12 @@ EOF_STYLES
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
 
-# Step 1: Inject table of contents
+# Step 1: Inject table of contents & Title
 cp "$srcLrm" ./lrm.md
-"$docTocExec" --notitle --github ./lrm.md >/dev/null
+"$docTocExec" \
+  --title='<h1>EqualsEquals Language Reference Manual</h1>' \
+  --github \
+  ./lrm.md >/dev/null
 
 # Step 2: Convert to Markdown PDF
 if [ $USE_PANDOC -gt 0 ];then
