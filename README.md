@@ -9,12 +9,12 @@ PDFs we've handed in. eg:
 
 ## Project Team Members
 
-| name | email | “role” | github
-|------|-------|--------|---------
-| Nam     | nam.hoang@columbia.edu |  | [nnhoang](https://github.com/nnhoang)
-| Tianci  | tz2278@columbia.edu    |  | [tiancizhong](https://github.com/tiancizhong)
-| Jimmy   | rx2119@columbia.edu    |  | [rxie25](https://github.com/rxie25)
-| Lanting | lh2756@barnard.edu     |  | [kekeleila](https://github.com/kekeleila)
-| Jon     | jz2648@columbia.edu    |  | [jzacsh](https://github.com/jzacsh)
+| name | email | “role” | uni | github
+|------|-------|--------|-----|--------
+| Nam Nhat Hoang | nam.hoang@columbia.edu | System Architect | nnh2110 | [nnhoang](https://github.com/nnhoang)
+| Tianci Zhong   | tz2278@columbia.edu    | Manager          | tz2278  | [tiancizhong](https://github.com/tiancizhong)
+| Ruicong Xie    | rx2119@columbia.edu    | Manager          | rx2119  | [rxie25](https://github.com/rxie25)
+| Lanting He     | lh2756@barnard.edu     | Tester           | lh2756  | [kekeleila](https://github.com/kekeleila)
+| Jonathan Zacsh | jz2648@columbia.edu    | Language Guru    | jz2648  | [jzacsh](https://github.com/jzacsh)
 
 [Availability chart](http://www.when2meet.com/?4146526­JMFYKY)
