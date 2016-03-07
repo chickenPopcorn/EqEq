@@ -533,7 +533,6 @@ Below are example programs in EqualsEquals.
 
 ```c
 sum = 0  // init a number called sum
-vecs[]  // init a vector of numbers called vecs
 pendulum {
   /**
    * Spell out equation for our compiler:
