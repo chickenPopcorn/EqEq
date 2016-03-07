@@ -462,7 +462,7 @@ Order of precedence of expressions (`expr`), and their meanings:
    ```
  + `id '[' expr? ']'`: for vector access.
 
- + `-expr` The result is the negative of the expression with the same type. The
+ + `-expr`: negative. The result is the negative of the expression. Note, the
    type of the expression must be double.
 
  + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the
