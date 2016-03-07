@@ -467,9 +467,9 @@ Order of precedence of expressions (`expr`), and their meanings:
 
  + `!expr`: logical negation.
 
-   The result of the logical negation operator `!` is 1 if the value of the
-   `expr` is 0, 0 if the value of the expression is non-zero. The type of the
-   result is double.  This operator is applicable only to double.
+   The result of the logical negation operator `!` is `1` if the value of `expr`
+   is `0`. If the value of `expr` is anything other than `0`, then `!expr`
+   results in `0`.
 
  + `expr ^ expr`
 
