@@ -513,9 +513,12 @@ Order of precedence of expressions (`expr`), and their meanings:
    moreover, the second operand is not evaluated if the value of the first
    operand is 0.
 
- + `expr = expr`  It require an lvalue as their left operand, and the type of an
-   assignment expression is that of its left operand. The value is the value
-   stored in the left operand after the assignment has taken place.
+ + `left_expr = right_expr`: assignment. the `left_expr` must be a single
+    variable expression. The result of this operation is that `left_expr` holds
+    the value of `right_expr` going forward. If `right_expr` contains unknown
+    variables, the `left_expr` will not be solveable until a `find` block
+    exprresses a solution in terms of `left_expr` and provides any missing
+    variables from the `right_expr`.
 
  + `expression , expression` A pair of expressions separated by a comma is
    evaluated left-to-right and the value of the left expression is discarded.
