@@ -28,10 +28,7 @@ The simplest - though contrived - valid program is:
 find { printf("Hello, all %.0f readers!\n", 21 * 2); }
 ```
 
-Which prints the following to standard out:
-```
-Hello, all 42 readers!
-```
+Which prints the following to standard out: `Hello, all 42 readers!`
 
 Formally, a valid program is a series of:
 - one or more `find` blocks.
