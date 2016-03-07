@@ -254,15 +254,14 @@ The following keywords are, and have special meaning in the language. See
   that returns a number, or a function call that return a number:
 
   For example:
-       ```
-       a = 3; b = a; (return b=3)
-       a = 3; b = a*2+1 (return 7)
-       a = 3; b = 6; c=gcd(a,b) (return 3).
-       ```
-  The return type will be checked. If the return type is not floating points
-  numbers (including interger). Then return 0, standing for ERROR.
+  ```
+  a = 3; b = a;          // b == 3
+  a = 3; b = a * 2 + 1   // b == 7
+  a = 3; b = 6; c = gcd  // c == 3
+  ```
 
-  For analysis of equation arithmetic, see "Expression Precedence & Meaning", below.
+  For analysis of equation arithmetic, see "Expression Precedence & Meaning",
+  below.
 
 6. Scopes (access to variables):
 
