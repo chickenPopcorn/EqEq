@@ -2,6 +2,8 @@
 #
 # Converts LRM doc to PDF including a table of contents.
 
+USE_PANDOC=1 # toggle this as `1` or `0` without quotes
+
 set -e
 declare -r lrmToPdfDir="$(mktemp --directory --tmpdir  "$(basename "$0")"_XXXXXX.d)"
 declare -r srcLrm="$(printf '%s/%s' "$(git rev-parse --show-toplevel)" notes/language-reference-manual.md)"
@@ -62,18 +64,28 @@ window.onload = function() {
 <script>hljs.initHighlightingOnLoad();</script>
 EOF_STYLES
 
+lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
+
+# Step 1: Inject table of contents
 cp "$srcLrm" ./lrm.md
 "$docTocExec" --notitle --github ./lrm.md >/dev/null
-"$markedExec" < ./lrm.md >> ./lrm.html
 
-lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
-wkhtmltopdf \
-  --page-size A4 \
-  --margin-bottom 20mm \
-  --margin-top 20mm \
-  --enable-javascript  \
-  --quiet  \
-  ./lrm.html "$lrmPdf"
+# Step 2: Convert to Markdown PDF
+if [ $USE_PANDOC -gt 0 ];then
+  pandoc --read=markdown_github --output="$lrmPdf" < ./lrm.md
+else
+  # Step 2 in 2 parts: markdown-to-html, html-to-pdf
+
+  "$markedExec" < ./lrm.md >> ./lrm.html
+  wkhtmltopdf \
+    --page-size A4 \
+    --margin-bottom 20mm \
+    --margin-top 20mm \
+    --enable-javascript  \
+    --quiet  \
+    ./lrm.html "$lrmPdf"
+fi
+
 printf '%s\n' "$lrmPdf"
 
 cleanup
