@@ -37,6 +37,11 @@ markedExec="$(getExecPath marked node_modules/marked/bin/marked)"
 # <script>hljs.initHighlightingOnLoad();</script>
 cat > ./lrm.html <<-EOF_STYLES
 <style type="text/css">
+  @font-face {
+    font-family: LiberationSerif;
+    src: url('file:///usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf');
+  }
+  body, p, h1, h2, h3, h4, h5, h6 { font-family: serif; }
   body {
     padding: 7em;
     font-family: serif;
@@ -63,6 +68,9 @@ window.onload = function() {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 EOF_STYLES
+#uncomment if using base64 embedded @font-face approach
+# fontBase64="$(base64  /usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf | tr '\n' ' ' | sed -e 's| ||g' )"
+# set -i "s|BASE64_FONT|$fontBase64|" ./lrm.html
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
 
