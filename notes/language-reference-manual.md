@@ -10,10 +10,10 @@
     - [x] ensure code snippet formatting isn't screwed up
       - [ ] ensure code snippet is colored
 - [ ] TODO(jon): review TODOs with TA/edwards (email Daniel)
-- [ ] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
+- [x] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
   - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
    1. Copy/paste old-LRM's content:
-       - [ ] Sample program
+       - [x] Sample program
    2. refactor *this* LRM's existing content
 
   - expand missing pieces
