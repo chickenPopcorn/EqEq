@@ -78,9 +78,8 @@ may be made up of:
 
 ## Tokens: Expressions' Lexemes
 
-Below the syntax of each type of expression is provided. For the semantic
-description of each, refer to the ["Declarations"](#declrations) section,
-below.
+Below is the syntax of each type of expression. For the semantic description of
+each, refer to the ["Declarations"](#declrations) section, below.
 
 1. Floating point numbers, including integers:
 
