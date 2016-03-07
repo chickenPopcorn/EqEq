@@ -86,7 +86,7 @@ below.
 
   eg: `123`, `1.34e-4`, `0.23`, `.13`, `0e1`.
 
-  Regular expression might be:
+  Described by the regular expression `flt` here:
   ```ocaml
   let pos = ['1' - '9']                    in
   let dig = '0' | pos                      in
@@ -100,7 +100,7 @@ below.
 
   eg: `weight = 100 /*grams*/`
 
-  Regular expression might be:
+  Described by the regular expression `var` here:
   ```ocaml
   let aph = ['a'-'z'] | ['A'-'Z']     in
 
@@ -111,20 +111,17 @@ below.
 
   eg: `Euclid: {/* any number of lines of EqualsEquals here */}`
 
-  Regular Expression might be _(builds on variables' expressions)_:
+  Building on variables' definition, the regular expression can be described by
+  `ctx` here:
   ```ocaml
-  let aph = ['a'-'z'] | ['A'-'Z']     in
-
-  let ctx = ['A'-'Z'] var ':'
-
-  (*note: starts with uppercase letter, ends with ':'*)
+  let ctx = ['A'-'Z'] var*
   ```
 
-4. Strings: mostly used for printing, results:
+4. Strings: mostly used for printing results:
 
-  eg: `printf("result of my maths: %d\n", gcd)`
+  eg: `printf("result of my maths: %.0f\n", gcd)`
 
-  Regular Expression might be _(builds on variables' expressions)_:
+  String literals can be described by the regular expression `str` here:
   ```ocaml
   let chr = \x(0...9|A...F|a...f)(0...9|A...F|a...f) in
   let spc = \(\n| \t| \b| \r| ' ')
