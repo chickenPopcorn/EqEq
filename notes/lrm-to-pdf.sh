@@ -100,10 +100,12 @@ EOF_STYLES
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
 
-# Step 1: Inject table of contents & Title
-cp "$srcLrm" ./lrm.md
 # Step 0.5: Inject authors table:
-sed -i "1 i\ $(grep '^|' "$srcDir"/README.md)" ./lrm.md
+grep '^|' "$srcDir"/README.md > ./lrm.md
+
+# Step 1: Inject table of contents & Title
+cat "$srcLrm" >> ./lrm.md
+
 "$docTocExec" \
   --title='<h1>EqualsEquals Language Reference Manual</h1>' \
   --github \

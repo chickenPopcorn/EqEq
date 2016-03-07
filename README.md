@@ -9,7 +9,7 @@ PDFs we've handed in. eg:
 
 ## Project Team Members
 
-| name | email | “role” | uni | github
+| name | email | role | UNI | github
 |------|-------|--------|-----|--------
 | Nam Nhat Hoang | nam.hoang@columbia.edu | System Architect | nnh2110 | [nnhoang](https://github.com/nnhoang)
 | Tianci Zhong   | tz2278@columbia.edu    | Manager          | tz2278  | [tiancizhong](https://github.com/tiancizhong)
