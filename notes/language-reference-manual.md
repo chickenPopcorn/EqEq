@@ -501,7 +501,7 @@ Order of precedence of expressions (`expr`), and their meanings:
    + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to)
      operators are exactly analogous to the relational operators except for
      their lower precedence. (Thus `a < b == c < d` is `1` whenever `a < b` and
-     `c < d` have the same truth-value)
+     `c < d` have the same truth-value).
 
  + `expr || expr` The `||` operator returns 1 if either of its operands is
    non-zero, and 0 otherwise. It guarantees left-to-right evaluation; moreover,
