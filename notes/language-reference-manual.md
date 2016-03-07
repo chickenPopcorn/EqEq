@@ -455,13 +455,10 @@ range(2, 8, 3) // same as writing: {2, 5, 8}
 #### Expression Precedence & Meaning
 
 Order of precedence of expressions (`expr`), and their meanings:
- + `'(' exp ')'`
-     eg: `( ...)`
-   exp here is evaluated before, at which point the parenthesis themselves lose
-   their meaning. eg:
+ + `'(' expr ')'`: for sub-expressions. For example, `expr` of `4 + 5` here:
    ```c
-   b * (4 + 5)
-   b * 9 // same
+   b * (4 + 5)  // `expr` should be considered first
+   b *  9       // same as above; note absense of parenthesis
    ```
  + `id '[' expr? ']'`: for vector access.
 
