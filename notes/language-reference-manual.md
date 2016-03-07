@@ -211,18 +211,19 @@ Following are reserved keywords, and have special meaning in the language. See
      gcd; // solution is gcd w/the current a and b
    }
    ```
-  `gcd` is similar to a function in C with parameter a and b.
-
+  The result is, the expression `gcd` has a value like that of a C-function's
+  return value, with parameters `a` and `b`.
 
 5. Equations:
   ```
-  variable =  variable (value assigned?)
-  variable =  some airthmetic expression
-  variable =  a function call that return a number
+  variable = variable (value assigned?)
+  variable = some airthmetic expression
+  variable = { /*some multi-line equation that evaluates to a number*/ }
   ```
   Only variable will be allowed on the left side of the equal sign. The
-  expression on the right side can be declared variable, arithmetic expression
-  that returns a number, or a function call that return a number:
+  expression on the right side can be a declared variable, an arithmetic
+  expression that evaluates to a number, or a multi-line equation enclosed in
+  curly-braces (see "Multi-line equation" above).
 
   For example:
   ```c
@@ -240,7 +241,7 @@ Following are reserved keywords, and have special meaning in the language. See
   VAR = EXPR
 
   Scope_name {
-    list of equation or list of function
+    list of equations
 
     // VAR = EXPR // overwrites global `VAR`
   }
