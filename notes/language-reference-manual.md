@@ -1,27 +1,3 @@
-<!--
-# TODO:s
-- [x] TODO(jon): render PDF:
-    - [ ] ensure we have page numbers
-    - [x] ensure title is before TOC
-       - [x] ensure title has lots of padding
-    - [x] ensure new-page break after TOC
-    - [x] ensure padding between print-breaks (so content isn't cut off)
-    - [x] line-height needs increase
-    - [x] ensure code snippet formatting isn't screwed up
-      - [ ] ensure code snippet is colored
-- [ ] TODO(jon): review TODOs with TA/edwards (email Daniel)
-- [x] TODO(jon): move [LRM google doc](https://goo.gl/VJcW5Z) into this doc
-  - refactor headers to look like [C LRM](https://www.bell-labs.com/usr/dmr/www/cman.pdf)
-   1. Copy/paste old-LRM's content:
-       - [x] Sample program
-   2. refactor *this* LRM's existing content
-
-  - expand missing pieces
-- [ ] as group: start scanner.mll based on "Keywords & Expressions" sectinos
-    - [ ] update this doc based on what works
-
--->
-
 # `EqualsEquals` Language Reference Manual
 
 EqualsEquals is a language designed for simple equation evaluation. EqualsEquals
