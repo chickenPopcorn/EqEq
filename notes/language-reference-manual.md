@@ -296,18 +296,22 @@ The following keywords are, and have special meaning in the language. See
 
 #### Statements
 ##### Expression Statement
-Expression statements are statement that includes an expression and a semicolon at the end:
+Expression statements are statement that includes an expression and a semicolon
+at the end:
 ```
 expression ;
 ```
 
 ##### Combining Statements
-A statement can be the multiple of other statements. `{` and `}` are used to group multiple statements as one statement. So the form of compound statements is:
+A statement can be the multiple of other statements. `{` and `}` are used to
+group multiple statements as one statement. So the form of compound statements
+is:
 ```
 { statement+ }
 ```
 
-, which means that a compound statement has an opening curly bracket, one or more statements, and a closing curly bracket.
+, which means that a compound statement has an opening curly bracket, one or
+more statements, and a closing curly bracket.
 
 ##### Conditional Statement
 Statements that are used in conditional statements:
@@ -327,7 +331,8 @@ Conditional statements have the following form:
 if_statement elif_statement* else_statement?
 ```
 
-, which means that it contains a required if_statement, any number of elif_statement, and an optional else_statement.
+, which means that it contains a required if_statement, any number of
+elif_statement, and an optional else_statement.
 
 ##### While Statement
 While statements have the form:
@@ -335,7 +340,8 @@ While statements have the form:
 while ( expression ) statement
 ```
 
-The substatement is executed repeatedly so long as the value of the expression remains non-zero.
+The substatement is executed repeatedly so long as the value of the expression
+remains non-zero.
 
 ##### Break Statement
 The statement
@@ -349,7 +355,9 @@ The statement
 ```
 continue ;
 ```
-causes control to pass to the loop-continuation portion of the smallest enclosing `while` or `with` statement; that is to the end of the loop. More precisely, in each of the statements.
+causes control to pass to the loop-continuation portion of the smallest
+enclosing `while` or `with` statement; that is to the end of the loop. More
+precisely, in each of the statements.
 
 ##### Context statement
 A context statement include a context name and a compound statement:
@@ -379,9 +387,11 @@ With statements have the form
 ```
 with [variable in expression, ]+ compound_statement
 ```
-, which means that with takes one ore more expressiosn, and a compound substatement.
+, which means that with takes one ore more expressiosn, and a compound
+substatement.
 
-If the expressions have type double, then with will evaluate the expression and execute the compound substatement:
+If the expressions have type double, then with will evaluate the expression and
+execute the compound substatement:
 ```c
 with x in 5 {
   print(x)
@@ -392,7 +402,9 @@ with x in 5, y in 6 {
 }  // 11
 ```
 
-If the expressions have type vectors, we will execute the compound substatement with all the combinations of values avaiable. Basically, it mirrors multiple `for` loop in Python:
+If the expressions have type vectors, we will execute the compound substatement
+with all the combinations of values avaiable. Basically, it mirrors multiple
+`for` loop in Python:
 ```c
 // with vector assignment (causing equivalence of `for` loop in other languages)
 with x in {1, 2, 3} {
@@ -405,12 +417,14 @@ with x in {1, 2}, y in {4, 6} {
 ```
 
 ##### Find Statement
-Find statements start with keyword `find` and an expression, followed by a substatement:
+Find statements start with keyword `find` and an expression, followed by a
+substatement:
 ```
 find expression statement
 ```
 
-In a find statement, the last statement should be evaluated with access to previously declared expressions.
+In a find statement, the last statement should be evaluated with access to
+previously declared expressions.
 
 Examples of find statements:
 ```c
@@ -485,8 +499,8 @@ Order of precedence of expressions (`expr`), and their meanings:
 
  + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the
    logical negation operator ! is 1 if the value of the expression is 0, 0 if
-   the value of the expression is non-zero. The type of the result is double. This
-   operator is applicable only to double.
+   the value of the expression is non-zero. The type of the result is double.
+   This operator is applicable only to double.
 
  + `exp ^ exp`
 
@@ -494,7 +508,9 @@ Order of precedence of expressions (`expr`), and their meanings:
    division operation. If both operands are double, the result is double.
 
  + `exp % exp` The binary `%` operator yields the remainder from the division of
-   the first expression by the second. Both operands are double, and only integer portion of the double will be used for modular operation, and the result is a double with fraction equals to zero. eg:
+   the first expression by the second. Both operands are double, and only
+   integer portion of the double will be used for modular operation, and the
+   result is a double with fraction equals to zero. eg:
    ```
    12.0 % 7.0 = 5.0
    12.3 % 7.5 = 5.0
@@ -521,8 +537,9 @@ Order of precedence of expressions (`expr`), and their meanings:
    non-zero.
 
  + `expr && expr` The `&&` operator returns 1 if both of its operands is
-    non-zero, and 0 if either is 0. It guarantees left-to-right evaluation; moreover,
-    the second operand is not evaluated if the value of the first operand is 0.
+   non-zero, and 0 if either is 0. It guarantees left-to-right evaluation;
+   moreover, the second operand is not evaluated if the value of the first
+   operand is 0.
 
  + `expr = expr`  It require an lvalue as their left operand, and the type of an
    assignment expression is that of its left operand. The value is the value
