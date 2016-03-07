@@ -465,19 +465,19 @@ Order of precedence of expressions (`expr`), and their meanings:
  + `-expr`: negative. The result is the negative of the expression. Note, the
    type of the expression must be double.
 
- + `!exp`: logical negation.
+ + `!expr`: logical negation.
 
-   The result of the logical negation operator `!` is 1 if the value of the expression is 0, 0 if
-   the value of the expression is non-zero. The type of the result is double.
-   This operator is applicable only to double.
+   The result of the logical negation operator `!` is 1 if the value of the
+   `expr` is 0, 0 if the value of the expression is non-zero. The type of the
+   result is double.  This operator is applicable only to double.
 
- + `exp ^ exp`
+ + `expr ^ expr`
 
- + `exp * exp`, `exp / exp` The binary operator * / indicates multiplication and
-   division operation. If both operands are double, the result is double.
+ + `expr * expr`, `expr / expr` The binary operator * / indicates multiplication
+   and division operation. If both operands are double, the result is double.
 
- + `exp % exp` The binary `%` operator yields the remainder from the division of
-   the first expression by the second. Both operands are double, and only
+ + `expr % expr` The binary `%` operator yields the remainder from the division
+   of the first expression by the second. Both operands are double, and only
    integer portion of the double will be used for modular operation, and the
    result is a double with fraction equals to zero. eg:
    ```c
@@ -489,14 +489,14 @@ Order of precedence of expressions (`expr`), and their meanings:
    expressions. Both are double, the result is double.
 
  + equality/inequality:
-   + `exp > exp`, `exp >= exp`, `exp < exp`, `exp <= exp` The operators `<`
-     (less than), `>` (greater than), `<=` (less than or equal to) and `>=`
+   + `expr > expr`, `expr >= expr`, `expr < expr`, `expr <= expr` The operators
+     `<` (less than), `>` (greater than), `<=` (less than or equal to) and `>=`
      (greater than or equal to) all yield 0 if the specified relation is false
      and 1 if it is true. Operand conversion is exactly the same as for the `+`
      operator.
 
-   + `exp != exp`, `exp == exp`: The `!=` (not equal to) and the `==` (equal to)
-     operators are exactly analogous to the relational operators except for
+   + `expr != expr`, `expr == expr`: The `!=` (not equal to) and the `==` (equal
+     to) operators are exactly analogous to the relational operators except for
      their lower precedence. (Thus `a < b == c < d` is `1` whenever `a < b` and
      `c < d` have the same truth-value).
 
