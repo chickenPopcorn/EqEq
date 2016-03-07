@@ -495,7 +495,7 @@ Order of precedence of expressions (`expr`), and their meanings:
      and 1 if it is true. Operand conversion is exactly the same as for the `+`
      operator.
 
-   + `exp != exp`, `exp == exp` The != (not equal to) and the == (equal to)
+   + `exp != exp`, `exp == exp`: The `!=` (not equal to) and the `==` (equal to)
      operators are exactly analogous to the relational operators except for
      their lower precedence. (Thus `a < b == c < d` is `1` whenever `a < b` and
      `c < d` have the same truth-value).
