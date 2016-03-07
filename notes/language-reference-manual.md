@@ -76,7 +76,7 @@ may be made up of:
 6. **equality** operations in `if`/`else` expressions _(which evaluate to `1` or
    `0` if both operators are equal)_
 
-## Expressions' Lexemes or Tokens
+## Tokens: Expressions' Lexemes
 
 Below the syntax of each type of expression is provided. For the semantic
 description of each, refer to the ["Declarations"](#declrations) section,
