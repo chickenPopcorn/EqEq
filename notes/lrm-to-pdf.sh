@@ -56,6 +56,6 @@ cp -v "$srcLrm" ./lrm.md
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
 wkhtmltopdf  ./lrm.html "$lrmPdf"
-printf 'PDF of LRM generated beside markdown, here:\n\t%s\n' "$lrmPdf"
+printf '%s\n' "$lrmPdf"
 
 cleanup
