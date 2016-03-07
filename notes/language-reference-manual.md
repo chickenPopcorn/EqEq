@@ -614,8 +614,8 @@ myGCD: find gcd {
 
 
 /* This works too. In this case, gcd is not in any special scope */
-gcd = {  // this is a function
-    ...  // same as the above example
+gcd = {
+  ...  // same as the above example
 }
 
 // evaluate gcd of 10 and 20
