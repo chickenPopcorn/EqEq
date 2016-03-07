@@ -11,9 +11,21 @@ trap cleanup SIGINT
 
 cd "$lrmToPdfDir"
 
-npm install doctoc marked > /dev/null 2>&1
-docTocExec="$(readlink -f node_modules/doctoc/doctoc.js)"; [ -x "$docTocExec" ]
-markedExec="$(readlink -f node_modules/marked/bin/marked)"; [ -x "$markedExec" ]
+getExecPath() {
+  local execName="$1"
+  local localExecPath="$2"
+
+  local path; path="$(readlink -f "$(type -p "$execName")")"
+  if [ $? -ne 0 ];then
+    printf 'WARNING: downloading local copy of `%s`\n' "$execName" >&2
+    npm install "$execName" >/dev/null 2>&1
+    path="$localExecPath"
+  fi
+
+  echo "$path"; [ -x "$path" ]
+}
+docTocExec="$(getExecPath doctoc node_modules/doctoc/doctoc.js)"
+markedExec="$(getExecPath marked node_modules/marked/bin/marked)"
 
 # <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.4.1/prism.min.js"></script>
 #
