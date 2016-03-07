@@ -247,6 +247,7 @@ Following are reserved keywords, and have special meaning in the language. See
   }
 
   Scope_name: find VAR [with VARB in range()]* ] {
+    /** code here has access to `Scope_name`'s equations */
   }
   ```
 
