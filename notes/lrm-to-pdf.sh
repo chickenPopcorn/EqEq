@@ -67,7 +67,13 @@ cp "$srcLrm" ./lrm.md
 "$markedExec" < ./lrm.md >> ./lrm.html
 
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
-wkhtmltopdf  ./lrm.html "$lrmPdf"
+wkhtmltopdf \
+  --page-size A4 \
+  --margin-bottom 20mm \
+  --margin-top 20mm \
+  --enable-javascript  \
+  --quiet  \
+  ./lrm.html "$lrmPdf"
 printf '%s\n' "$lrmPdf"
 
 cleanup
