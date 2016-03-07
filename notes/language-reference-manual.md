@@ -465,8 +465,9 @@ Order of precedence of expressions (`expr`), and their meanings:
  + `-expr`: negative. The result is the negative of the expression. Note, the
    type of the expression must be double.
 
- + `!exp`   // eg: `if ((!(a % b))+2)) == (a % !b + 2)` The result of the
-   logical negation operator ! is 1 if the value of the expression is 0, 0 if
+ + `!exp`: logical negation.
+
+   The result of the logical negation operator `!` is 1 if the value of the expression is 0, 0 if
    the value of the expression is non-zero. The type of the result is double.
    This operator is applicable only to double.
 
