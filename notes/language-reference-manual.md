@@ -137,7 +137,7 @@ below.
 
 ### Reserved Keywords
 
-The following keywords are, and have special meaning in the language. See
+Following are reserved keywords, and have special meaning in the language. See
 "Statements" and "Declarations" sections elsewhere for each of their meanings.
 
 + `if`
