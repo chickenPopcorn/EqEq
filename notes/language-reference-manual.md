@@ -154,7 +154,7 @@ Following are reserved keywords, and have special meaning in the language. See
    declarator, declarator, ...
   ```
   For example:
-  ```
+  ```c
   a = 2, b = 3
   a = b, b = a % b
   ```
@@ -187,7 +187,7 @@ Following are reserved keywords, and have special meaning in the language. See
   or String and could not be fixed of both.
 
 4. Multi-line equation: declaration of multi-line equation has the format:
-  ```
+  ```c
   equation_name = {
     // some operations
     ... // some return value
@@ -198,23 +198,23 @@ Following are reserved keywords, and have special meaning in the language. See
   equation can only return one variable.
 
   For example:
-    ```
-      gcd = {
-        if (0 == b) {
-          a;  // solution is a
-        } elif (a == 0) {
-          b;  // solution is b
-        }
+  ```c
+   gcd = {
+     if (0 == b) {
+       a;  // solution is a
+     } elif (a == 0) {
+       b;  // solution is b
+     }
 
-        if (a > b) {
-          a = b, b = a % b
-          // note: multiple assignments on single line
-        } else {
-          a = b % a, b = a
-        }
-        gcd; // solution is gcd w/the current a and b
-      }
-    ```
+     if (a > b) {
+       a = b, b = a % b
+       // note: multiple assignments on single line
+     } else {
+       a = b % a, b = a
+     }
+     gcd; // solution is gcd w/the current a and b
+   }
+   ```
   `gcd` is similar to a function in C with parameter a and b.
 
 
@@ -229,7 +229,7 @@ Following are reserved keywords, and have special meaning in the language. See
   that returns a number, or a function call that return a number:
 
   For example:
-  ```
+  ```c
   a = 3; b = a;          // b == 3
   a = 3; b = a * 2 + 1   // b == 7
   a = 3; b = 6; c = gcd  // c == 3
@@ -240,7 +240,7 @@ Following are reserved keywords, and have special meaning in the language. See
 
 6. Scopes (access to variables):
 
-  ```
+  ```c
   VAR = EXPR
 
   Scope_name {
@@ -290,7 +290,7 @@ more statements, and a closing curly bracket.
 
 ##### Conditional Statement
 Statements that are used in conditional statements:
-```
+```c
 // if_statement
 if ( expression ) statement
 
@@ -311,7 +311,7 @@ elif_statement, and an optional else_statement.
 
 ##### While Statement
 While statements have the form:
-```
+```c
 while ( expression ) statement
 ```
 
@@ -348,7 +348,7 @@ context_name: statement
 The substatement will be evaluated in the context given by `context_name`.
 
 Examples:
-```
+```c
 mycontext {
   x = 5
 }
@@ -434,7 +434,7 @@ print( a_string_with_formatters [, expressions]* )
 
 Users can format strings in `print()` with `%f` and `%s` formatter (and but not
 `%d`, since `eqeq` only uses float). For example,
-```
+```c
 print("words here %f.0 and %f here\n", 4, myvar)
 // words here 4 and 3.14159 here
 ```
@@ -463,7 +463,7 @@ Order of precedence of expressions (`expr`), and their meanings:
      eg: `( ...)`
    exp here is evaluated before, at which point the parenthesis themselves lose
    their meaning. eg:
-   ```
+   ```c
    b * (4 + 5)
    b * 9 // same
    ```
@@ -486,7 +486,7 @@ Order of precedence of expressions (`expr`), and their meanings:
    the first expression by the second. Both operands are double, and only
    integer portion of the double will be used for modular operation, and the
    result is a double with fraction equals to zero. eg:
-   ```
+   ```c
    12.0 % 7.0 = 5.0
    12.3 % 7.5 = 5.0
    ```
@@ -584,7 +584,7 @@ pendulum: find v {
 ```
 
 ### Example of a multi-line equation to find `gcd` of `a` and `b`
-```
+```c
 myGCD {
   gcd = {
     if (0 == b) {
