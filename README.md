@@ -5,7 +5,7 @@
 [goo.gl/ST9I3s](https://goo.gl/ST9I3s) contains all our drafts, documents, final
 PDFs we've handed in. eg:
 - [Project Proposal](https://drive.google.com/file/d/1vwV6nNTylikhsjUWWYB0BBrInuwZ4OZ5WZyC11K7jYePCuM8EMZ8WPW4motcqm5cziZKHFPD7UtOvflY/view)
-- [Language Reference Manual](https://goo.gl/VJcW5Z) _(LRM)_
+- [Language Reference Manual](https://github.com/rxie25/PLT2016Spring/blob/master/notes/language-reference-manual.md) _(LRM)_
 
 ## Project Team Members
 
