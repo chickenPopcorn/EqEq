@@ -5,7 +5,7 @@ evaluation. EqualsEquals helps express mathematical equation in ASCII (though
 UTF-8 string literals are allowed) without straying too far from
 whiteboard-style notation. Users do not need to be overly careful to perfectly
 reduce formulas behind. Leaving unknowns for later is possible, without
-encapsulating equations's unknowns as function parameters. EqualsEquals takes
+encapsulating equations' unknowns as function parameters. EqualsEquals takes
 multiple equations as input and can evaluate the value of a certain variables
 of the equations when the values of other variables are given.
 
@@ -61,7 +61,7 @@ Euclid:find gcd {
 
 Within contexts and `find` blocks, valid statements look like many C-style
 languages, where expressions are semi-colon (`;`) separated, may be have
-sub-expessions using parenthesis (`(`, `)`) and the lexemes of an expression
+sub-expressions using parenthesis (`(`, `)`) and the lexemes of an expression
 may be made up of:
 
 1. **variables** to which floating-point numbers are assigned
@@ -70,7 +70,7 @@ may be made up of:
 2. **arithmetic** expressions: addition, subtraction, multiplication, division,
    exponents
 3. **comments** characters ignored by the compiler
-4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a     = 3`)
+4. **white-space** to arbitrary length (eg: `a = 3` is the same as `a     = 3`)
 5. **string** literals used for printing
 6. **equality** operations in `if`/`else` expressions _(which evaluate to `1` or
    `0` if both operators are equal)_
@@ -78,7 +78,7 @@ may be made up of:
 ## Tokens: Expressions' Lexemes
 
 Below is the syntax of each type of expression. For the semantic description of
-each, refer to the ["Declarations"](#declrations) section, below.
+each, refer to the ["Declarations"](#declarations) section, below.
 
 1. Floating point numbers, including integers:
 
@@ -92,9 +92,9 @@ each, refer to the ["Declarations"](#declrations) section, below.
   let fra = '.' dig+ exp?                  in
   let num = pos dig*                       in
 
-  let flt = num | ((num | 0)? frac) | (num exp)
+  let flt = num | ((num | 0)? fra) | (num exp)
   ```
-2. Variable Assignment: numbes stored with user-defined nams:
+2. Variable Assignment: numbers stored with user-defined names:
 
   eg: `weight = 100 /*grams*/`
 
@@ -128,7 +128,7 @@ each, refer to the ["Declarations"](#declrations) section, below.
 
   let str = (aph | num | chr | spc)*
   ```
-  <!-- note this means we have to convet UTF-8 chars to escaped ascii strings -->
+  <!-- note this means we have to convert UTF-8 chars to escaped ASCII strings -->
 
 ## Reserved Keywords
 
@@ -218,7 +218,7 @@ Following are reserved keywords, and have special meaning in the language. See
 5. Equations:
   ```
   variable = variable (value assigned?)
-  variable = some airthmetic expression
+  variable = some arithmetic expression
   variable = { /*some multi-line equation that evaluates to a number*/ }
   ```
   Only variable will be allowed on the left side of the equal sign. The
@@ -247,7 +247,7 @@ Following are reserved keywords, and have special meaning in the language. See
     // VAR = EXPR // overwrites global `VAR`
   }
 
-  Scope_name: find VAR [with VARB in range()]* ] {
+  Scope_name: find VAR [with VAR_B in range()]* ] {
     /** code here has access to `Scope_name`'s equations */
   }
   ```
@@ -255,16 +255,16 @@ Following are reserved keywords, and have special meaning in the language. See
   Here, `Scope_name` is like an object of equations. Equations are put inside
   the bracket follow `Scope_name`.
 
-  Any varibale declared outside of a `Scope_name` is a global variable that can
+  Any variable declared outside of a `Scope_name` is a global variable that can
   be accessed from anywhere within the program. If a variable declared in some
-  `Scope_name` has the same name as some global variable, it will overwite the
+  `Scope_name` has the same name as some global variable, it will overwrite the
   value within the `Scope_name`.  After getting out of the `Scope_name`, the
   variable will restore its value.
 
   `Scope_name: find VAR [...]` is the evaluation part. A `with` clause is
   optional. See "With Statement" section below. `find` will evaluate the
   variable following it using the equations inside the `Scope_name` block. Once
-  a `Scope_name` is defined, mutiple `find` are
+  a `Scope_name` is defined, multiple `find` are
   allowed to use the equations inside it.
 
 
@@ -314,7 +314,7 @@ While statements have the form:
 while ( expression ) statement
 ```
 
-The substatement is executed repeatedly so long as the value of the expression
+The sub-statement is executed repeatedly so long as the value of the expression
 remains non-zero.
 
 #### Break Statement
@@ -344,7 +344,7 @@ To access a context, we use a statement with the following form:
 context_name: statement
 ```
 
-The substatement will be evaluated in the context given by `context_name`.
+The sub-statement will be evaluated in the context given by `context_name`.
 
 Examples:
 ```c
@@ -363,11 +363,11 @@ With statements have the form
 ```
 with [variable in expression, ]+ compound_statement
 ```
-, which means that with takes one ore more expressiosn, and a compound
-substatement.
+, which means that with takes one or more expressions, and a compound
+sub-statement.
 
 If the expressions have type double, then with will evaluate the expression and
-execute the compound substatement:
+execute the compound sub-statement:
 ```c
 with x in 5 {
   print(x);
@@ -378,8 +378,8 @@ with x in 5, y in 6 {
 }  // 11
 ```
 
-If the expressions have type vectors, we will execute the compound substatement
-with all the combinations of values avaiable. Basically, it mirrors multiple
+If the expressions have type vectors, we will execute the compound sub-statement
+with all the combinations of values available. Basically, it mirrors multiple
 `for` loop in Python:
 ```c
 // with vector assignment (causing equivalence of `for` loop in other languages)
@@ -394,7 +394,7 @@ with x in {1, 2}, y in {4, 6} {
 
 #### Find Statement
 Find statements start with keyword `find` and an expression, followed by a
-substatement:
+sub-statement:
 ```
 find expression statement
 ```
@@ -466,7 +466,7 @@ the order of their precedence.
  + `'(' expr ')'`: for sub-expressions. For example, `expr` of `4 + 5` here:
    ```c
    b * (4 + 5); // `expr` should be considered first
-   b *  9;      // same as above; note absense of parenthesis
+   b *  9;      // same as above; note absence of parenthesis
    ```
  + `id '[' expr? ']'`: for vector access.
 
@@ -523,8 +523,8 @@ the order of their precedence.
  + `left_expr = right_expr`: assignment. the `left_expr` must be a single
     variable expression. The result of this operation is that `left_expr` holds
     the value of `right_expr` going forward. If `right_expr` contains unknown
-    variables, the `left_expr` will not be solveable until a `find` block
-    exprresses a solution in terms of `left_expr` and provides any missing
+    variables, the `left_expr` will not be solvable until a `find` block
+    expresses a solution in terms of `left_expr` and provides any missing
     variables from the `right_expr`.
 
  + `expression , expression` A pair of expressions separated by a comma is
@@ -538,7 +538,7 @@ Below are example programs in EqualsEquals.
 ## Example of equations' `find` Use-cases
 
 ```c
-sum = 0  // init a number called sum
+sum = 0  // initialize a number called sum
 pendulum {
   /**
    * Spell out equation for our compiler:
