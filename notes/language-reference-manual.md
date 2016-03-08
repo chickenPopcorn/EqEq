@@ -212,8 +212,9 @@ Following are reserved keywords, and have special meaning in the language. See
      gcd; // solution is gcd w/the current a and b
    }
    ```
-  The result is, the expression `gcd` has a value like that of a C-function's
-  return value, with parameters `a` and `b`.
+  This example results in an expression `gcd` - similar to a C-style function -
+  that can be referred to later, given the necessary inputs `a` and `b` (in
+  eqeq's case, the right "context").
 
 5. Equations:
   ```
