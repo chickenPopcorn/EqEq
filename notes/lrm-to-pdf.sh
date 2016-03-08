@@ -63,6 +63,7 @@ printCustomWebDev() {
       text-decoration: none;
       color: inherit;
     }
+    pre, code { white-space: pre; }
     pre { padding: 1em 0 1em 1ex; }
     code { font-size:.7em; }
     pre > code.hljs, pre > code, pre { background-color: #FFF8E8; }
