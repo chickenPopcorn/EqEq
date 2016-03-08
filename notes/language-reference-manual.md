@@ -456,6 +456,8 @@ range(2, 5);     // same as writing: {2, 3, 4}
 range(2, 8, 3);  // same as writing: {2, 5, 8}
 ```
 
+<!-- TODO: insert built-in descriptions for cos, sin, sqrt, others.-->
+
 ## Expression Precedence & Meaning
 
 Order of precedence of expressions (`expr`), and their meanings:
