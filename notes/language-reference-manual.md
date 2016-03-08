@@ -440,7 +440,6 @@ print("words here %f.0 and %f here\n", 4, myvar);
 // words here 4 and 3.14159 here
 ```
 
-
 #### `range()`
 `range()` mimics Python's `range()` function. It takes an optional expression
 `start`, an expression `stop`, and an optional expression `step`. It returns a
@@ -457,7 +456,7 @@ range(2, 5);     // same as writing: {2, 3, 4}
 range(2, 8, 3);  // same as writing: {2, 5, 8}
 ```
 
-#### Expression Precedence & Meaning
+## Expression Precedence & Meaning
 
 Order of precedence of expressions (`expr`), and their meanings:
  + `'(' expr ')'`: for sub-expressions. For example, `expr` of `4 + 5` here:
