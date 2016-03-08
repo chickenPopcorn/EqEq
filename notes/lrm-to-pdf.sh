@@ -63,11 +63,9 @@ printCustomWebDev() {
       text-decoration: none;
       color: inherit;
     }
-    pre {
-      padding: 1em 0 1em 1ex;
-      background-color: #FFF4DB;
-    }
+    pre { padding: 1em 0 1em 1ex; }
     code { font-size:.7em; }
+    pre > code.hljs, pre > code, pre { background-color: #FFF8E8; }
     p { line-height: 1.25em; }
     table:nth-of-type(1),
     #authors table {
@@ -95,6 +93,7 @@ printCustomWebDev() {
     }
   }
   </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 EOF_STYLES
