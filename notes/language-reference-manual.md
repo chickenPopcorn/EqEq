@@ -186,12 +186,13 @@ Following are reserved keywords, and have special meaning in the language. See
   ```c
   equation_name = {
     // some operations
-    ... // some return value
+    var; // a variable, indicating equation_name's value
   }
   ```
-  The 'equation_name' has the type Double, where "..." indicates
-  the returned variable. The equation will be passed by value. The multi-line
-  equation can only return one variable.
+  The `equation_name` has the type Double, where `var` indicates
+  the name of variable expression holding the desired value. The equation will
+  be passed by value. The multi-line equations, like regular equations, can
+  only express one value _( or a vector of values)_.
 
   For example:
   ```c
