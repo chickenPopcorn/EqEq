@@ -65,13 +65,12 @@ sub-expessions using parenthesis (`(`, `)`) and the lexemes of an expression
 may be made up of:
 
 1. **variables** to which floating-point numbers are assigned
-
  + **vectors**, like variables, but have square brackets (`[]`) after their
    identifier is indeed a _vector_ of numbers, eg: `myVector[]`
-
-2. **arithmetic** expressions: addition, subtraction, multiplication, division, exponents
+2. **arithmetic** expressions: addition, subtraction, multiplication, division,
+   exponents
 3. **comments** characters ignored by the compiler
-4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a   = 3`)
+4. **whitespace** to arbitrary length (eg: `a = 3` is the same as `a     = 3`)
 5. **string** literals used for printing
 6. **equality** operations in `if`/`else` expressions _(which evaluate to `1` or
    `0` if both operators are equal)_
