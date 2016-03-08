@@ -544,7 +544,7 @@ pendulum {
   m = 10;
   theta = pi / 2;
   g = 9.8;
-  h = l - l * cos(theta);
+  h = l - l * cos(theta); // cosine, being a built-in, like `sqrt`
   v = sqrt( 2 * g * h);
   // note: relying on existing libraries for cos
 }
