@@ -30,14 +30,16 @@ getExecPath() {
 docTocExec="$(getExecPath doctoc node_modules/doctoc/doctoc.js)"
 markedExec="$(getExecPath marked node_modules/marked/bin/marked)"
 
-# <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.4.1/prism.min.js"></script>
-#
-# <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
-#
-# <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
-# <script>hljs.initHighlightingOnLoad();</script>
-cat > ./lrm.html <<-EOF_STYLES
-<style type="text/css">
+printCustomWebDev() {
+  # <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.4.1/prism.min.js"></script>
+  #
+  # <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+  #
+  # <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
+  # <script>hljs.initHighlightingOnLoad();</script>
+
+  cat <<-EOF_STYLES
+  <style type="text/css">
     body {
       padding: 4em;
       font-family: LiberationSerif, serif;
@@ -45,7 +47,7 @@ cat > ./lrm.html <<-EOF_STYLES
     }
     #toc,
     body > ul:first-of-type {
-      margin: 3em auto 10em auto;
+      margin: 1.5em auto 6em auto;
     }
     #toc a,
     body > ul:first-of-type a {
@@ -54,7 +56,7 @@ cat > ./lrm.html <<-EOF_STYLES
     }
     h1:nth-of-type(1) {
       text-align: center;
-      margin: 2em 0;
+      margin: 2em 0 1em 0;
     }
     a {
       /** since we're not inserting foot-notes, this is just strange */
@@ -67,57 +69,70 @@ cat > ./lrm.html <<-EOF_STYLES
     }
     code { font-size:.7em; }
     p { line-height: 1.25em; }
+    table:nth-of-type(1),
     #authors table {
       margin: 1em auto;
       text-align: left;
-      width: 60%;
+      width: 100%;
+      font-size:.85em;
     }
-    #authors table tbody { outline: 1px solid #bbb;}
-</style>
-<script>
-'use strict';
-window.onload = function() {
-  var codes = document.querySelectorAll('code');
-  for (let idx in codes) {
-    var node = codes[idx];
-    if (!node || !node.getAttribute) { continue; }
-    var lang = (node.getAttribute('class') || '').match(/lang-(\w*)/);
-    if (!(lang && lang.length && lang[1])) { continue; }
+    table:nth-of-type(1) thead { border-bottom: 1px solid grey; }
+  </style>
+  <script>
+  'use strict';
+  window.onload = function() {
+    var codes = document.querySelectorAll('code');
+    for (let idx in codes) {
+      var node = codes[idx];
+      if (!node || !node.getAttribute) { continue; }
+      var lang = (node.getAttribute('class') || '').match(/lang-(\w*)/);
+      if (!(lang && lang.length && lang[1])) { continue; }
 
-    lang = lang[1];
-    node.setAttribute(
-        'class',
-        node.getAttribute('class') + ' ' + lang);
+      lang = lang[1];
+      node.setAttribute(
+          'class',
+          node.getAttribute('class') + ' ' + lang);
+    }
   }
-}
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
 EOF_STYLES
+}
+
 #uncomment if using base64 embedded @font-face approach
 # fontBase64="$(base64  /usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf | tr '\n' ' ' | sed -e 's| ||g' )"
 # set -i "s|BASE64_FONT|$fontBase64|" ./lrm.html
 
+injectToc() {
+  "$docTocExec" \
+    --title='<h1>EqualsEquals Language Reference Manual</h1>' \
+    --github \
+    ./lrm.md >/dev/null
+}
+
 lrmPdf="$(mktemp --tmpdir="$(dirname "$srcLrm")" lrm_XXXXXXXX.pdf)"
 
-# Step 0.5: Inject authors table:
-grep '^|' "$srcDir"/README.md > ./lrm.md
+cp "$srcLrm" ./lrm.md
 
-# Step 1: Inject table of contents & Title
-cat "$srcLrm" >> ./lrm.md
-
-"$docTocExec" \
-  --title='<h1>EqualsEquals Language Reference Manual</h1>' \
-  --github \
-  ./lrm.md >/dev/null
-
-# Step 2: Convert to Markdown PDF
 if [ $USE_PANDOC -gt 0 ];then
+  injectToc ./lrm.md
   pandoc --read=markdown_github --output="$lrmPdf" < ./lrm.md
 else
-  # Step 2 in 2 parts: markdown-to-html, html-to-pdf
+  injectToc ./lrm.md
 
-  "$markedExec" < ./lrm.md >> ./lrm.html
+  "$markedExec" < ./lrm.md >> ./lrm.html.orig
+
+  printCustomWebDev > lrm.html
+
+  # Step 0.5: Inject authors table:
+  declare -r titleLnNum="$(grep --line-number '^<h1>EqualsEquals' ./lrm.md | sed -e 's|^\([0-9]*\):.*$|\1|')"
+  sed -n "1,${titleLnNum}p" ./lrm.html.orig >> lrm.html
+  grep '^|' "$srcDir"/README.md  |
+    sed -e 's/\(^|.*|.*|.*|.*\)|.*$/\1/' |
+    "$markedExec" >> ./lrm.html
+  sed -n "$(( titleLnNum + 1  )),\$p" ./lrm.html.orig >> lrm.html
+
   wkhtmltopdf \
     --page-size A4 \
     --margin-bottom 20mm \
