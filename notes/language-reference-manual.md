@@ -460,7 +460,9 @@ range(2, 8, 3);  // same as writing: {2, 5, 8}
 
 ## Expression Precedence & Meaning
 
-Order of precedence of expressions (`expr`), and their meanings:
+Here various expressions' meanings are described, generally shown as `expr`, in
+the order of their precedence.
+
  + `'(' expr ')'`: for sub-expressions. For example, `expr` of `4 + 5` here:
    ```c
    b * (4 + 5); // `expr` should be considered first
