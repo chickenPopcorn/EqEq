@@ -19,8 +19,8 @@ test: microc.native testall.sh
 .PHONY : clean
 clean :
 	ocamlbuild -clean
-	rm -rf testall.log *.diff microc scanner.ml parser.ml parser.mli
-	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
+	$(RM) testall.log *.diff microc scanner.ml parser.ml parser.mli
+	$(RM) *.cmx *.cmi *.cmo *.cmx *.o
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
