@@ -21,6 +21,7 @@ clean :
 	ocamlbuild -clean
 	$(RM) testall.log *.diff microc scanner.ml parser.ml parser.mli
 	$(RM) *.cmx *.cmi *.cmo *.cmx *.o
+	$(RM) test-*.out test-*.ll
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
