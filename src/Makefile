@@ -4,11 +4,12 @@
 
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
-.PHONY : microc.native
+OPAM_INIT     = ~/.opam/opam-init/init.sh
+OCAM_BLD_OPTS = -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4
 
-microc.native :
-	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
-		microc.native
+.PHONY : microc.native
+microc.native:
+	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) microc.native'
 
 .PHONY : test
 test: microc.native testall.sh
