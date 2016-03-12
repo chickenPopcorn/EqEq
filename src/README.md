@@ -31,6 +31,7 @@ machine, thoroughly documented in `./INSTALL`
 ### Quickstart
 
 Can't remember if you've done the one-time setup on your machine?
+
 1. Make sure `git status` shows you're in a clean copy of this repo
 2. If you can do the below with all tests passing _(obviously)_ then you
   already setup your machine:
