@@ -27,3 +27,17 @@ fail-while2...OK
 
 The above assumes you've done the one-time installation of dependencies for your
 machine, thoroughly documented in `./INSTALL`
+
+### Quickstart
+
+Can't remember if you've done the one-time setup on your machine?
+
+  1. Make sure `git status` shows you're in a clean copy of this repo
+  2. If you can do the below with all tests passing _(obviously)_ then you
+    already setup your machine:
+  ```bash
+    git checkout 1548af6bc79197445a203 &&
+      make test &&
+      make clean >/dev/null &&
+      git checkout master
+  ```
