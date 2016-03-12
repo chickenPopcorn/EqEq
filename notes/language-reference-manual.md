@@ -557,7 +557,7 @@ pendulum: find v with l in range(0, 20) {
   // Our compiler now has solutions to: m, g, l (and indirectly h), so v can
   // be solved:
 
-  print("velocity: %d", v);
+  print("velocity: %f", v);
 
   // v is automatically evaluated when it's referred to
 }
@@ -613,7 +613,7 @@ myGCD: find gcd {
   a = 10;
   b = 20;
 
-  print("gcd of %d and %d is %d", a, b, gcd);
+  print("gcd of %.0f and %.0f is %.0f\n", a, b, gcd);
 }
 /* END: Example of a multi-line equations to find gcd of a and b */
 
@@ -627,7 +627,7 @@ gcd = {
 find gcd {
   a = 10;
   b = 20;
-  print("gcd of %d and %d is %d", a, b, gcd);
+  print("gcd of %.0f and %.0f is %.0f\n", a, b, gcd);
 }
 /* END: Example of a multi-line equations to find gcd of a and b */
 ```
