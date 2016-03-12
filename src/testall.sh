@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Regression testing script for MicroC
 # Step through a list of files
