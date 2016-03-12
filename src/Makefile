@@ -13,7 +13,7 @@ microc.native:
 
 .PHONY : test
 test: microc.native testall.sh
-	./testall.sh
+	./testall.sh -v tests/*.mc tests/*.eq
 
 # "make clean" removes all generated files
 

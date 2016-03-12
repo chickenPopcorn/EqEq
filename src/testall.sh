@@ -21,12 +21,15 @@ globallog=testall.log
 rm -f $globallog
 error=0
 globalerror=0
+verbosefail=0
 
 keep=0
 
+allopts=kvh
 Usage() {
-    echo "Usage: testall.sh [options] [.mc files]"
+    echo "Usage: testall.sh -[$allopts] [.mc files]"
     echo "-k    Keep intermediate files"
+    echo "-v    Verbose print of failures"
     echo "-h    Print this help"
     exit 1
 }
@@ -136,10 +139,13 @@ CheckFail() {
     fi
 }
 
-while getopts kdpsh c; do
+while getopts "$allopts" c; do
     case $c in
         k) # Keep intermediate files
             keep=1
+            ;;
+        v) # Don't hide what happened on failures in logs
+            verbosefail=1
             ;;
         h) # Help
             Usage
@@ -179,6 +185,17 @@ do
             globalerror=1
             ;;
     esac
+
+    # Verbose-printing of logs
+    if [ "$error" -eq 1 ] && [ "$verbosefail" -eq 1 ];then
+      lastFailLine="$(
+        grep -n Testing "$globallog" |
+          sed -n '$p' |
+          sed -e 's|^\([0-9]*\):.*$|\1|g'
+      )"
+      sed -n "${lastFailLine},$"p "$globallog"
+      echo
+    fi
 done
 
 exit $globalerror
