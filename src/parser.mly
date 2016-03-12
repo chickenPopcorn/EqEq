@@ -8,6 +8,7 @@ open Ast
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
+%token FIND
 %token <int> LITERAL
 %token <string> ID
 %token EOF
@@ -33,8 +34,9 @@ program:
 
 decls:
    /* nothing */ { [], [] }
- | decls vdecl { ($2 :: fst $1), snd $1 }
- | decls fdecl { fst $1, ($2 :: snd $1) }
+ | decls vdecl     { ($2 :: fst $1), snd $1 }
+ | decls fdecl     { fst $1, ($2 :: snd $1) }
+ | decls find_decl { fst $1, ($2 :: snd $1) }
 
 fdecl:
    typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -64,6 +66,14 @@ vdecl_list:
 vdecl:
    typ ID SEMI { ($1, $2) }
 
+find_decl:
+   FIND LBRACE stmt_list RBRACE
+     { { typ = Void;
+         fname = "FAKE";
+         formals = [];
+         locals = [];
+         body = List.rev $3 } }
+
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { $2 :: $1 }
@@ -78,6 +88,7 @@ stmt:
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+  | FIND stmt_list RBRACE { Block(List.rev $2) }
 
 expr_opt:
     /* nothing */ { Noexpr }
