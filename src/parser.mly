@@ -11,6 +11,7 @@ open Ast
 %token IF ELSE WHILE FIND
 %token <int> LITERAL
 %token <string> ID
+%token <string> CTX
 %token EOF
 
 %nonassoc NOELSE
@@ -33,9 +34,9 @@ program:
   decls EOF { $1 }
 
 decls:
-   /* nothing */   { [], [] }
- | decls ctxtdecl     { ($2 :: fst $1), snd $1 }
- | decls finddecl     { fst $1, ($2 :: snd $1) }
+   /* nothing */     { [], [] }
+ | decls ctxtdecl    { ($2 :: fst $1), snd $1 }
+ | decls finddecl    { fst $1, ($2 :: snd $1) }
 /**
  * TODO: add ability for global-context function declarations to exist:
  * What does statement-action look like? Does it matter? Probably needs to be
@@ -46,12 +47,11 @@ decls:
  */
 
 ctxtdecl:
-   ID ASSIGN LBRACE ctx RBRACE
+   CTX ASSIGN LBRACE ctx RBRACE
      { ( $1, List.rev $4 ) }
 
 ctx:
-   stmt_list { $1}
- | funcdecl { $1 }
+   funcdecl { $1 }
 
 funcdecl:
    ID ASSIGN LBRACE stmt_list RBRACE

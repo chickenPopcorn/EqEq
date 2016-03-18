@@ -2,6 +2,9 @@
 
 { open Parser }
 
+let identifier = ['a'-'z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let context = ['A'-'Z'] identifier*
+
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
@@ -30,7 +33,8 @@ rule token = parse
 | "while"  { WHILE }
 | "find"   { FIND }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+| identifier as lxm { ID(lxm) }
+| context as lxm { CTX(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

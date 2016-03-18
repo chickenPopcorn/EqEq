@@ -25,6 +25,11 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
+type ctx_decl = {
+    context : string;
+    body : stmt list;
+  }
+
 (* func: we call this a "multi-line equation" *)
 type func_decl = {
     fname : string;
@@ -37,7 +42,8 @@ type find_decl = {
     body : stmt list;
   }
 
-type program = bind list * func_decl list
+type program = ctx_decl list * find_decl list
+(* TODO: add this back when we get global equations func_decl list*)
 
 (* Pretty-printing functions *)
 
@@ -83,14 +89,26 @@ let string_of_typ = function
     Double -> "double"
   | Bool -> "bool"
 
-let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let string_of_ctxdecl ctx =
+  ctx.context ^
+  " = {\n" ^
+  String.concat "" (List.map string_of_stmt ctx.body) ^
+  "\n}\n"
 
-let string_of_fdecl fdecl =
+let string_of_finddecl finddecl =
+  finddecl.context ^
+  ": find " ^
+  finddecl.target ^
+  " {\n" ^
+  String.concat "" (List.map string_of_stmt finddecl.body) ^
+  "\n}\n"
+
+let string_of_funcdecl funcdecl =
   fdecl.fname ^
-  ")\n{\n" ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
-  "}\n"
+  " = {\n" ^
+  String.concat "" (List.map string_of_stmt funcdecl.body) ^
+  "\n}\n"
 
-let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+let string_of_program (contexts, findexprs) =
+  String.concat "" (List.map string_of_ctxdecl contexts) ^ "\n" ^
+  String.concat "\n" (List.map string_of_finddecl findexprs)
