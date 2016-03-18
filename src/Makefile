@@ -20,7 +20,8 @@ test: microc.native testall.sh
 .PHONY : clean
 clean :
 	ocamlbuild -clean
-	$(RM) testall.log *.diff microc scanner.ml parser.ml parser.mli
+	$(RM) testall.log *.diff microc scanner.ml
+	$(RM) parser.ml parser.mli parser.output parser.conflicts
 	$(RM) *.cmx *.cmi *.cmo *.cmx *.o
 	$(RM) test-*.out test-*.ll
 
