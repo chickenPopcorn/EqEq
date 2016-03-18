@@ -8,6 +8,10 @@
 *.cmxs
 *.cmxa
 
+parser.ml
+parser.mli
+parser.output
+
 # ocamlbuild working directory
 _build/
 
@@ -18,3 +22,4 @@ _build/
 # oasis generated files
 setup.data
 setup.log
+
