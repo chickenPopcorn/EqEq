@@ -1,4 +1,4 @@
-(* Ocamllex scanner for MicroC *)
+(* Ocamllex scanner for EqualsEquals *)
 
 { open Parser }
 
@@ -27,14 +27,7 @@ rule token = parse
 | "!"      { NOT }
 | "if"     { IF }
 | "else"   { ELSE }
-| "for"    { FOR }
 | "while"  { WHILE }
-| "return" { RETURN }
-| "int"    { INT }
-| "bool"   { BOOL }
-| "void"   { VOID }
-| "true"   { TRUE }
-| "false"  { FALSE }
 | "find"   { FIND }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }

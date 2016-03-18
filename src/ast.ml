@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Void
+type typ = Double | Bool
 
 type bind = typ * string
 
@@ -22,16 +22,18 @@ type expr =
 type stmt =
     Block of stmt list
   | Expr of expr
-  | Return of expr
   | If of expr * stmt * stmt
-  | For of expr * expr * expr * stmt
   | While of expr * stmt
 
+(* func: we call this a "multi-line equation" *)
 type func_decl = {
-    typ : typ;
     fname : string;
-    formals : bind list;
-    locals : bind list;
+    body : stmt list;
+  }
+
+type find_decl = {
+    context : string;
+    target : string;
     body : stmt list;
   }
 
@@ -59,8 +61,6 @@ let string_of_uop = function
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
-  | BoolLit(true) -> "true"
-  | BoolLit(false) -> "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -74,27 +74,20 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
-  | For(e1, e2, e3, s) ->
-      "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
-      string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_typ = function
-    Int -> "int"
+    Double -> "double"
   | Bool -> "bool"
-  | Void -> "void"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
-  string_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
+  fdecl.fname ^
   ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 

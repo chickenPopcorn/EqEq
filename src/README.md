@@ -6,6 +6,11 @@ mathematical equation evaluation. For more details, see its [Reference
 Manual](https://docs.google.com/document/d/1uHGe2qazuy-I7Vem7u8muxDnWaysDX49lKMbMmlDml4)
 _("LRM" for "Language [RM]" in code and comments)_.
 
+## Status
+Currently the codebase is being refactored to repressent the eqeq LRM, rather
+than MicroC's spec, which we forked from. See [microc-to-eqeq](refactor) for the
+list of ongoing changes.
+
 ## Building & Testing
 
 To build and run end-to-end test suite:
@@ -41,3 +46,5 @@ git checkout 1548af6bc79197445a203 &&
   make clean >/dev/null &&
   git checkout master
 ```
+
+refactor: ../notes/microc-to-eqeq.md
