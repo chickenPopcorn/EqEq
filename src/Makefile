@@ -32,10 +32,10 @@ OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx microc.cmx
 microc : $(OBJS)
 	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o microc
 
-scanner.ml : scanner.mll
+scanner scanner.ml : scanner.mll
 	ocamllex scanner.mll
 
-parser.ml parser.mli : parser.mly
+parser parser.ml parser.mli : parser.mly
 	ocamlyacc parser.mly
 
 %.cmo : %.ml
