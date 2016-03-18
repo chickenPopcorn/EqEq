@@ -4,8 +4,9 @@
 
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
-OPAM_INIT     = ~/.opam/opam-init/init.sh
-OCAM_BLD_OPTS = -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4
+OPAM_INIT      = ~/.opam/opam-init/init.sh
+OCAM_BLD_OPTS  = -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4
+PARSER_GENR   := ocamlyacc
 
 .PHONY : microc.native
 microc.native:
@@ -36,7 +37,7 @@ scanner scanner.ml : scanner.mll
 	ocamllex scanner.mll
 
 parser parser.ml parser.mli : parser.mly
-	ocamlyacc parser.mly
+	$(PARSER_GENR) parser.mly
 
 %.cmo : %.ml
 	ocamlc -c $<
