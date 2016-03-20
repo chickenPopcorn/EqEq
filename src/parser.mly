@@ -4,8 +4,7 @@
 open Ast
 %}
 
-/* add COMMA when we add grammar for it */
-%token SEMI LPAREN RPAREN LBRACE RBRACE
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token IF ELSE WHILE FIND
@@ -98,4 +97,13 @@ expr:
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | ID ASSIGN expr   { Assign($1, $3) }
+  | ID LPAREN actuals_opt RPAREN { Builtin($1, $3) }
   | LPAREN expr RPAREN { $2 }
+
+actuals_opt:
+    /* nothing */ { [] }
+  | actuals_list  { List.rev $1 }
+
+actuals_list:
+    expr                    { [$1] }
+  | actuals_list COMMA expr { $3 :: $1 }

@@ -115,7 +115,7 @@ let check (globals, functions) =
             check_assign (type_of_identifier var) (expr e)
                      (Failure ("illegal assignment " ^ string_of_typ lt ^ " = " ^
                                string_of_typ rt ^ " in " ^ string_of_expr ex))
-          | Call(fname, actuals) as call -> let fd = function_decl fname in
+          | Builtin(fname, actuals) as call -> let fd = function_decl fname in
              if List.length actuals != List.length fd.formals then
                raise (Failure ("expecting " ^ string_of_int
                  (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
