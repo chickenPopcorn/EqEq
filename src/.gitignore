@@ -1,1 +1,11 @@
+# `make test` generated files
 testall.log
+
+# `make scanner` generated files
+scanner.ml
+
+# `make parser` generated files
+parser.ml
+parser.mli
+parser.output
+parser.conflicts
