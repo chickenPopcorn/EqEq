@@ -128,9 +128,11 @@ let check (globals, functions) =
                fd.typ
     in
 
-    let check_bool_expr e = if expr e != Bool
-     then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
-     else () in
+    let check_bool_expr e =
+      if expr e != Bool then
+        raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
+      else ()
+    in
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
