@@ -92,25 +92,3 @@ In summary:
 
 + finddecl
 ```
-
-# Effect of Changes
-
-This all leaves the entire second-half of the compiler's pipeline broken, but
-gives eqeq something to start with: **a working scanner & parser**. Well, at
-least according to this test:
-```bash
-$ make clean
-ocamlbuild -clean
-rm -f testall.log *.diff microc scanner.ml parser.ml parser.mli parser.output
-rm -f *.cmx *.cmi *.cmo *.cmx *.o
-rm -f test-*.out test-*.ll
-
-$ make scanner.ml
-ocamllex scanner.mll
-48 states, 1470 transitions, table size 6168 bytes
-
-$ make parser.ml
-ocamlyacc parser.mly
-1 shift/reduce conflict.
-```
-TODO: fix this shift/reduce error ^
