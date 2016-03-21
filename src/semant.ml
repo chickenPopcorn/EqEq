@@ -150,10 +150,13 @@ let check (contexts, finds) =
   in
 
   (**** Checking Context blocks  ****)
-  let check_ctxs =
-    ignore;
-  (* TODO: semantic analysis of variables, allow unceclared and all the stuff
-   * that makes our lang special... right here! *)
+  let check_ctxs ctxBlk =
+    (* TODO: semantic analysis of variables, allow undeclared and all the stuff
+     * that makes our lang special... right here!
+    let knowns = [(*  *)] in
+    let unknowns = [] in
+    *)
+    check_stmt (Block ctxBlk.body)
   in
 
   List.iter check_ctxs contexts in
