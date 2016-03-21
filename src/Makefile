@@ -13,7 +13,7 @@ microc.native:
 	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) microc.native'
 
 .PHONY : test
-test: microc.native testall.sh
+test: clean microc.native testall.sh
 	./testall.sh -v tests/*.mc tests/*.eq
 
 # "make clean" removes all generated files
