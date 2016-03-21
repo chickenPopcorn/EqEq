@@ -41,6 +41,12 @@ let check (contexts, finds) =
       contexts
   in
 
+  let check_have_context supposed_ctx_name =
+    if StringMap.mem supposed_ctx_name known_ctxs then
+      raise (Failure "unrecognized context, " ^ supposed_ctx_name)
+    else StringMap.find supposed_ctx_name known_ctxs
+  in
+
   report_duplicate (fun n -> "duplicate context " ^ n) (List.map snd contexts);
 
   (* Builtin declarations we provide *)
