@@ -1,5 +1,11 @@
 (* Code generation: translates semantically checked AST & produces vanilla C. *)
 
+(**
+ * TODO: figure out how to expose APIs:
+ *    `assert_valid_module`
+ *    `string_of_llmodule`
+ *)
+
 module L = Llvm
 module A = Ast
 
