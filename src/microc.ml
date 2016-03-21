@@ -4,7 +4,7 @@
  *  3. generate C
  *)
 
-type cli_arg = Ast | Compile | DummyGen
+type cli_arg = Ast | Compile
 
 let _ =
   let cli_arg =
