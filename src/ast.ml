@@ -11,7 +11,6 @@ type bind = typ * string
 
 type expr =
     Literal of int
-  | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -104,7 +103,7 @@ let string_of_finddecl finddecl =
   "\n}\n"
 
 let string_of_funcdecl funcdecl =
-  fdecl.fname ^
+  funcdecl.fname ^
   " = {\n" ^
   String.concat "" (List.map string_of_stmt funcdecl.body) ^
   "\n}\n"

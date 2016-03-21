@@ -10,7 +10,8 @@ module StringMap = Map.Make(String)
    Check each context, then check each find declaration *)
 
 let check (contexts, finds) =
-
+  ();
+(*
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
     let rec helper = function
@@ -178,3 +179,4 @@ let check (contexts, finds) =
 
   in
   List.iter check_find finds
+*)
