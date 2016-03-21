@@ -1,4 +1,4 @@
-(* Semantic checking for the MicroC compiler *)
+(* Semantic checking for the EqualsEquals compiler *)
 
 open Ast
 
@@ -7,9 +7,9 @@ module StringMap = Map.Make(String)
 (* Semantic checking of a program. Returns void if successful,
    throws an exception if something is wrong.
 
-   Check each global variable, then check each function *)
+   Check each context, then check each find declaration *)
 
-let check (globals, functions) =
+let check (contexts, finds) =
 
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
@@ -20,31 +20,20 @@ let check (globals, functions) =
     in helper (List.sort compare list)
   in
 
-  (* Raise an exception if a given binding is to a void type *)
-  let check_not_void exceptf = function
-      (Void, n) -> raise (Failure (exceptf n))
-    | _ -> ()
-  in
-
   (* Raise an exception of the given rvalue type cannot be assigned to
-     the given lvalue type *)
+     the given lvalue type
   let check_assign lvaluet rvaluet err =
      if lvaluet == rvaluet then lvaluet else raise err
   in
 
-  (**** Checking Global Variables ****)
+  TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
+  (**** Checking Context blocks  ****)
 
-  report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
+  report_duplicate (fun n -> "duplicate context " ^ n) (List.map snd contexts);
 
-  (**** Checking Functions ****)
-
-  if List.mem "print" (List.map (fun fd -> fd.fname) functions)
-  then raise (Failure ("function print may not be defined")) else ();
-
-  report_duplicate (fun n -> "duplicate function " ^ n)
-    (List.map (fun fd -> fd.fname) functions);
+  (**** Checking Find blocks ****)
+  (* TODO: figure out how author might screw `find` expressions, and add here *)
 
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "print"
@@ -55,7 +44,7 @@ let check (globals, functions) =
    in
 
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-                         built_in_decls functions
+                         built_in_decls finds
   in
 
   let function_decl s = try StringMap.find s function_decls
@@ -64,23 +53,23 @@ let check (globals, functions) =
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
 
-  let check_function func =
+  let check_find findBlk =
 
     List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
-      " in " ^ func.fname)) func.formals;
+      " in " ^ findBlk.fname)) findBlk.formals;
 
-    report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
-      (List.map snd func.formals);
+    report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ findBlk.fname)
+      (List.map snd findBlk.formals);
 
     List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
-      " in " ^ func.fname)) func.locals;
+      " in " ^ findBlk.fname)) findBlk.locals;
 
-    report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-      (List.map snd func.locals);
+    report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ findBlk.fname)
+      (List.map snd findBlk.locals);
 
-    (* Type of each variable (global, formal, or local *)
+    (* Type of each find block (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-      StringMap.empty (globals @ func.formals @ func.locals )
+      StringMap.empty (contexts @ findBlk.formals @ findBlk.locals )
     in
 
     let type_of_identifier s =
@@ -136,7 +125,8 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
-      Block sl -> let rec check_block = function
+      Block sl ->
+        let rec check_block = function
                [Return _ as s] -> stmt s
              | Return _ :: _ -> raise (Failure "nothing may follow a return")
              | Block sl :: ss -> check_block (sl @ ss)
@@ -144,9 +134,9 @@ let check (globals, functions) =
              | [] -> ()
             in check_block sl
           | Expr e -> ignore (expr e)
-          | Return e -> let t = expr e in if t = func.typ then () else
+          | Return e -> let t = expr e in if t = findBlk.typ then () else
              raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
-                             string_of_typ func.typ ^ " in " ^ string_of_expr e))
+                             string_of_typ findBlk.typ ^ " in " ^ string_of_expr e))
 
           | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
           | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
@@ -154,7 +144,7 @@ let check (globals, functions) =
           | While(p, s) -> check_bool_expr p; stmt s
     in
 
-    stmt (Block func.body)
+    stmt (Block findBlk.body)
 
   in
-  List.iter check_function functions
+  List.iter check_find finds
