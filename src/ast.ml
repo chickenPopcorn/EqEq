@@ -24,21 +24,21 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
-type ctx_decl = {
-    context : string;
-    body : stmt list;
-  }
-
 (* func: we call this a "multi-line equation" *)
 type func_decl = {
     fname : string;
     body : stmt list;
   }
 
-type find_decl = {
+type ctx_decl = {
     context : string;
-    target : string;
-    body : stmt list;
+    body : func_decl list;
+  }
+
+type find_decl = {
+    fcontext : string;
+    ftarget : string;
+    fbody : stmt list;
   }
 
 type program = ctx_decl list * find_decl list
@@ -88,24 +88,24 @@ let string_of_typ = function
     Double -> "double"
   | Bool -> "bool"
 
-let string_of_ctxdecl ctx =
-  ctx.context ^
-  " = {\n" ^
-  String.concat "" (List.map string_of_stmt ctx.body) ^
-  "\n}\n"
-
-let string_of_finddecl finddecl =
-  finddecl.context ^
-  ": find " ^
-  finddecl.target ^
-  " {\n" ^
-  String.concat "" (List.map string_of_stmt finddecl.body) ^
-  "\n}\n"
-
 let string_of_funcdecl funcdecl =
   funcdecl.fname ^
   " = {\n" ^
   String.concat "" (List.map string_of_stmt funcdecl.body) ^
+  "\n}\n"
+
+let string_of_ctxdecl ctx =
+  ctx.context ^
+  " = {\n" ^
+  String.concat "" (List.map string_of_funcdecl ctx.body) ^
+  "\n}\n"
+
+let string_of_finddecl finddecl =
+  finddecl.fcontext ^
+  ": find " ^
+  finddecl.ftarget ^
+  " {\n" ^
+  String.concat "" (List.map string_of_stmt finddecl.fbody) ^
   "\n}\n"
 
 let string_of_program (contexts, findexprs) =
