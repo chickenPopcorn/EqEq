@@ -31,7 +31,12 @@ let check (contexts, finds) =
   (**** List of known Context blocks  ****)
   let known_ctxs =
     List.fold_left
-      (ctx, existing -> StringMap.add ctx.context ctx existing)
+      (
+        ctx, existing ->
+          if StringMap.mem ctx.context existing then
+            raise (Failure "duplicate context, " ^ ctx.context)
+          else StringMap.add ctx.context ctx existing
+      )
       StringMap.empty
       contexts
   in
