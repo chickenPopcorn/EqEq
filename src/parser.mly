@@ -45,12 +45,10 @@ decls:
  *
  */
 
+/* TODO: improve funcdeclt_list to make it better */
 ctxtdecl:
-   CTX ASSIGN LBRACE ctx RBRACE
-     { ( $1, List.rev $4 ) }
-
-ctx:
-   funcdecl { $1 }
+   CTX ASSIGN LBRACE funcdecl_list RBRACE
+     { { context = $1; body = List.rev $4 } }
 
 funcdecl:
    ID ASSIGN LBRACE stmt_list RBRACE
@@ -58,14 +56,16 @@ funcdecl:
 
 finddecl:
    FIND ID LBRACE stmt_list RBRACE
-     { { context = ""; (* global context *)
-         target = $2;
-         body = List.rev $4 } }
+     { { fcontext = ""; (* global context *)
+         ftarget = $2;
+         fbody = List.rev $4 } }
  | ID FIND ID LBRACE stmt_list RBRACE
-     { { context = $1;
-         target = $3;
-         body = List.rev $5 } }
+     { { fcontext = $1;
+         ftarget = $3;
+         fbody = List.rev $5 } }
 
+funcdecl_list:
+  | funcdecl_list funcdecl { $2 :: $1 }
 
 stmt_list:
     /* nothing */  { [] }
