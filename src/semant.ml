@@ -164,8 +164,8 @@ let check (contexts, finds) =
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ findBlk.fname)
       (List.map snd findBlk.locals);
 
-    check_stmt (Block findBlk.body);
     check_have_context fidBlk.target;
+    check_stmt (Block findBlk.body);
 
   in
   List.iter check_find finds
