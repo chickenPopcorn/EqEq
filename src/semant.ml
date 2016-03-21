@@ -43,12 +43,16 @@ let check (contexts, finds) =
        locals = []; body = [] })
    in
 
-  let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-                         built_in_decls finds
+  let function_decls =
+    List.fold_left
+      (fun m fd -> StringMap.add fd.fname fd m)
+      built_in_decls
+      finds
   in
 
-  let function_decl s = try StringMap.find s function_decls
-       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+  let function_decl s =
+    try StringMap.find s function_decls
+    with Not_found -> raise (Failure ("unrecognized function " ^ s))
   in
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
@@ -82,16 +86,17 @@ let check (contexts, finds) =
       Literal _ -> Int
           | BoolLit _ -> Bool
           | Id s -> type_of_identifier s
-          | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
-      (match op with
-              Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-            | Equal | Neq when t1 = t2 -> Bool
-            | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-            | And | Or when t1 = Bool && t2 = Bool -> Bool
-            | _ -> raise (Failure ("illegal binary operator " ^
-                  string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
-                  string_of_typ t2 ^ " in " ^ string_of_expr e))
-            )
+          | Binop(e1, op, e2) as e ->
+              let t1 = expr e1 and t2 = expr e2 in
+                (match op with
+                    Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
+                  | Equal | Neq when t1 = t2 -> Bool
+                  | Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
+                  | And | Or when t1 = Bool && t2 = Bool -> Bool
+                  | _ -> raise (Failure ("illegal binary operator " ^
+                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                        string_of_typ t2 ^ " in " ^ string_of_expr e))
+                  )
           | Unop(op, e) as ex -> let t = expr e in
              (match op with
                Neg when t = Int -> Int
@@ -125,23 +130,24 @@ let check (contexts, finds) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
-      Block sl ->
-        let rec check_block = function
-               [Return _ as s] -> stmt s
-             | Return _ :: _ -> raise (Failure "nothing may follow a return")
-             | Block sl :: ss -> check_block (sl @ ss)
-             | s :: ss -> stmt s ; check_block ss
-             | [] -> ()
-            in check_block sl
-          | Expr e -> ignore (expr e)
-          | Return e -> let t = expr e in if t = findBlk.typ then () else
-             raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
+        Block sl ->
+          let rec check_block = function
+              [Return _ as s] -> stmt s
+            | Return _ :: _ -> raise (Failure "nothing may follow a return")
+            | Block sl :: ss -> check_block (sl @ ss)
+            | s :: ss -> stmt s ; check_block ss
+            | [] -> ()
+          in check_block sl
+      | Expr e -> ignore (expr e)
+      | Return e ->
+          let t = expr e in
+          if t = findBlk.typ then () else
+          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                              string_of_typ findBlk.typ ^ " in " ^ string_of_expr e))
-
-          | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
-          | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
-                                   ignore (expr e3); stmt st
-          | While(p, s) -> check_bool_expr p; stmt s
+      | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2
+      | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2;
+                               ignore (expr e3); stmt st
+      | While(p, s) -> check_bool_expr p; stmt s
     in
 
     stmt (Block findBlk.body)
