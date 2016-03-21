@@ -30,7 +30,10 @@ let check (contexts, finds) =
 
   (**** Checking Context blocks  ****)
   let known_ctxs =
-    [] (* TODO: built map of our contexts *)
+    List.fold_left
+      (ctx, existing -> StringMap.add ctx.context ctx existing)
+      StringMap.empty
+      contexts
   in
 
   report_duplicate (fun n -> "duplicate context " ^ n) (List.map snd contexts);
