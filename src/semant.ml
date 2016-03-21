@@ -28,7 +28,7 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (**** Checking Context blocks  ****)
+  (**** List of known Context blocks  ****)
   let known_ctxs =
     List.fold_left
       (ctx, existing -> StringMap.add ctx.context ctx existing)
@@ -37,9 +37,6 @@ let check (contexts, finds) =
   in
 
   report_duplicate (fun n -> "duplicate context " ^ n) (List.map snd contexts);
-
-  (**** Checking Find blocks ****)
-  (* TODO: figure out how author might screw `find` expressions, and add here *)
 
   (* Builtin declarations we provide *)
   let builtin_decls =
@@ -141,6 +138,7 @@ let check (contexts, finds) =
     | While(p, s) -> check_bool_expr p; check_stmt s
   in
 
+  (**** Checking Context blocks  ****)
   let check_ctxs =
     ignore;
   (* TODO: semantic analysis of variables, allow unceclared and all the stuff
@@ -149,6 +147,7 @@ let check (contexts, finds) =
 
   List.iter check_ctxs contexts in
 
+  (**** Checking Find blocks ****)
   let check_find findBlk =
     let check_have_context =
       try StringMap.find expected_ctx_name known_ctxs
