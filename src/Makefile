@@ -30,6 +30,9 @@ parser parser.ml parser.mli : parser.mly
 test: clean eqeq.native testall.sh
 	./testall.sh -v tests/*.eq
 
+lint:
+	@./lint.sh
+
 clean :
 	ocamlbuild -clean
 	$(RM) *.diff eqeq.native scanner.ml
