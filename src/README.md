@@ -13,7 +13,9 @@ list of ongoing changes.
 
 ## Building & Testing
 
-To build and run end-to-end test suite:
+To build, simply: `make`
+
+To Run end-to-end test suite:
 ```sh
 $ make test # ie: `make && ./testall.sh`
 ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 microc.native
@@ -27,6 +29,8 @@ test-fib...OK
 fail-while1...OK
 fail-while2...OK
 ```
+
+Be sure to run `make lint` from time to time.
 
 ### One-time Setup
 
