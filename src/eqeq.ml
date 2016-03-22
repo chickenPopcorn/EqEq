@@ -24,5 +24,5 @@ let _ =
 
   (* Steps 2 3 *)
   match cli_arg with
-    Ast -> print_string Ast.string_of_program ast
-  | Compile -> print_string Codegen.translate ast
+    Ast -> print_string (Ast.string_of_program ast)
+  | Compile -> print_string (Codegen.translate ast)
