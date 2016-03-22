@@ -10,8 +10,8 @@ let _ =
   let cli_arg =
     if Array.length Sys.argv > 1 then
       List.assoc Sys.argv.(1) [
-        ("-a", Ast);        (* Print the AST only *)
-         ("-c", Compile)    (* Generate, check C *)
+        ("-a", Ast);       (* Print the AST only *)
+        ("-c", Compile)    (* Generate, check C *)
       ]
     else Compile
   in
@@ -24,7 +24,5 @@ let _ =
 
   (* Steps 2 3 *)
   match cli_arg with
-    (* Ast -> print_string (Ast.string_of_program ast);
-  | Compile -> print_string Codegen.translate ast; *)
-    Ast ->  Ast.string_of_program ast;
-  | Compile ->  Codegen.translate ast;
+    Ast -> print_string Ast.string_of_program ast
+  | Compile -> print_string Codegen.translate ast
