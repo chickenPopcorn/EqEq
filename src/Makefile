@@ -1,5 +1,5 @@
 OPAM_INIT      = ~/.opam/opam-init/init.sh
-OCAM_BLD_OPTS  = -use-ocamlfind -pkgs -cflags -w,+a-4
+OCAM_BLD_OPTS  = -use-ocamlfind
 PARSER_GENR   := ocamlyacc
 # Copy/pasted *.cmo make-targets (from generated list at bottom of file)
 OBJS = ast.cmo codegen.cmo eqeq.cmo parser.cmo scanner.cmo semant.cmo
