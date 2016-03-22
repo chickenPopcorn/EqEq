@@ -1,38 +1,21 @@
-# Make sure ocamlbuild can find opam-managed packages: first run
-#
-# eval `opam config env`
-
-# Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
-
 OPAM_INIT      = ~/.opam/opam-init/init.sh
-OCAM_BLD_OPTS  = -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4
+OCAM_BLD_OPTS  = -use-ocamlfind -pkgs -cflags -w,+a-4
 PARSER_GENR   := ocamlyacc
+# Copy/pasted *.cmo make-targets (from generated list at bottom of file)
+OBJS = ast.cmo codegen.cmo eqeq.cmo parser.cmo scanner.cmo semant.cmo
 
-# Copy/pasted make-targets from generated list at bottom of file:
-OBJS = ast.cmo ast.cmx codegen.cmo codegen.cmx microc.cmo microc.cmx parser.cmo parser.cmx scanner.cmo scanner.cmx semant.cmo semant.cmx parser.cmi
 
-eqeq.native:
-	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) eqeq.native'
+all : clean eqeq
 
-test: clean eqeq.native testall.sh
-	./testall.sh -v tests/*.eq
-
-clean :
-	ocamlbuild -clean
-	$(RM) testall.log *.diff eqeq scanner.ml
-	$(RM) parser.ml parser.mli parser.output parser.conflicts
-	$(RM) *.cmx *.cmi *.cmo *.cmx *.o
-	$(RM) test-*.out test-*.ll
-
-eqeq : $(OBJS)
-	ocamlc $@ microc.ml
-	ocamlc *.cmx -o $@
+eqeq :
+	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) ./$@.native'
 
 scanner scanner.ml : scanner.mll
 	ocamllex scanner.mll
 
 parser parser.ml parser.mli : parser.mly
 	$(PARSER_GENR) parser.mly
+# eg: `make PARSER_GENR=menhir parser/whatever`
 
 %.cmo : %.ml
 	ocamlc -c $<
@@ -40,10 +23,19 @@ parser parser.ml parser.mli : parser.mly
 %.cmi : %.mli
 	ocamlc -c $<
 
-# %.cmx : %.ml
-# 	ocamlfind ocamlopt -c -package llvm $<
 
-.PHONY : clean test eqeq.native
+
+.PHONY : clean test eqeq all
+
+test: clean eqeq.native testall.sh
+	./testall.sh -v tests/*.eq
+
+clean :
+	ocamlbuild -clean
+	$(RM) *.diff eqeq.native scanner.ml
+	$(RM) parser.ml parser.mli parser.output parser.conflicts
+	$(RM) *.cmx *.cmi *.cmo *.cmx *.o
+	$(RM) testall.log
 
 
 # Generated 20160321@18:20, with:
@@ -55,8 +47,8 @@ ast.cmo :
 ast.cmx :
 codegen.cmo : ast.cmo
 codegen.cmx : ast.cmx
-microc.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
-microc.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
+eqeq.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
+eqeq.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
 scanner.cmo : parser.cmi
