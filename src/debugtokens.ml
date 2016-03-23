@@ -1,10 +1,6 @@
 open Parser
 open Ast
 
-type num =
-  | Num_int of int
-  | Num_float of float
-
 let stringify = function
   | LPAREN -> "LPAREN"
   | RPAREN -> "RPAREN"
