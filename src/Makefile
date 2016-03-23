@@ -30,7 +30,7 @@ debugtokens : debugtokens.ml
 
 .PHONY : clean test eqeq all
 
-test : clean eqeq testall.sh
+test : clean eqeq $(TEST_SUITE).sh
 	./$(TEST_SUITE).sh $(TEST_OPTS) tests/*.eq
 
 lint:
