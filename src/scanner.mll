@@ -3,7 +3,7 @@
 { open Parser }
 
 let identifier = ['a'-'z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-let context = ['A'-'Z'] identifier*
+let context = ['A'-'Z'] identifier
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
