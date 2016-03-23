@@ -2,6 +2,7 @@ OPAM_INIT      = ~/.opam/opam-init/init.sh
 OCAM_BLD_OPTS  = -use-ocamlfind
 PARSER_GENR   := ocamlyacc
 TEST_OPTS     := -v
+TEST_SUITE     = e2e-tests
 # Copy/pasted *.cmo make-targets (from generated list at bottom of file)
 OBJS = ast.cmo codegen.cmo eqeq.cmo parser.cmo scanner.cmo semant.cmo
 
@@ -30,14 +31,15 @@ debugtokens : debugtokens.ml
 .PHONY : clean test eqeq all
 
 test : clean eqeq testall.sh
-	./testall.sh $(TEST_OPTS) tests/*.eq
+	./$(TEST_SUITE).sh $(TEST_OPTS) tests/*.eq
 
 lint:
 	@./lint.sh
 
 clean :
 	ocamlbuild -clean
-	./testall.sh -c
+	./$(TEST_SUITE).sh -c
+	$(RM) ./$(TEST_SUITE).log
 	$(RM) *.diff *.native scanner.ml
 	$(RM) parser.ml parser.mli parser.output parser.conflicts
 	$(RM) *.cmx *.cmi *.cmo *.cmx *.o

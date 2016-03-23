@@ -17,7 +17,7 @@ To build, simply: `make`
 
 To Run end-to-end test suite:
 ```sh
-$ make test # ie: `make && ./testall.sh`
+$ make test # or: `make TEST_OPTS=-h test` or any other options it takes
 ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 microc.native
 Finished, 22 targets (0 cached) in 00:00:01.
 ./testall.sh
