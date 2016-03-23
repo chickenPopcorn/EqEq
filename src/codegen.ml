@@ -12,7 +12,7 @@ module StringMap = Map.Make(String)
 
 let translate (globals, functions) =
   "#include <stdio.h>\n" ^
-  "int main() { printf(\"%f\n\", 42.0); }\n"
+  "int main() { printf(\"%f\\n\", 42.0); }\n"
 
 (*
   let context = L.global_context () in
