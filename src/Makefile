@@ -23,7 +23,8 @@ parser parser.ml parser.mli : parser.mly
 %.cmi : %.mli
 	ocamlc -c $<
 
-
+debugtokens: debugtokens.ml
+	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) ./$@.native'
 
 .PHONY : clean test eqeq all
 
@@ -35,7 +36,7 @@ lint:
 
 clean :
 	ocamlbuild -clean
-	$(RM) *.diff eqeq.native scanner.ml
+	$(RM) *.diff *.native scanner.ml
 	$(RM) parser.ml parser.mli parser.output parser.conflicts
 	$(RM) *.cmx *.cmi *.cmo *.cmx *.o
 	$(RM) testall.log
