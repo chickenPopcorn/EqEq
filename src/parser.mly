@@ -60,7 +60,7 @@ finddecl:
      { { fcontext = ""; (* global context *)
          ftarget = $2;
          fbody = List.rev $4 } }
- | ID COLON FIND ID LBRACE stmt_list RBRACE
+ | CTX COLON FIND ID LBRACE stmt_list RBRACE
      { { fcontext = $1;
          ftarget = $4;
          fbody = List.rev $6 } }
