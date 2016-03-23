@@ -32,6 +32,29 @@ fail-while2...OK
 
 Be sure to run `make lint` from time to time.
 
+### Debugging Tools
+See what our scanner thinks of source programs, with `debugtokens` target:
+```sh
+$ make debugtokens && ./debugtokens.native < tests/test-helloworld.eq
+bash -c 'source ~/.opam/opam-init/init.sh && ocamlbuild -use-ocamlfind ./debugtokens.native'
+Finished, 16 targets (16 cached) in 00:00:00.
+CTX
+ASSIGN
+LBRACE
+ID
+...snipped..
+LPAREN
+Fatal error: exception Failure("illegal character "")
+```
+
+Interactive mode with menhir and our parser:
+```sh
+$ menhir --interpret --interpret-show-cst parser.mly # note missing ASSIGN
+CTX LBRACE ID ASSIGN LITERAL SEMI RBRACE
+
+REJECT
+```
+
 ### One-time Setup
 
 The above assumes you've done the one-time installation of dependencies for your
