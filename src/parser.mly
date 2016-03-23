@@ -65,6 +65,7 @@ finddecl:
          fbody = List.rev $6 } }
 
 funcdecl_list:
+    /* nothing */  { [] }
   | funcdecl_list funcdecl { $2 :: $1 }
 
 stmt_list:
