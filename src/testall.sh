@@ -1,198 +1,217 @@
-#!/bin/sh
-set -e
-
-# Regression testing script for MicroC
-# Step through a list of files
-#  Compile, run, and check the output of each expected-to-work test
+#!/usr/bin/env bash
+#
+# Regression testing script for EqualsEquals
+# Steps through a list of files
+#  Compiles, runs, and check the output of each expected-to-work test
 #  Compile and check the error of each expected-to-fail test
+set -e
+ulimit -t 30  # Set time limit for all operations
 
-# Path to the microc compiler.  Usually "./microc.native"
-# Try "_build/microc.native" if ocamlbuild was unable to create a symbolic link.
-MICROC="./eqeq.native"
+#... high-level maintenance
+rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
+declare -r genFileExts=(c diff actual stderr a)
 
-# Set time limit for all operations
-ulimit -t 30
+# CLI arguments & APIs
+declare -r thisScript="$(basename "$0")"
+declare -r allopts=kvhdc
+opt_verbose=0 # v
+opt_keep=0    # k
+opt_debug=0   # d
+Usage() {     # h
+    echo -e "
+  Usage: $thisScript -[$allopts] [LANG_SOURCE_FILES]
 
-globallog=testall.log
-rm -f "$globallog"
-error=0
-globalerror=0
-verbosefail=0
+  Where LANG_SOURCE_FILES is one or more EqualsEquals file, in the form:
+  - test-[testlabel].eq where 'testlabel' is some meaningful name of an
+    expected sucessful test program
+  - fail-[testlabel].eq where 'testlabel' is some meaningful name of an
+    expected invalid test program
 
-keep=0
+  Options:
+    -k    Keeps intermediate files after testing; default: $opt_keep
+           - TEST_SOURCE.c\tTEST_SOURCE's compiled target output.
+           - TEST_SOURCE.diff\tshowing difference in case of failures
+           - TEST_SOURCE.actual\tstderr & stdout of TEST_SOURCE's behavior
+           - TEST_SOURCE.stderr\tTEST_SOURCE's compile-time errors.
+           - TEST_SOURCE.a\tTEST_SOURCE's compiled target.
 
-allopts=kvh
-Usage() {
-    echo "Usage: testall.sh -[$allopts] [.eq files]"
-    echo "-k    Keep intermediate files"
-    echo "-v    Verbose print of failures"
-    echo "-h    Print this help"
+    -v    Verbose print of failures' actual vs. expected; default: $opt_verbose
+
+    -d    Debug this script's behavior, with bash commands/args printed.
+
+    -c    Cleanup generated files and exit; default: false
+
+    -h    Print this help message
+    \r" >&2
     exit 1
 }
 
-SignalError() {
-    if [ $error -eq 0 ] ; then
-        echo "FAILED"
-        error=1
-    fi
-    echo "  $1"
-}
-
-# Compare <outfile> <reffile> <difffile>
-# Compares the outfile with reffile.  Differences, if any, written to difffile
-Compare() {
-    generatedfiles="$generatedfiles $3"
-    echo diff -b $1 $2 ">" $3 1>&2
-    diff -b "$1" "$2" > "$3" 2>&1 || {
-        SignalError "$1 differs"
-        echo "FAILED $1 differs from $2" 1>&2
-    }
-}
-
-# Run <args>
-# Report the command, run it, and report any errors
-Run() {
-    echo $* 1>&2
-    eval $* || {
-        SignalError "$1 failed on $*"
-        return 1
-    }
-}
-
-# RunFail <args>
-# Report the command, run it, and expect an error
-RunFail() {
-    echo $* 1>&2
-    eval $* && {
-        SignalError "failed: $* did not report an error"
-        return 1
-    }
-    return 0
-}
-
-Check() {
-    error=0
-    basename=`echo $1 | sed 's/.*\\///
-                             s/.eq//'`
-    reffile=`echo $1 | sed 's/.eq$//'`
-    basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
-
-    echo -n "$basename..."
-
-    echo 1>&2
-    echo "###### Testing $basename" 1>&2
-
-    generatedfiles=""
-
-    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
-    Run "$MICROC" "<" $1 ">" "${basename}.c" &&
-    Run "make" "${basename}.a" &&
-    "${basename}.a" > "${basename}.out"
-    Compare ${basename}.out ${reffile}.out ${basename}.diff
-
-    # Report the status and clean up the generated files
-
-    if [ $error -eq 0 ] ; then
-        if [ $keep -eq 0 ] ; then
-            rm -f $generatedfiles
-        fi
-        echo "OK"
-        echo "###### SUCCESS" 1>&2
-    else
-        echo "###### FAILED" 1>&2
-        globalerror=$error
-    fi
-}
-
-CheckFail() {
-    error=0
-    basename=`echo $1 | sed 's/.*\\///
-                             s/.eq//'`
-    reffile=`echo $1 | sed 's/.eq$//'`
-    basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
-
-    echo -n "$basename..."
-
-    echo 1>&2
-    echo "###### Testing $basename" 1>&2
-
-    generatedfiles=""
-
-    generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
-    RunFail "$MICROC" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
-    Compare ${basename}.err ${reffile}.err ${basename}.diff
-
-    # Report the status and clean up the generated files
-
-    if [ $error -eq 0 ] ; then
-        if [ $keep -eq 0 ] ; then
-            rm -f $generatedfiles
-        fi
-        echo "OK"
-        echo "###### SUCCESS" 1>&2
-    else
-        echo "###### FAILED" 1>&2
-        globalerror=$error
-    fi
-}
-
+# Parse command line arguments ASAP
 while getopts "$allopts" c; do
     case $c in
-        k) # Keep intermediate files
-            keep=1
-            ;;
-        v) # Don't hide what happened on failures in logs
-            verbosefail=1
-            ;;
-        h) # Help
-            Usage
-            ;;
+        k) opt_keep=1 ;;
+        v) opt_verbose=1 ;;
+        d)
+          set -x
+          opt_debug=1
+          ;;
+        c)
+          echo 'Cleaning up test files...'
+          for genExt in "${genFileExts[@]}";do
+            for gen in tests/{test,fail}-*".$genExt";do
+              rmIfExists "$gen"
+            done
+            rmIfExists "$globallog"
+          done
+
+          exit 0
+          ;;
+        h) Usage ;;
     esac
 done
+shift $(( OPTIND - 1))
 
-shift `expr $OPTIND - 1`
-
-LLIFail() {
-  echo "Could not find the LLVM interpreter \"$LLI\"."
-  echo "Check your LLVM installation and/or modify the LLI variable in testall.sh"
+# Path to the our compiler.
+#   Try "_build/eqeq.native" if ocamlbuild was unable to create a symbolic link.
+declare -r eqCompiler="./eqeq.native"
+[ -x "$eqCompiler" ] || {
+  printf 'CRITICAL: no EqEq compiler found at "%s"!\n' "$eqCompiler"
   exit 1
 }
+declare -r globallog=testall.log;
+rmIfExists "$globallog" >/dev/null
 
-which "$LLI" >> $globallog || LLIFail
-
-
-if [ $# -ge 1 ]
-then
-    files=$@
+# Determine which test files we're running
+if [ $# -ge 1 ]; then
+    testFiles=$@
 else
-    files="tests/test-*.eq tests/fail-*.eq"
+    testFiles=(tests/test-*.eq tests/fail-*.eq)
 fi
 
-for file in $files
-do
-    case $file in
+labelOfSource() { basename "$1" | \sed -e 's|\..*||g'; }
+diffFiles()  { \diff --ignore-space-change "$1" "$2"; }
+isMatch() { diffFiles "$1" "$2" >/dev/null 2>&1; }
+
+# usage: [PASS|FAIL]
+printUnitResult() { printf '\tResult:\t%s\n' "$1" >&2 | tee -a "$globallog"; }
+unitTagFromExit() { if [ $1 -eq 0 ];then echo PASS; else echo FAIL;fi }
+checkExists() { [ -f "$1" ]; }
+
+# usage: testprog [EXPECTEXIT]
+#  Where EXPECTEXIT is 0 if expecting passing `testprog`, 1 otherwise
+CheckTest() {
+  local eqTestSrc="$(readlink -f "$1")"; local testDir="$(dirname "$1")"
+  local expectExit=$2; { [ "$expectExit" -eq 0 ] ||  [ "$expectExit" -eq 1 ]; }
+
+  local testLabel="$(labelOfSource "$eqTestSrc")"
+  ! checkExists "$expected"
+
+  # Derivative files we expect present
+  local eqTest="${testLabel}.eq"
+  local expected="${testLabel}.$(
+    if [ "$expectExit" -eq 0 ];then printf out; else printf err;fi
+  )"; checkExists "$expected"
+
+  # files we'll generate
+  local eqTarget="$testDir"/"${testLabel}.c"
+  local eqTargetObj="$testDir"/"${testLabel}.a"
+  local compilerErrs="$testDir"/"${testLabel}.stderr"
+  local actual="$testDir"/"${testLabel}.actual"
+  local diffR="$testDir"/"${testLabel}.diff"
+
+  # Print what we're up to
+  local expectSummary="$(
+    if [ "$expectExit" -eq 0 ];then
+      echo 'resulting program behavior'
+    else
+      echo 'compilation failure'
+    fi
+  )"
+  printf '#### Testing "%s" for its %s\n' "$testLabel" "$expectSummary" |
+      tee -a "$globallog"
+
+  # Finally run our test
+  { "$eqCompiler" < "$eqTestSrc" > "$eqTarget" 2 > "$compilerErrs" || true; } |
+      tee -a "$globallog"
+  actualExit=$?
+
+  if [ "$actualExit" -eq "$expectExit" ]; then
+    # EqEq compiler treated sample source as expected
+
+    local left="$expected" right="$actual"
+    if [ "$expectExit" -eq 0 ];then
+      if ! cc "$eqTarget" -o "$eqTargetObj" 2>&1;then
+        printf \
+          "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" \
+          >> "$globallog"
+          return 1
+      fi
+
+      # Run our compield test target (itself compiled with eqCompiler)
+      "$eqTargetObj" > "$actual" 2>&1
+    else
+      right="$compilerErrs"
+    fi
+
+    printUnitResult "$(
+      isMatch "$left" "$right"; unitTagFromExit $?
+    )"
+    diffFiles "$left" "$right" > "$diffR"
+    if [ "$opt_verbose" -eq 1 ];then
+      cat "$diffR" >&2
+    fi
+
+    isMatch "$left" "$right"; return $?
+  else
+      # EqEq compiler did opposite of what we expected with sample source
+
+      if [ "$expectExit" -eq 0 ];then
+        printf '\tEqEq source unexpectedly failed to compile\n' >> "$globallog"
+      else
+        printf \
+          '\tBad EqEq source compiled, but failure expected\n' >> "$globallog"
+      fi
+    printUnitResult $(unitTagFromExit 1)
+    return 1
+  fi
+  return 0
+}
+
+touch "$globallog"
+sincePreviousTestLine=1
+for testFile in $testFiles; do
+    case $testFile in
         *test-*)
-            Check $file 2>> $globallog
+            expectExit=0
             ;;
         *fail-*)
-            CheckFail $file 2>> $globallog
+            expectExit=1
             ;;
         *)
-            echo "unknown file type $file"
-            globalerror=1
+            printf 'Skipping UNKNOWN test file:\t"%s"\n' "$testFile"
+            anyFailures=1
+            continue;
             ;;
     esac
 
-    # Verbose-printing of logs
-    if [ "$error" -eq 1 ] && [ "$verbosefail" -eq 1 ];then
-      lastFailLine="$(
-        grep -n Testing "$globallog" |
-          sed -n '$p' |
-          sed -e 's|^\([0-9]*\):.*$|\1|g'
-      )"
-      sed -n "${lastFailLine},$"p "$globallog"
-      echo
+    # Run test
+    if ! CheckTest "$testFile" "$expectExit" 2>&1;then
+      anyFailures=1
     fi
+
+    if [ "$opt_keep" -eq 0 ];then
+      for genExt in "${genFileExts[@]}";do
+        rmIfExists \
+          "$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
+      done
+    fi
+
+    # Verbose-printing of logs
+    if [ "$opt_verbose" -eq 1 ];then
+      sed -n "${sincePreviousTestLine},$"p "$globallog"
+    fi
+
+    sincePreviousTestLine="$(wc -l < "$globallog")"
 done
 
-exit $globalerror
+exit $anyFailures
