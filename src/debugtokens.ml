@@ -26,6 +26,7 @@ let stringify = function
   | IF -> "IF"
   | ELSE -> "ELSE"
   | WHILE -> "WHILE"
+  | STRLIT(lxm) -> "STRLIT"
   | FIND -> "FIND"
   | LITERAL(lxm) -> "LITERAL"
   | ID(lxm) -> "ID"

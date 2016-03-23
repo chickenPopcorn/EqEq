@@ -10,6 +10,7 @@ open Ast
 %token IF ELSE WHILE FIND
 %token <int> LITERAL
 %token <string> ID
+%token <string> STRLIT
 %token <string> CTX
 %token EOF
 
@@ -81,7 +82,7 @@ stmt:
   | FIND stmt_list RBRACE { Block(List.rev $2) }
 
 expr:
-    LITERAL          { Literal($1) }
+    literal          { $1 }
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
@@ -100,6 +101,10 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Builtin($1, $3) }
   | LPAREN expr RPAREN { $2 }
+
+literal:
+    LITERAL { Literal($1) }
+  | STRLIT  { Strlit($1) }
 
 actuals_opt:
     /* nothing */ { [] }

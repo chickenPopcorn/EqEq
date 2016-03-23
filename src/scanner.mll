@@ -33,6 +33,7 @@ rule token = parse
 | "else"   { ELSE }
 | "while"  { WHILE }
 | "find"   { FIND }
+| '"' ([^'"']*) as lxm '"' { STRLIT(lxm) }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | identifier as lxm { ID(lxm) }
 | context as lxm { CTX(lxm) }

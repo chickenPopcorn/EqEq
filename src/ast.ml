@@ -12,6 +12,7 @@ type bind = typ * string
 type expr =
     Literal of int
   | Id of string
+  | Strlit of string
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of string * expr
