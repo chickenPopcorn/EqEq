@@ -11,8 +11,8 @@ module A = Ast
 module StringMap = Map.Make(String)
 
 let translate (globals, functions) =
-  "#include \"stdio\"\n" ^
-  "int main() { print(\"%f\n\", 42.0); }\n"
+  "#include <stdio.h>\n" ^
+  "int main() { printf(\"%f\n\", 42.0); }\n"
 
 (*
   let context = L.global_context () in
