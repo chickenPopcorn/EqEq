@@ -1,5 +1,5 @@
-SomeContext {
-  a = 42;
+SomeContext = {
+  a = { 42; }
 }
 
 SomeContext:find a {
