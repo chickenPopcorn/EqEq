@@ -3,7 +3,7 @@ open Ast
 
 type num =
   | Num_int of int
-  | Num_float of float 
+  | Num_float of float
 
 let stringify = function
   | LPAREN -> "LPAREN"
@@ -36,7 +36,7 @@ let stringify = function
   | CTX(lxm) -> "CTX"
   | EOF -> "EOF"
 
-let _ = 
+let _ =
   let lexbuf = Lexing.from_channel stdin in
   let rec print_tokens = function
     | EOF -> " "
