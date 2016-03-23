@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token IF ELSE WHILE FIND
@@ -59,10 +59,10 @@ finddecl:
      { { fcontext = ""; (* global context *)
          ftarget = $2;
          fbody = List.rev $4 } }
- | ID FIND ID LBRACE stmt_list RBRACE
+ | ID COLON FIND ID LBRACE stmt_list RBRACE
      { { fcontext = $1;
-         ftarget = $3;
-         fbody = List.rev $5 } }
+         ftarget = $4;
+         fbody = List.rev $6 } }
 
 funcdecl_list:
   | funcdecl_list funcdecl { $2 :: $1 }
