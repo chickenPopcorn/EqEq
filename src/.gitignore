@@ -1,5 +1,5 @@
 # `make test` generated files
-testall.log
+e2e-tests.log
 
 # `make scanner` generated files
 scanner.ml

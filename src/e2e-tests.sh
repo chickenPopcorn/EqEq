@@ -9,8 +9,10 @@ ulimit -t 30  # Set time limit for all operations
 
 #... high-level maintenance
 rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
+labelOfSource() { basename "$1" | \sed -e 's|\..*||g'; }
 declare -r genFileExts=(c diff actual stderr a)
-declare -r globallog="$(basename "$0")".log
+declare -r suiteLog="$(labelOfSource "$0")".log
+declare -r srcExt=eq
 
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
@@ -23,9 +25,9 @@ Usage() {     # h
   Usage: $thisScript -[$allopts] [LANG_SOURCE_FILES]
 
   Where LANG_SOURCE_FILES is one or more EqualsEquals file, in the form:
-  - test-[testlabel].eq where 'testlabel' is some meaningful name of an
+  - test-[testlabel].$srcExt where 'testlabel' is some meaningful name of an
     expected sucessful test program
-  - fail-[testlabel].eq where 'testlabel' is some meaningful name of an
+  - fail-[testlabel].$srcExt where 'testlabel' is some meaningful name of an
     expected invalid test program
 
   Options:
@@ -47,6 +49,16 @@ Usage() {     # h
     exit 1
 }
 
+cleanGeneratedFiles() {
+  echo 'Cleaning up old generated e2e-test files...'
+  for genExt in "${genFileExts[@]}";do
+    for gen in tests/{test,fail}-*".$genExt";do
+      rmIfExists "$gen"
+    done
+    rmIfExists "$suiteLog"
+  done
+}
+
 # Parse command line arguments ASAP
 while getopts "$allopts" c; do
     case $c in
@@ -57,83 +69,97 @@ while getopts "$allopts" c; do
           opt_debug=1
           ;;
         c)
-          echo 'Cleaning up test files...'
-          for genExt in "${genFileExts[@]}";do
-            for gen in tests/{test,fail}-*".$genExt";do
-              rmIfExists "$gen"
-            done
-            rmIfExists "$globallog"
-          done
+          cleanGeneratedFiles
 
           exit 0
           ;;
         h) Usage ;;
     esac
 done
-shift $(( OPTIND - 1))
+shift $(( OPTIND - 1 ))
 
 # Path to the our compiler.
 #   Try "_build/eqeq.native" if ocamlbuild was unable to create a symbolic link.
-declare -r eqCompiler="./eqeq.native"
+declare -r eqCompiler="$(readlink -f "./eqeq.native")"
 [ -x "$eqCompiler" ] || {
   printf 'CRITICAL: no EqEq compiler found at "%s"!\n' "$eqCompiler"
   exit 1
 }
-rmIfExists "$globallog" >/dev/null
+rmIfExists "$suiteLog" >/dev/null
 
 # Determine which test files we're running
 if [ $# -ge 1 ]; then
-    testFiles=$@
+    testFiles=$*
 else
-    testFiles=(tests/test-*.eq tests/fail-*.eq)
+    testFiles=($(
+      find tests/ \
+        -type f \
+        -name "fail-*.$srcExt"\
+        -o \
+        -name "test-*.$srcExt"
+      ))
 fi
 
-labelOfSource() { basename "$1" | \sed -e 's|\..*||g'; }
 diffFiles()  { \diff --ignore-space-change "$1" "$2"; }
-isMatch() { diffFiles "$1" "$2" >/dev/null 2>&1; }
-
-# usage: [PASS|FAIL]
-printUnitResult() { printf '\tResult:\t%s\n' "$1" >&2 | tee -a "$globallog"; }
+printUnitResult() { printf '\tResult:\t%s\n' "$1"; } # usage: [PASS|FAIL]
 unitTagFromExit() { if [ $1 -eq 0 ];then echo PASS; else echo FAIL;fi }
-checkExists() { [ -f "$1" ]; }
+# Get path to sibling we'll be generating with suffix $1 as sibling to $2
+pathToGenSib() {
+  local suffix="$1"; [ -n "$suffix" ]
+  local sibling="$(readlink -f "$2")"; [ -d "$sibling" ]
+  local dir="$(dirname "$sibling")"
 
-# usage: testprog [EXPECTEXIT]
+  local newFile="$dir"/"$(labelOfSource "$sibling").${suffix}"
+
+  printf '%s' "$newFile"
+}
+ensureFirstSibling() {
+  local path; path="$(pathToGenSib $@)"
+  [ -f "$path" ] && return 1
+  echo "$path"
+}
+
+# usage: testprog EXPECTEXIT testNum 
 #  Where EXPECTEXIT is 0 if expecting passing `testprog`, 1 otherwise
 CheckTest() {
-  local eqTestSrc="$(readlink -f "$1")"; local testDir="$(dirname "$1")"
-  local expectExit=$2; { [ "$expectExit" -eq 0 ] ||  [ "$expectExit" -eq 1 ]; }
-
-  local testLabel="$(labelOfSource "$eqTestSrc")"
-  ! checkExists "$expected"
-
-  # Derivative files we expect present
-  local eqTest="${testLabel}.eq"
-  local expected="${testLabel}.$(
-    if [ "$expectExit" -eq 0 ];then printf out; else printf err;fi
-  )"; checkExists "$expected"
-
-  # files we'll generate
-  local eqTarget="$testDir"/"${testLabel}.c"
-  local eqTargetObj="$testDir"/"${testLabel}.a"
-  local compilerErrs="$testDir"/"${testLabel}.stderr"
-  local actual="$testDir"/"${testLabel}.actual"
-  local diffR="$testDir"/"${testLabel}.diff"
+  local eqTestSrc="$(readlink -f "$1")"
+  local testDir="$(dirname "$eqTestSrc")"
+  local expectExit=$2; { [ "$expectExit" -eq 0 ] || [ "$expectExit" -eq 1 ]; }
+  local testNum=$3
 
   # Print what we're up to
   local expectSummary="$(
     if [ "$expectExit" -eq 0 ];then
-      echo 'resulting program behavior'
+      echo "target's behavior"
     else
-      echo 'compilation failure'
+      echo 'compilation fails'
     fi
   )"
-  printf '#### Testing "%s" for its %s\n' "$testLabel" "$expectSummary" |
-      tee -a "$globallog"
+  printf '[%d] "%s"\tasserting %s\t' \
+      $testNum "$(labelOfSource "$eqTestSrc")" "$expectSummary" |
+    tee -a "$suiteLog"
 
-  # Finally run our test
-  { "$eqCompiler" < "$eqTestSrc" > "$eqTarget" 2 > "$compilerErrs" || true; } |
-      tee -a "$globallog"
-  actualExit=$?
+  # Derivative files we expect present
+  local expected="$(pathToGenSib "$(
+    if [ "$expectExit" -eq 0 ];then printf out; else printf err;fi
+  )" "$eqTestSrc")";
+  if ! [ -f "$expected" ];then
+    printUnitResult $(unitTagFromExit 1) | tee -a "$suiteLog"
+    printf \
+      'BUG: cannot test without expecation file:\n\t%s\n' \
+      "$expected" >> "$suiteLog"
+    return 1
+  fi
+
+  # files we'll generate
+  local eqTarget="$(ensureFirstSibling c "$eqTestSrc")"
+  local eqTargetObj="$(ensureFirstSibling a "$eqTestSrc")"
+  local compilerErrs="$(ensureFirstSibling stderr "$eqTestSrc")"
+  local actual="$(ensureFirstSibling actual "$eqTestSrc")"
+  local diffR="$(ensureFirstSibling diff "$eqTestSrc")"
+
+  # Actually run test program
+  "$eqCompiler" < "$eqTestSrc" > "$eqTarget" && actualExit=$? || actualExit=$?
 
   if [ "$actualExit" -eq "$expectExit" ]; then
     # EqEq compiler treated sample source as expected
@@ -143,7 +169,7 @@ CheckTest() {
       if ! cc "$eqTarget" -o "$eqTargetObj" 2>&1;then
         printf \
           "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" \
-          >> "$globallog"
+          >> "$suiteLog"
           return 1
       fi
 
@@ -153,65 +179,92 @@ CheckTest() {
       right="$compilerErrs"
     fi
 
-    printUnitResult "$(
-      isMatch "$left" "$right"; unitTagFromExit $?
-    )"
     diffFiles "$left" "$right" > "$diffR"
+    printUnitResult "$(unitTagFromExit $?)" | tee -a "$suiteLog"
     if [ "$opt_verbose" -eq 1 ];then
-      cat "$diffR" >&2
+      cat "$diffR"
     fi
 
-    isMatch "$left" "$right"; return $?
+    [ "$(wc --lines < "$diffR")" -eq 0 ]; return $?
   else
-      # EqEq compiler did opposite of what we expected with sample source
+    # EqEq compiler did opposite of what we expected with sample source
 
-      if [ "$expectExit" -eq 0 ];then
-        printf '\tEqEq source unexpectedly failed to compile\n' >> "$globallog"
-      else
-        printf \
-          '\tBad EqEq source compiled, but failure expected\n' >> "$globallog"
-      fi
-    printUnitResult $(unitTagFromExit 1)
+    printUnitResult $(unitTagFromExit 1) | tee -a "$suiteLog"
+    if [ "$expectExit" -eq 0 ];then
+      printf '\tEqEq source unexpectedly failed to compile\n' >> "$suiteLog"
+    else
+      printf '\tBad EqEq source compiled, but failure expected\n' >> "$suiteLog"
+    fi
     return 1
   fi
   return 0
 }
 
-touch "$globallog"
+isTestPresent() {
+  local label d;
+  d="$(dirname "$(readlink -f -- "$1")")";
+  label="$(labelOfSource "$1")"
+  [ -f "$1" ] && { [ -f "$d"/"${label}.out" ] || [ -f "$d"/"${label}.err" ]; }
+}
+
+# Running with *previously* generated files just makes my brain explode...
+cleanGeneratedFiles
+touch "$suiteLog"
+
+# Print test suite outline
+printf 'Running %d tests:\n\t%s\n' \
+  ${#testFiles[@]} "$(printf '%s, ' "${testFiles[@]}")"
+
 sincePreviousTestLine=1
-for testFile in $testFiles; do
-    case $testFile in
-        *test-*)
+testNum=0; numFails=0
+for testFile in "${testFiles[@]}"; do
+  if ! isTestPresent "$testFile";then
+    printf 'WARNING:\tskipping missing or incomplete test:\t"%s"\n' "$testFile"
+    continue;
+  fi
+    case "$(basename "$testFile")" in
+        test-*.$srcExt)
             expectExit=0
             ;;
-        *fail-*)
+        fail-*.$srcExt)
             expectExit=1
             ;;
         *)
-            printf 'Skipping UNKNOWN test file:\t"%s"\n' "$testFile"
-            anyFailures=1
+            printf 'WARNING:\tskipping UNKNOWN test:\t"%s"\n' "$testFile"
             continue;
             ;;
     esac
+    if [ "$testNum" -eq 0 ];then testNum=1;fi
 
     # Run test
-    if ! CheckTest "$testFile" "$expectExit" 2>&1;then
-      anyFailures=1
+    if ! CheckTest "$testFile" "$expectExit" "$testNum";then
+      numFails=$(( numFails + 1 ))
     fi
 
     if [ "$opt_keep" -eq 0 ];then
       for genExt in "${genFileExts[@]}";do
-        rmIfExists \
-          "$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
+        gen="$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
+        rmIfExists "$gen" >/dev/null
       done
     fi
 
     # Verbose-printing of logs
     if [ "$opt_verbose" -eq 1 ];then
-      sed -n "${sincePreviousTestLine},$"p "$globallog"
+      sed -n "$(( ${sincePreviousTestLine} + 1 )),$"p "$suiteLog"
     fi
 
-    sincePreviousTestLine="$(wc -l < "$globallog")"
+    testNum=$(( testNum + 1 ))
+    sincePreviousTestLine="$(wc --lines < "$suiteLog")"
 done
 
+
+# Print test suite summary
+printf '\nSummary: '
+if [ "$testNum" -eq 0 ];then
+  printf 'SKIPPED\n'
+elif [ "$numFails" -eq 0 ];then
+  printf 'PASSED\n'
+else
+  printf '%d of %s FAILED\n' "$numFails" "${#testFiles[@]}"
+fi
 exit $anyFailures

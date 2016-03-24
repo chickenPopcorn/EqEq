@@ -31,7 +31,7 @@ debugtokens : debugtokens.ml
 .PHONY : clean test eqeq all
 
 test : clean eqeq $(TEST_SUITE).sh
-	./$(TEST_SUITE).sh $(TEST_OPTS) tests/*.eq
+	./$(TEST_SUITE).sh $(TEST_OPTS)
 
 lint:
 	@./lint.sh
