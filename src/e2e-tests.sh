@@ -10,6 +10,7 @@ ulimit -t 30  # Set time limit for all operations
 #... high-level maintenance
 rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
 declare -r genFileExts=(c diff actual stderr a)
+declare -r globallog=$(basename "$0").log;
 
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
@@ -78,7 +79,6 @@ declare -r eqCompiler="./eqeq.native"
   printf 'CRITICAL: no EqEq compiler found at "%s"!\n' "$eqCompiler"
   exit 1
 }
-declare -r globallog=testall.log;
 rmIfExists "$globallog" >/dev/null
 
 # Determine which test files we're running
