@@ -18,16 +18,15 @@ To build, simply: `make`
 To Run end-to-end test suite:
 ```sh
 $ make test # or: `make TEST_OPTS=-h test` or any other options it takes
-ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 microc.native
-Finished, 22 targets (0 cached) in 00:00:01.
-./testall.sh
-test-arith1...OK
-test-arith2...OK
-test-arith3...OK
-test-fib...OK
-...
-fail-while1...OK
-fail-while2...OK
+
+#... {clean, build, etc.}-output snipped...
+
+Running 1 tests:
+        tests/test-helloworld.eq,
+[1] "test-helloworld"   asserting target's behavior             Result: PASS
+
+Summary: PASSED
+
 ```
 
 Be sure to run `make lint` from time to time.
