@@ -8,9 +8,12 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 ## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
 
-Currently the codebase is being refactored to repressent the eqeq LRM, rather
-than MicroC's spec, which we forked from. See [microc-to-eqeq](../notes/microc-to-eqeq.md) for the
-list of ongoing changes.
+Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20%22Hello%20World%22%20of%20our%20Language) which means we're:
+ 1. testing: **keeping our build passing** at every commit on `master` branch
+ 2. **real phases**: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO) and [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16) for the real thing
+ 3. **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each of #2
+
+The codebase was recently refactored to represent the eqeq LRM, rather than MicroC's, so it's safe to assume if a line of code looks too simple, you're right! We were just trying to get somethin to compile, so we could all run `make test` reliably.
 
 ## Building & Testing
 
@@ -31,6 +34,19 @@ Summary: PASSED
 ```
 
 Be sure to run `make lint` from time to time.
+
+### Writing Tests
+So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's computer? Great! Do this:
+```sh
+$ $EDIT tests/test-crazynewkeyword.eq  # ideal case, capturing the complexity you've added (a correct program)
+$ $EDIT tests/test-crazynewkeyword.out # what your example compiled eq C program should do (just the output)
+$ make test
+$ $EDIT tests/fail-crazynewkeyword.eq  # misuse you can think of (an incorrect program)
+$ $EDIT tests/fail-crazynewkeyword.out # how our compiler should complain for your example eq source
+$ make test
+```
+
+Note: currently we're trying to only test the behavior of our *compiled* C programs _(that is: we're not testing what our compiler outputs, but what its output programs do)_.
 
 ### Debugging Tools
 See what our scanner thinks of source programs, with `debugtokens` target:
