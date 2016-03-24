@@ -7,4 +7,6 @@ before_install:
   - opam init --yes
   - eval `opam config env`
   - opam install --yes llvm.3.4 ocamlfind
-script: make test
+script:
+  - cd src/
+  - make test
