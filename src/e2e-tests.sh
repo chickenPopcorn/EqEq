@@ -21,7 +21,7 @@ opt_verbose=0 # v
 opt_keep=0    # k
 opt_debug=0   # d
 Usage() {     # h
-    echo -e "
+  echo -e "
   Usage: $thisScript -[$allopts] [LANG_SOURCE_FILES]
 
   Where LANG_SOURCE_FILES is one or more EqualsEquals file, in the form:
@@ -61,20 +61,20 @@ cleanGeneratedFiles() {
 
 # Parse command line arguments ASAP
 while getopts "$allopts" c; do
-    case $c in
-        k) opt_keep=1 ;;
-        v) opt_verbose=1 ;;
-        d)
-          set -x
-          opt_debug=1
-          ;;
-        c)
-          cleanGeneratedFiles
+  case $c in
+    k) opt_keep=1 ;;
+    v) opt_verbose=1 ;;
+    d)
+      set -x
+      opt_debug=1
+      ;;
+    c)
+      cleanGeneratedFiles
 
-          exit 0
-          ;;
-        h) Usage ;;
-    esac
+      exit 0
+      ;;
+    h) Usage ;;
+  esac
 done
 shift $(( OPTIND - 1 ))
 
@@ -89,15 +89,15 @@ rmIfExists "$suiteLog" >/dev/null
 
 # Determine which test files we're running
 if [ $# -ge 1 ]; then
-    testFiles=$*
+  testFiles=$*
 else
-    testFiles=($(
-      find tests/ \
-        -type f \
-        -name "fail-*.$srcExt"\
-        -o \
-        -name "test-*.$srcExt"
-      ))
+  testFiles=($(
+    find tests/ \
+      -type f \
+      -name "fail-*.$srcExt"\
+      -o \
+      -name "test-*.$srcExt"
+  ))
 fi
 
 diffFiles()  { \diff --ignore-space-change "$1" "$2"; }
@@ -119,7 +119,7 @@ ensureFirstSibling() {
   echo "$path"
 }
 
-# usage: testprog EXPECTEXIT testNum 
+# usage: testprog EXPECTEXIT testNum
 #  Where EXPECTEXIT is 0 if expecting passing `testprog`, 1 otherwise
 CheckTest() {
   local eqTestSrc="$(readlink -f "$1")"
@@ -212,7 +212,7 @@ cleanGeneratedFiles
 touch "$suiteLog"
 
 # Print test suite outline
-printf 'Running %d tests:\n\t%s\n' \
+printf '\nRunning %d tests:\n\t%s\n' \
   ${#testFiles[@]} "$(printf '%s, ' "${testFiles[@]}")"
 
 sincePreviousTestLine=1
@@ -222,39 +222,35 @@ for testFile in "${testFiles[@]}"; do
     printf 'WARNING:\tskipping missing or incomplete test:\t"%s"\n' "$testFile"
     continue;
   fi
-    case "$(basename "$testFile")" in
-        test-*.$srcExt)
-            expectExit=0
-            ;;
-        fail-*.$srcExt)
-            expectExit=1
-            ;;
-        *)
-            printf 'WARNING:\tskipping UNKNOWN test:\t"%s"\n' "$testFile"
-            continue;
-            ;;
-    esac
-    if [ "$testNum" -eq 0 ];then testNum=1;fi
+  case "$(basename "$testFile")" in
+    test-*.$srcExt) expectExit=0;;
+    fail-*.$srcExt) expectExit=1;;
+    *)
+      printf 'WARNING:\tskipping UNKNOWN test:\t"%s"\n' "$testFile"
+      continue
+      ;;
+  esac
+  if [ "$testNum" -eq 0 ];then testNum=1;fi
 
-    # Run test
-    if ! CheckTest "$testFile" "$expectExit" "$testNum";then
-      numFails=$(( numFails + 1 ))
-    fi
+  # Run test
+  if ! CheckTest "$testFile" "$expectExit" "$testNum";then
+    numFails=$(( numFails + 1 ))
+  fi
 
-    if [ "$opt_keep" -eq 0 ];then
-      for genExt in "${genFileExts[@]}";do
-        gen="$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
-        rmIfExists "$gen" >/dev/null
-      done
-    fi
+  if [ "$opt_keep" -eq 0 ];then
+    for genExt in "${genFileExts[@]}";do
+      gen="$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
+      rmIfExists "$gen" >/dev/null
+    done
+  fi
 
-    # Verbose-printing of logs
-    if [ "$opt_verbose" -eq 1 ];then
-      sed -n "$(( ${sincePreviousTestLine} + 1 )),$"p "$suiteLog"
-    fi
+  # Verbose-printing of logs
+  if [ "$opt_verbose" -eq 1 ];then
+    sed -n "$(( ${sincePreviousTestLine} + 1 )),$"p "$suiteLog"
+  fi
 
-    testNum=$(( testNum + 1 ))
-    sincePreviousTestLine="$(wc --lines < "$suiteLog")"
+  testNum=$(( testNum + 1 ))
+  sincePreviousTestLine="$(wc --lines < "$suiteLog")"
 done
 
 
