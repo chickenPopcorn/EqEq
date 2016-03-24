@@ -59,6 +59,17 @@ cleanGeneratedFiles() {
   done
 }
 
+col() {
+  local c=$1  esc=0 ;shift
+  case "$c" in
+    red) esc='\e[1;31m';;
+    grn) esc='\e[1;32m';;
+    blu) esc='\e[1;34m';;
+    ylw) esc='\e[1;33m';;
+  esac
+  echo -ne $esc"$@"'\033[0m'
+}
+
 # Parse command line arguments ASAP
 while getopts "$allopts" c; do
   case $c in
@@ -102,7 +113,7 @@ fi
 
 diffFiles()  { \diff --ignore-space-change "$1" "$2"; }
 printUnitResult() { printf '\tResult:\t%s\n' "$1"; } # usage: [PASS|FAIL]
-unitTagFromExit() { if [ $1 -eq 0 ];then echo PASS; else echo FAIL;fi }
+unitTagFromExit() { if [ $1 -eq 0 ];then col grn PASS; else col red FAIL;fi }
 # Get path to sibling we'll be generating with suffix $1 as sibling to $2
 pathToGenSib() {
   local suffix="$1"; [ -n "$suffix" ]
@@ -136,7 +147,7 @@ CheckTest() {
     fi
   )"
   printf '[%d] "%s"\tasserting %s\t' \
-      $testNum "$(labelOfSource "$eqTestSrc")" "$expectSummary" |
+    $testNum "$(col blu "$(labelOfSource "$eqTestSrc")")" "$expectSummary" |
     tee -a "$suiteLog"
 
   # Derivative files we expect present
@@ -212,8 +223,9 @@ cleanGeneratedFiles
 touch "$suiteLog"
 
 # Print test suite outline
-printf '\nRunning %d tests:\n\t%s\n' \
-  ${#testFiles[@]} "$(printf '%s, ' "${testFiles[@]}")"
+printf '\nRunning %s:\n\t%s\n\n' \
+  "$(col blu "$(printf '%d tests' ${#testFiles[@]})")" \
+  "$(printf '%s, ' "${testFiles[@]}")"
 
 sincePreviousTestLine=1
 testNum=0; numFails=0
@@ -253,14 +265,13 @@ for testFile in "${testFiles[@]}"; do
   sincePreviousTestLine="$(wc --lines < "$suiteLog")"
 done
 
-
 # Print test suite summary
 printf '\nSummary: '
 if [ "$testNum" -eq 0 ];then
-  printf 'SKIPPED\n'
+  col ylw 'SKIPPED\n'
 elif [ "$numFails" -eq 0 ];then
-  printf 'PASSED\n'
+  col grn 'PASSED\n'
 else
-  printf '%d of %s FAILED\n' "$numFails" "${#testFiles[@]}"
+  printf '%d of %s %s\n' "$numFails" "${#testFiles[@]}" "$(col red FAILED)"
 fi
 exit $anyFailures
