@@ -1,4 +1,4 @@
-# [PLT 2016 Spring](http://www.cs.columbia.edu/~sedwards/classes/2016/4115-spring/index.html)
+# Columbia's CS "[PLT 2016 Spring](http://www.cs.columbia.edu/~sedwards/classes/2016/4115-spring/index.html)"
 
 ## Project Files & Documents
 
