@@ -1,7 +1,7 @@
 language: c
 before_install:
-  - sudo apt-get --yes install m4 llvm software-properties-common
-  - sudo add-apt-repository --yes ppa:avsm/ppa libllvm-3.4-ocaml-dev
+  - sudo apt-get --yes install m4 llvm software-properties-common libllvm-3.4-ocaml-dev
+  - sudo add-apt-repository --yes ppa:avsm/ppa
   - sudo apt-get --yes update -qq
   - sudo apt-get --yes install opam
   - opam init --yes
