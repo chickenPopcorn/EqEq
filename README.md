@@ -6,6 +6,7 @@
 PDFs we've handed in. eg:
 - [Project Proposal](https://drive.google.com/file/d/1vwV6nNTylikhsjUWWYB0BBrInuwZ4OZ5WZyC11K7jYePCuM8EMZ8WPW4motcqm5cziZKHFPD7UtOvflY/view)
 - [Language Reference Manual](https://github.com/rxie25/PLT2016Spring/blob/master/notes/language-reference-manual.md) _(LRM)_
+- [`src/`](/blob/master/src/) tree holds the actual compiler
 
 ## Project Team Members
 
