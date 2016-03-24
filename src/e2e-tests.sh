@@ -10,7 +10,7 @@ ulimit -t 30  # Set time limit for all operations
 #... high-level maintenance
 rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
 declare -r genFileExts=(c diff actual stderr a)
-declare -r globallog=$(basename "$0").log;
+declare -r globallog="$(basename "$0")".log
 
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
