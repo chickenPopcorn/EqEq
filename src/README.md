@@ -6,7 +6,8 @@ mathematical equation evaluation. For more details, see its [Reference
 Manual](https://docs.google.com/document/d/1uHGe2qazuy-I7Vem7u8muxDnWaysDX49lKMbMmlDml4)
 _("LRM" for "Language [RM]" in code and comments)_.
 
-## Status
+## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
+
 Currently the codebase is being refactored to repressent the eqeq LRM, rather
 than MicroC's spec, which we forked from. See [microc-to-eqeq](../notes/microc-to-eqeq.md) for the
 list of ongoing changes.
