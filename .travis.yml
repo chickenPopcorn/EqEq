@@ -1,6 +1,6 @@
 language: c
 before_install:
-  - apt-get install -y ocaml m4 llvm opam
+  - sudo apt-get install -y ocaml m4 llvm opam
   - bash -ex .travis-ci.sh
   - opam llvm.3.6 ocamlfind
   - eval `opam config env`
