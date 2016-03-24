@@ -37,14 +37,41 @@ See what our scanner thinks of source programs, with `debugtokens` target:
 ```sh
 $ make debugtokens && ./debugtokens.native < tests/test-helloworld.eq
 bash -c 'source ~/.opam/opam-init/init.sh && ocamlbuild -use-ocamlfind ./debugtokens.native'
-Finished, 16 targets (16 cached) in 00:00:00.
+# .. snipped `ocamlfind` commands ...
+File "ast.ml", line 68, characters 25-390:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Strlit _
+/usr/bin/ocamllex.opt -q scanner.mll
+# .. snipped `ocamlfind` commands ...
+File "ast.ml", line 68, characters 25-390:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Strlit _
+# .. snipped `ocamlfind` commands ...
 CTX
 ASSIGN
 LBRACE
 ID
-...snipped..
+ASSIGN
+LBRACE
+LITERAL
+SEMI
+RBRACE
+RBRACE
+CTX
+COLON
+FIND
+ID
+LBRACE
+ID
 LPAREN
-Fatal error: exception Failure("illegal character "")
+STRLIT
+COMMA
+ID
+RPAREN
+SEMI
+RBRACE
 ```
 
 Interactive mode with menhir and our parser:
