@@ -196,7 +196,7 @@ CheckTest() {
       cat "$diffR"
     fi
 
-    [ "$(wc --lines < "$diffR")" -eq 0 ]; return $?
+    [ "$(wc -l < "$diffR")" -eq 0 ]; return $?
   else
     # EqEq compiler did opposite of what we expected with sample source
 
@@ -262,7 +262,7 @@ for testFile in "${testFiles[@]}"; do
   fi
 
   testNum=$(( testNum + 1 ))
-  sincePreviousTestLine="$(wc --lines < "$suiteLog")"
+  sincePreviousTestLine="$(wc -l < "$suiteLog")"
 done
 
 # Print test suite summary
