@@ -49,6 +49,12 @@ Usage() {     # h
     exit 1
 }
 
+if [ "$(uname -s)" = Darwin ];then
+  rlnk_f() { echo -n $@; }
+else
+  rlnk_f() { readlink -f $@; }
+fi
+
 cleanGeneratedFiles() {
   echo 'Cleaning up old generated e2e-test files...'
   for genExt in "${genFileExts[@]}";do
@@ -96,7 +102,7 @@ shift $(( OPTIND - 1 ))
 
 # Path to the our compiler.
 #   Try "_build/eqeq.native" if ocamlbuild was unable to create a symbolic link.
-declare -r eqCompiler="$(readlink -f "./eqeq.native")"
+declare -r eqCompiler="$(rlnk_f "./eqeq.native")"
 [ -x "$eqCompiler" ] || {
   printf 'CRITICAL: no EqEq compiler found at "%s"!\n' "$eqCompiler"
   exit 1
@@ -122,7 +128,7 @@ unitTagFromExit() { if [ $1 -eq 0 ];then col grn PASS; else col red FAIL;fi }
 # Get path to sibling we'll be generating with suffix $1 as sibling to $2
 pathToGenSib() {
   local suffix="$1"; [ -n "$suffix" ]
-  local sibling="$(readlink -f "$2")"; [ -d "$sibling" ]
+  local sibling="$(rlnk_f "$2")"; [ -d "$sibling" ]
   local dir="$(dirname "$sibling")"
 
   local newFile="$dir"/"$(labelOfSource "$sibling").${suffix}"
@@ -138,7 +144,7 @@ ensureFirstSibling() {
 # usage: testprog EXPECTEXIT testNum
 #  Where EXPECTEXIT is 0 if expecting passing `testprog`, 1 otherwise
 CheckTest() {
-  local eqTestSrc="$(readlink -f "$1")"
+  local eqTestSrc="$(rlnk_f "$1")"
   local testDir="$(dirname "$eqTestSrc")"
   local expectExit=$2; { [ "$expectExit" -eq 0 ] || [ "$expectExit" -eq 1 ]; }
   local testNum=$3
@@ -218,7 +224,7 @@ CheckTest() {
 
 isTestPresent() {
   local label d;
-  d="$(dirname "$(readlink -f -- "$1")")";
+  d="$(dirname "$(rlnk_f "$1")")";
   label="$(labelOfSource "$1")"
   [ -f "$1" ] && { [ -f "$d"/"${label}.out" ] || [ -f "$d"/"${label}.err" ]; }
 }
