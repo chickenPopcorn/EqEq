@@ -3,5 +3,5 @@ SomeContext = {
 }
 
 SomeContext:find a {
-  print("%f\n", a);
+  print("%.0f\n", a);
 }
