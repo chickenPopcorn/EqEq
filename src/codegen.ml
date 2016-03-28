@@ -4,9 +4,27 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
-let translate (globals, functions) =
+let translate (contexts, finds) =
+  let string_of_funcdecl funcdecl =
+    "double " ^
+    (* funcdecl.fname ^ *)
+    " = " ^
+    (* String.concat "" (List.map A.string_of_stmt funcdecl.body) ^ *)
+    ";\n"
+  in
+  let string_of_ctxdecl ctx =
+    String.concat "" (List.map A.string_of_funcdecl ctx.body)
+  in
+  (* let rec generate_c = function
+    | [] -> "\n"
+    | hd::tl -> (string_of_ctxdecl hd.body) ^ generate_c tl
+  in *)
   "#include <stdio.h>\n" ^
-  "int main() { printf(\"%.0f\\n\", 42.0); }\n"
+  "int main() {\n" ^
+  String.concat "" (List.map string_of_ctxdecl contexts) ^
+  "return 0;\n}"
+  (* A.string_of_program (contexts, []) *)
+  (* string_of_ctxdecl contexts ^ "\n" ^ string_of_finddecl finds *)
 
 (*
   let context = L.global_context () in
