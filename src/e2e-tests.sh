@@ -45,7 +45,7 @@ Usage() {     # h
 
     -c    Cleanup generated files and exit; default: false
 
-    -s    Run [s]kipped tests despite being marked to skip
+    -s    Run [s]kipped tests despite being marked 'skip'; default: $opt_runSkip
 
     -h    Print this help message
     \r" >&2
@@ -104,6 +104,7 @@ while getopts "$allopts" c; do
 done
 shift $(( OPTIND - 1 ))
 
+
 # Path to the our compiler.
 #   Try "_build/eqeq.native" if ocamlbuild was unable to create a symbolic link.
 declare -r eqCompiler="$(rlnk_f "./eqeq.native")"
@@ -114,7 +115,9 @@ declare -r eqCompiler="$(rlnk_f "./eqeq.native")"
 rmIfExists "$suiteLog" >/dev/null
 
 # Determine which test files we're running
-if [ $# -ge 1 ]; then
+if [ "$1" = help ];then
+  Usage
+elif [ $# -ge 1 ]; then
   testFiles=($*)
 else
   testFiles=($(
