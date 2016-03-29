@@ -111,7 +111,7 @@ rmIfExists "$suiteLog" >/dev/null
 
 # Determine which test files we're running
 if [ $# -ge 1 ]; then
-  testFiles=$*
+  testFiles=($*)
 else
   testFiles=($(
     find tests/ \
@@ -128,7 +128,7 @@ unitTagFromExit() { if [ $1 -eq 0 ];then col grn PASS; else col red FAIL;fi }
 # Get path to sibling we'll be generating with suffix $1 as sibling to $2
 pathToGenSib() {
   local suffix="$1"; [ -n "$suffix" ]
-  local sibling="$(rlnk_f "$2")"; [ -d "$sibling" ]
+  local sibling="$(rlnk_f "$2")"; [ -f "$sibling" ]
   local dir="$(dirname "$sibling")"
 
   local newFile="$dir"/"$(labelOfSource "$sibling").${suffix}"
