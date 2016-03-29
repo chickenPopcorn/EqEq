@@ -9,14 +9,15 @@ ulimit -t 30  # Set time limit for all operations
 
 #... high-level maintenance
 rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
-labelOfSource() { basename "$1" | \sed -e 's|\.\w*$||'; }
+labelOfSource() { basename "$1" | \sed -e 's|\.\w*$||' -e 's|\.skip$||'; }
 declare -r genFileExts=(c diff actual stderr a)
 declare -r suiteLog="$(labelOfSource "$0")".log
 declare -r srcExt=eq
 
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
-declare -r allopts=kvhdc
+declare -r allopts=kvhdcs
+opt_runSkip=0 # s
 opt_verbose=0 # v
 opt_keep=0    # k
 opt_debug=0   # d
@@ -43,6 +44,8 @@ Usage() {     # h
     -d    Debug this script's behavior, with bash commands/args printed.
 
     -c    Cleanup generated files and exit; default: false
+
+    -s    Run [s]kipped tests despite being marked to skip
 
     -h    Print this help message
     \r" >&2
@@ -95,6 +98,7 @@ while getopts "$allopts" c; do
 
       exit 0
       ;;
+    s) opt_runSkip=1;;
     h) Usage ;;
   esac
 done
@@ -247,23 +251,24 @@ skip() {
   numSkip=$(( numSkip + 1 ))
 }
 
+isMarkedSkip() { echo "$1" | \grep -E "*-*.skip.$srcExt" >/dev/null; }
 
 sincePreviousTestLine=1
 for testFile in "${testFiles[@]}"; do
-  testNum=$(( testNum + 1 ))
-  failed=0
+  failed=0; testNum=$(( testNum + 1 ))
+  label="$(labelOfSource "$testFile")"
+
+  if isMarkedSkip "$testFile" && [ "$opt_runSkip" -eq 0 ];then
+    skip $testNum "'$label' not implemented"
+    continue;
+  fi
 
   case "$(basename "$testFile")" in
-    *-*.skip.$srcExt)
-      skip $testNum \
-        "'$(labelOfSource "$testFile" | sed -e "s|\.skip$||")' not implemented"
-      continue
-      ;;
     test-*.$srcExt) expectExit=0;;
     fail-*.$srcExt) expectExit=1;;
     *)
       skip $testNum "not a fail or test file '$testFile'"
-      continue
+      continue;
       ;;
   esac
 
@@ -282,7 +287,7 @@ for testFile in "${testFiles[@]}"; do
   # Cleanup after each test
   if [ "$opt_keep" -eq 0 ];then
     for genExt in "${genFileExts[@]}";do
-      gen="$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
+      gen="$(dirname "$testFile")"/"${label}.${genExt}"
       rmIfExists "$gen" >/dev/null
     done
   fi
