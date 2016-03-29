@@ -266,7 +266,7 @@ for testFile in "${testFiles[@]}"; do
     test-*.$srcExt) expectExit=0;;
     fail-*.$srcExt) expectExit=1;;
     *)
-      skip $testNum "not a fail or test fle '$testFile'"
+      skip $testNum "not a fail or test file '$testFile'"
       continue
       ;;
   esac
