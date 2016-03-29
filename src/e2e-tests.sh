@@ -253,10 +253,6 @@ for testFile in "${testFiles[@]}"; do
   testNum=$(( testNum + 1 ))
   failed=0
 
-  if ! isTestPresent "$testFile";then
-    skip $testNum "expect .out/.err matching '$testFile'"
-    continue;
-  fi
   case "$(basename "$testFile")" in
     *-*.skip.$srcExt)
       skip $testNum \
@@ -270,6 +266,11 @@ for testFile in "${testFiles[@]}"; do
       continue
       ;;
   esac
+
+  if ! isTestPresent "$testFile";then
+    skip $testNum "expect .out/.err matching '$testFile'"
+    continue;
+  fi
 
   # Run test
   if CheckTest "$testFile" "$expectExit" "$testNum";then
