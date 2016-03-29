@@ -238,28 +238,42 @@ printf '\nRunning %s:\n\t%s\n\n' \
   "$(col blu "$(printf '%d tests' ${#testFiles[@]})")" \
   "$(printf '%s, ' "${testFiles[@]}")"
 
+# Test suite's stats:
+testNum=0; numFail=0; numSkip=0; numPass=0;
+skip() {
+  local testNum="$1"; shift 1;
+  printf '[%d] %s\t%s\tResult: %s\n' \
+    $testNum "$(col blu WARNING)" "$*" "$(col ylw SKIP)"
+  numSkip=$(( numSkip + 1 ))
+}
+
+
 sincePreviousTestLine=1
-testNum=0; numFails=0
 for testFile in "${testFiles[@]}"; do
+  testNum=$(( testNum + 1 ))
+  failed=0
+
   if ! isTestPresent "$testFile";then
-    printf 'WARNING:\tskipping missing or incomplete test:\t"%s"\n' "$testFile"
+    skip $testNum "expect .out/.err matching '$testFile'"
     continue;
   fi
   case "$(basename "$testFile")" in
     test-*.$srcExt) expectExit=0;;
     fail-*.$srcExt) expectExit=1;;
     *)
-      printf 'WARNING:\tskipping UNKNOWN test:\t"%s"\n' "$testFile"
+      skip $testNum "not a fail or test fle '$testFile'"
       continue
       ;;
   esac
-  if [ "$testNum" -eq 0 ];then testNum=1;fi
 
   # Run test
-  if ! CheckTest "$testFile" "$expectExit" "$testNum";then
-    numFails=$(( numFails + 1 ))
+  if CheckTest "$testFile" "$expectExit" "$testNum";then
+    numPass=$(( numPass + 1 ))
+  else
+    numFail=$(( numFail + 1 ))
   fi
 
+  # Cleanup after each test
   if [ "$opt_keep" -eq 0 ];then
     for genExt in "${genFileExts[@]}";do
       gen="$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
@@ -268,21 +282,20 @@ for testFile in "${testFiles[@]}"; do
   fi
 
   # Verbose-printing of logs
-  if [ "$opt_verbose" -eq 1 ];then
-    sed -n "$(( ${sincePreviousTestLine} + 1 )),$"p "$suiteLog"
+  if [ "$failed" -eq 1 ] && [ "$opt_verbose" -eq 1 ];then
+    sed -n "$(( sincePreviousTestLine + 1 )),$"p "$suiteLog"
   fi
 
-  testNum=$(( testNum + 1 ))
   sincePreviousTestLine="$(wc -l < "$suiteLog")"
 done
+testNum=$(( testNum - 1 ))
 
 # Print test suite summary
-printf '\nSummary: '
-if [ "$testNum" -eq 0 ];then
-  col ylw 'SKIPPED\n'
-elif [ "$numFails" -eq 0 ];then
-  col grn 'PASSED\n'
-else
-  printf '%d of %s %s\n' "$numFails" "${#testFiles[@]}" "$(col red FAILED)"
-fi
+printf '\n%s of %d tests:\t%s%s%s\n' \
+  "$(col blu Summary)" \
+  "${#testFiles[@]}" \
+  "$(if [ "$numFail" -gt 0 ];then col red "$numFail FAILED\t";fi)" \
+  "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
+  "$(col grn "$numPass PASSED")"
+
 exit $anyFailures
