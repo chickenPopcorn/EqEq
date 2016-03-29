@@ -9,7 +9,7 @@ ulimit -t 30  # Set time limit for all operations
 
 #... high-level maintenance
 rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
-labelOfSource() { basename "$1" | \sed -e 's|\..*||g'; }
+labelOfSource() { basename "$1" | \sed -e 's|\.\w*$||'; }
 declare -r genFileExts=(c diff actual stderr a)
 declare -r suiteLog="$(labelOfSource "$0")".log
 declare -r srcExt=eq
@@ -258,6 +258,11 @@ for testFile in "${testFiles[@]}"; do
     continue;
   fi
   case "$(basename "$testFile")" in
+    *-*.skip.$srcExt)
+      skip $testNum \
+        "'$(labelOfSource "$testFile" | sed -e "s|\.skip$||")' not implemented"
+      continue
+      ;;
     test-*.$srcExt) expectExit=0;;
     fail-*.$srcExt) expectExit=1;;
     *)
