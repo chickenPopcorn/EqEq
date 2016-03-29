@@ -294,7 +294,6 @@ for testFile in "${testFiles[@]}"; do
 
   sincePreviousTestLine="$(wc -l < "$suiteLog")"
 done
-testNum=$(( testNum - 1 ))
 
 # Print test suite summary
 printf '\n%s of %d tests:\t%s%s%s\n' \
