@@ -1,5 +1,5 @@
 BasicMaths = {
-  alpha = 3
+  alpha = { 3; }
 }
 
 BasicMaths:find alpha {
