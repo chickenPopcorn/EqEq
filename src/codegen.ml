@@ -7,7 +7,7 @@ module StringMap = Map.Make(String)
 let translate (contexts, finds) =
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
-    | A.Literal(l) -> string_of_int l
+    | A.Literal(l) -> string_of_float l
     | A.Id(s) -> s
     | A.Binop(e1, o, e2) ->
         gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2

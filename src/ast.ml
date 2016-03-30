@@ -10,7 +10,7 @@ type typ = Double | Bool
 type bind = typ * string
 
 type expr =
-    Literal of int
+    Literal of float
   | Id of string
   | Strlit of string
   | Binop of expr * op * expr
@@ -67,7 +67,7 @@ let string_of_uop = function
 
 let rec string_of_expr = function
     Strlit(l) -> l
-  | Literal(l) -> string_of_int l
+  | Literal(l) -> string_of_float l
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2

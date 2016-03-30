@@ -8,7 +8,7 @@ open Ast
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token IF ELSE WHILE FIND
-%token <int> LITERAL
+%token <float> LITERAL
 %token <string> ID
 %token <string> STRLIT
 %token <string> CTX
