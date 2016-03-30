@@ -15,7 +15,6 @@ let translate (contexts, finds) =
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
-    | A.Noexpr -> ""
   in
   let rec gen_stmt = function
     | A.Block(stmts) ->
