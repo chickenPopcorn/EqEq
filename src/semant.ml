@@ -89,7 +89,7 @@ let check (contexts, finds) =
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    check_have_context findBlk.A.ftarget;
+    check_have_context findBlk.A.fcontext;
     List.iter check_stmt findBlk.A.fbody
   in
 
