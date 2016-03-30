@@ -63,21 +63,22 @@ let check (contexts, finds) =
           (* effectively unravel statements out of their block *)
           let rec check_block = function
             | Block sl :: ss -> check_block (sl @ ss)
-            | s :: ss -> check_stmt s ; check_block ss
+            | s :: ss -> check_stmt s; check_block ss
             | [] -> ()
           in check_block sl
       | Expr e -> (
           match e with (* Verify an expression or throw an exception *)
-              | Literal -> ()
-              | BoolLit -> ()
-              | Id -> ()
-              | Binop -> ()
-              | Unop -> ()
-              | Assign -> ()
-              | Builtin -> ()
+              | Literal(lit) -> ()
+              | Strlit(str) -> ()
+              | Id(id) -> ()
+              | Binop(left, op, right) -> ()
+              | Unop(op, expr) -> ()
+              | Assign(left, expr) -> ()
+              | Builtin(name, expr) -> ()
         )
-      | If(p, b1, b2) -> check_expr p; check_stmt b1; check_stmt b2
-      | While(p, s) -> check_expr p; check_stmt s
+      | If(p, b1, b2) ->
+          check_stmt (Expr p); check_stmt b1; check_stmt b2
+      | While(p, s) -> check_stmt (Expr p); check_stmt s
   in
 
   (**** Checking Context blocks  ****)
