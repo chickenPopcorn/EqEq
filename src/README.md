@@ -98,6 +98,11 @@ CTX LBRACE ID ASSIGN LITERAL SEMI RBRACE
 REJECT
 ```
 
+To get the generated C code (ie. the output of code gen):
+```bash
+make && ./eqeq.native < $YOUR_TEST_FILE
+```
+
 ### One-time Setup
 
 The above assumes you've done the one-time installation of dependencies for your
