@@ -5,10 +5,6 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Double | Bool
-
-type bind = typ * string
-
 type expr =
     Literal of int
   | Id of string
@@ -85,10 +81,6 @@ let rec string_of_stmt = function
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-
-let string_of_typ = function
-    Double -> "double"
-  | Bool -> "bool"
 
 let string_of_funcdecl funcdecl =
   funcdecl.fname ^
