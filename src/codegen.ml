@@ -15,7 +15,6 @@ let translate (contexts, finds) =
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
-    | A.Noexpr -> ""
   in
   let rec gen_stmt = function
     | A.Block(stmts) ->
@@ -30,11 +29,11 @@ let translate (contexts, finds) =
     "double " ^
     funcdecl.A.fname ^
     " = " ^
-    String.concat "" (List.map gen_stmt funcdecl.A.body) ^
+    String.concat "" (List.map gen_stmt funcdecl.A.fdbody) ^
     "\n"
   in
   let gen_ctxdecl ctx =
-    String.concat "" (List.map gen_funcdecl ctx.A.body)
+    String.concat "" (List.map gen_funcdecl ctx.A.cbody)
   in
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody) ^
