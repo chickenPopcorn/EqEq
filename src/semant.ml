@@ -58,22 +58,7 @@ let check (contexts, finds) =
   in
 
   (* Verify a statement or throw an exception *)
-  let rec check_stmt =
-    (* TODO(copy/pasted from ast.ml): update this to match:
-     *    type expr =
-     *        Literal of int
-     *      | BoolLit of bool
-     *      | Id of string
-     *      | Binop of expr * op * expr
-     *      | Unop of uop * expr
-     *      | Assign of string * expr
-     *      | Builtin of string * expr list
-     *      | Noexpr
-     *)
-    (* Verify an expression or throw an exception *)
-    let rec check_expr e =
-      ignore e;
-    in function
+  let rec check_stmt = function
       | Block sl ->
           (* effectively unravel statements out of their block *)
           let rec check_block = function
@@ -81,7 +66,16 @@ let check (contexts, finds) =
             | s :: ss -> check_stmt s ; check_block ss
             | [] -> ()
           in check_block sl
-      | Expr e -> check_expr e
+      | Expr e -> (
+          match e with (* Verify an expression or throw an exception *)
+              | Literal -> ()
+              | BoolLit -> ()
+              | Id -> ()
+              | Binop -> ()
+              | Unop -> ()
+              | Assign -> ()
+              | Builtin -> ()
+        )
       | If(p, b1, b2) -> check_expr p; check_stmt b1; check_stmt b2
       | While(p, s) -> check_expr p; check_stmt s
   in
