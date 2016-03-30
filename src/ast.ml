@@ -13,7 +13,6 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Builtin of string * expr list
-  | Noexpr
 
 type stmt =
     Block of stmt list
@@ -71,7 +70,6 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Builtin(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | Noexpr -> ""
 
 let rec string_of_stmt = function
     Block(stmts) ->
