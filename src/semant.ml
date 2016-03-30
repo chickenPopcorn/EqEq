@@ -114,8 +114,7 @@ let check (contexts, finds) =
 
     check_have_context fidBlk.target;
     check_stmt (Block findBlk.body);
-
   in
 
-  List.iter check_ctx contexts;
+  List.iter check_ctx contexts in
   List.iter check_find finds
