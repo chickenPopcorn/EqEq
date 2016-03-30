@@ -21,14 +21,14 @@ type stmt =
   | While of expr * stmt
 
 (* func: we call this a "multi-line equation" *)
-type func_decl = {
+type multi_eq = {
     fname : string;
     fdbody : stmt list;
   }
 
 type ctx_decl = {
     context : string;
-    cbody : func_decl list;
+    cbody : multi_eq list;
   }
 
 type find_decl = {
@@ -38,7 +38,7 @@ type find_decl = {
   }
 
 type program = ctx_decl list * find_decl list
-(* TODO: add this back when we get global equations func_decl list*)
+(* TODO: add this back when we get global equations multi_eq list*)
 
 (* Pretty-printing functions *)
 
@@ -80,16 +80,16 @@ let rec string_of_stmt = function
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_funcdecl funcdecl =
-  funcdecl.fname ^
+let string_of_multieq multieq =
+  multieq.fname ^
   " = {\n" ^
-  String.concat "" (List.map string_of_stmt funcdecl.fdbody) ^
+  String.concat "" (List.map string_of_stmt multieq.fdbody) ^
   "\n}\n"
 
 let string_of_ctxdecl ctx =
   ctx.context ^
   " = {\n" ^
-  String.concat "" (List.map string_of_funcdecl ctx.cbody) ^
+  String.concat "" (List.map string_of_multieq ctx.cbody) ^
   "\n}\n"
 
 let string_of_finddecl finddecl =

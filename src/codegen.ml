@@ -25,15 +25,15 @@ let translate (contexts, finds) =
         gen_stmt s1 ^ "else\n" ^ gen_stmt s2
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
   in
-  let gen_funcdecl funcdecl =
+  let gen_multieq multieq =
     "double " ^
-    funcdecl.A.fname ^
+    multieq.A.fname ^
     " = " ^
-    String.concat "" (List.map gen_stmt funcdecl.A.fdbody) ^
+    String.concat "" (List.map gen_stmt multieq.A.fdbody) ^
     "\n"
   in
   let gen_ctxdecl ctx =
-    String.concat "" (List.map gen_funcdecl ctx.A.cbody)
+    String.concat "" (List.map gen_multieq ctx.A.cbody)
   in
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody) ^
