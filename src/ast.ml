@@ -5,10 +5,6 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Double | Bool
-
-type bind = typ * string
-
 type expr =
     Literal of int
   | Id of string
@@ -17,7 +13,6 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Builtin of string * expr list
-  | Noexpr
 
 type stmt =
     Block of stmt list
@@ -28,12 +23,12 @@ type stmt =
 (* func: we call this a "multi-line equation" *)
 type func_decl = {
     fname : string;
-    body : stmt list;
+    fdbody : stmt list;
   }
 
 type ctx_decl = {
     context : string;
-    body : func_decl list;
+    cbody : func_decl list;
   }
 
 type find_decl = {
@@ -75,7 +70,6 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Builtin(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
-  | Noexpr -> ""
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -86,20 +80,16 @@ let rec string_of_stmt = function
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_typ = function
-    Double -> "double"
-  | Bool -> "bool"
-
 let string_of_funcdecl funcdecl =
   funcdecl.fname ^
   " = {\n" ^
-  String.concat "" (List.map string_of_stmt funcdecl.body) ^
+  String.concat "" (List.map string_of_stmt funcdecl.fdbody) ^
   "\n}\n"
 
 let string_of_ctxdecl ctx =
   ctx.context ^
   " = {\n" ^
-  String.concat "" (List.map string_of_funcdecl ctx.body) ^
+  String.concat "" (List.map string_of_funcdecl ctx.cbody) ^
   "\n}\n"
 
 let string_of_finddecl finddecl =
