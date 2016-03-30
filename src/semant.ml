@@ -42,7 +42,7 @@ let check (contexts, finds) =
   (**** List of known Context blocks  ****)
   let known_ctxs =
     List.fold_left
-      (fun (existing, ctx) ->
+      (fun existing ctx ->
          if StringMap.mem ctx.context existing then
            fail ("duplicate context, " ^ (quot ctx.context))
          else
