@@ -10,3 +10,4 @@ before_install:
 script:
   - cd src/
   - make test
+  - make lint

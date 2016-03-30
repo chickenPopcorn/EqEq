@@ -9,14 +9,15 @@ ulimit -t 30  # Set time limit for all operations
 
 #... high-level maintenance
 rmIfExists() { if [ -f "$1" ];then rm -v "$1";fi; }
-labelOfSource() { basename "$1" | \sed -e 's|\..*||g'; }
+labelOfSource() { basename "$1" | \sed -e 's|\.\w*$||' -e 's|\.skip$||'; }
 declare -r genFileExts=(c diff actual stderr a)
 declare -r suiteLog="$(labelOfSource "$0")".log
 declare -r srcExt=eq
 
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
-declare -r allopts=kvhdc
+declare -r allopts=kvhdcs
+opt_runSkip=0 # s
 opt_verbose=0 # v
 opt_keep=0    # k
 opt_debug=0   # d
@@ -43,6 +44,8 @@ Usage() {     # h
     -d    Debug this script's behavior, with bash commands/args printed.
 
     -c    Cleanup generated files and exit; default: false
+
+    -s    Run [s]kipped tests despite being marked 'skip'; default: $opt_runSkip
 
     -h    Print this help message
     \r" >&2
@@ -95,10 +98,12 @@ while getopts "$allopts" c; do
 
       exit 0
       ;;
+    s) opt_runSkip=1;;
     h) Usage ;;
   esac
 done
 shift $(( OPTIND - 1 ))
+
 
 # Path to the our compiler.
 #   Try "_build/eqeq.native" if ocamlbuild was unable to create a symbolic link.
@@ -110,8 +115,10 @@ declare -r eqCompiler="$(rlnk_f "./eqeq.native")"
 rmIfExists "$suiteLog" >/dev/null
 
 # Determine which test files we're running
-if [ $# -ge 1 ]; then
-  testFiles=$*
+if [ "$1" = help ];then
+  Usage
+elif [ $# -ge 1 ]; then
+  testFiles=($*)
 else
   testFiles=($(
     find tests/ \
@@ -128,7 +135,7 @@ unitTagFromExit() { if [ $1 -eq 0 ];then col grn PASS; else col red FAIL;fi }
 # Get path to sibling we'll be generating with suffix $1 as sibling to $2
 pathToGenSib() {
   local suffix="$1"; [ -n "$suffix" ]
-  local sibling="$(rlnk_f "$2")"; [ -d "$sibling" ]
+  local sibling="$(rlnk_f "$2")"; [ -f "$sibling" ]
   local dir="$(dirname "$sibling")"
 
   local newFile="$dir"/"$(labelOfSource "$sibling").${suffix}"
@@ -238,51 +245,70 @@ printf '\nRunning %s:\n\t%s\n\n' \
   "$(col blu "$(printf '%d tests' ${#testFiles[@]})")" \
   "$(printf '%s, ' "${testFiles[@]}")"
 
+# Test suite's stats:
+testNum=0; numFail=0; numSkip=0; numPass=0;
+skip() {
+  local testNum="$1"; shift 1;
+  printf '[%d] %s\t%s\tResult: %s\n' \
+    $testNum "$(col blu WARNING)" "$*" "$(col ylw SKIP)"
+  numSkip=$(( numSkip + 1 ))
+}
+
+isMarkedSkip() { echo "$1" | \grep -E "*-*.skip.$srcExt" >/dev/null; }
+
 sincePreviousTestLine=1
-testNum=0; numFails=0
 for testFile in "${testFiles[@]}"; do
-  if ! isTestPresent "$testFile";then
-    printf 'WARNING:\tskipping missing or incomplete test:\t"%s"\n' "$testFile"
+  failed=0; testNum=$(( testNum + 1 ))
+  label="$(labelOfSource "$testFile")"
+
+  if isMarkedSkip "$testFile" && [ "$opt_runSkip" -eq 0 ];then
+    skip $testNum "'$label' not implemented"
     continue;
   fi
+
   case "$(basename "$testFile")" in
     test-*.$srcExt) expectExit=0;;
     fail-*.$srcExt) expectExit=1;;
     *)
-      printf 'WARNING:\tskipping UNKNOWN test:\t"%s"\n' "$testFile"
-      continue
+      skip $testNum "not a fail or test file '$testFile'"
+      continue;
       ;;
   esac
-  if [ "$testNum" -eq 0 ];then testNum=1;fi
 
-  # Run test
-  if ! CheckTest "$testFile" "$expectExit" "$testNum";then
-    numFails=$(( numFails + 1 ))
+  if ! isTestPresent "$testFile";then
+    skip $testNum "expect .out/.err matching '$testFile'"
+    continue;
   fi
 
+  # Run test
+  if CheckTest "$testFile" "$expectExit" "$testNum";then
+    numPass=$(( numPass + 1 ))
+  else
+    numFail=$(( numFail + 1 ))
+  fi
+
+  # Cleanup after each test
   if [ "$opt_keep" -eq 0 ];then
     for genExt in "${genFileExts[@]}";do
-      gen="$(dirname "$testFile")"/"$(labelOfSource "$testFile").${genExt}"
+      gen="$(dirname "$testFile")"/"${label}.${genExt}"
       rmIfExists "$gen" >/dev/null
     done
   fi
 
   # Verbose-printing of logs
-  if [ "$opt_verbose" -eq 1 ];then
-    sed -n "$(( ${sincePreviousTestLine} + 1 )),$"p "$suiteLog"
+  if [ "$failed" -eq 1 ] && [ "$opt_verbose" -eq 1 ];then
+    sed -n "$(( sincePreviousTestLine + 1 )),$"p "$suiteLog"
   fi
 
-  testNum=$(( testNum + 1 ))
   sincePreviousTestLine="$(wc -l < "$suiteLog")"
 done
 
 # Print test suite summary
-printf '\nSummary: '
-if [ "$testNum" -eq 0 ];then
-  col ylw 'SKIPPED\n'
-elif [ "$numFails" -eq 0 ];then
-  col grn 'PASSED\n'
-else
-  printf '%d of %s %s\n' "$numFails" "${#testFiles[@]}" "$(col red FAILED)"
-fi
+printf '\n%s of %d tests:\t%s%s%s\n' \
+  "$(col blu Summary)" \
+  "${#testFiles[@]}" \
+  "$(if [ "$numFail" -gt 0 ];then col red "$numFail FAILED\t";fi)" \
+  "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
+  "$(col grn "$numPass PASSED")"
+
 exit $anyFailures
