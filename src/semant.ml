@@ -1,7 +1,6 @@
 (* Semantic checking for the EqualsEquals compiler *)
 
-open Ast
-
+module A = Ast
 module StringMap = Map.Make(String)
 
 (* Semantic checking of a program. Returns void if successful,
@@ -14,9 +13,9 @@ let check (contexts, finds) =
 
   (* string prettifiers *)
   let quot content = "\"" ^ content ^  "\"" in
-  let ex_qt expr = quot (string_of_expr expr) in
-  let bop_qt bop = quot (string_of_op bop) in
-  let uop_qt uop = quot (string_of_uop uop) in
+  let ex_qt expr = quot (A.string_of_expr expr) in
+  let bop_qt bop = quot (A.string_of_op bop) in
+  let uop_qt uop = quot (A.string_of_uop uop) in
 
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
@@ -30,10 +29,10 @@ let check (contexts, finds) =
   let known_ctxs =
     List.fold_left
       (fun existing ctx ->
-         if StringMap.mem ctx.context existing then
-           fail ("duplicate context, " ^ (quot ctx.context))
+         if StringMap.mem ctx.A.context existing then
+           fail ("duplicate context, " ^ (quot ctx.A.context))
          else
-           StringMap.add ctx.context ctx existing
+           StringMap.add ctx.A.context ctx existing
       )
       StringMap.empty
       contexts
@@ -46,33 +45,31 @@ let check (contexts, finds) =
 
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
-      | Block sl ->
+      | A.Block sl ->
           (* effectively unravel statements out of their block *)
           let rec check_block = function
-            | Block sl :: ss -> check_block (sl @ ss)
+            | A.Block sl :: ss -> check_block (sl @ ss)
             | s :: ss -> check_stmt s; check_block ss
             | [] -> ()
           in check_block sl
-      | Expr e -> (
+      | A.Expr e -> (
           match e with (* Verify an expression or throw an exception *)
-              | Literal(lit) -> ()
-              | Strlit(str) -> ()
-              | Id(id) -> ()
-              | Binop(left, op, right) -> ()
-              | Unop(op, expr) -> ()
-              | Assign(left, expr) -> ()
-              | Builtin(name, expr) -> ()
+              | A.Literal(lit) -> ()
+              | A.Strlit(str) -> ()
+              | A.Id(id) -> ()
+              | A.Binop(left, op, right) -> ()
+              | A.Unop(op, expr) -> ()
+              | A.Assign(left, expr) -> ()
+              | A.Builtin(name, expr) -> ()
         )
-      | If(p, b1, b2) ->
-          check_stmt (Expr p); check_stmt b1; check_stmt b2
-      | While(p, s) -> check_stmt (Expr p); check_stmt s
+      | A.If(p, b1, b2) ->
+          check_stmt (A.Expr p); check_stmt b1; check_stmt b2
+      | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
   in
 
   (**** Checking Context blocks  ****)
   let check_ctx ctxBlk =
-    let check_equation eq =
-      List.iter check_stmt eq.body
-    in
+    let check_eq eq = List.iter check_stmt eq.A.body in
 
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
@@ -86,13 +83,13 @@ let check (contexts, finds) =
       with Not_found -> raise (Failure ("unrecognized variable " ^ quot s))
     in
     *)
-    List.iter check_equation ctxBlk.body
+    List.iter check_eq ctxBlk.A.body
   in
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    ignore check_have_context fidBlk.target
-    check_stmt findBlk.body
+    ignore check_have_context fidBlk.A.target
+    check_stmt findBlk.A.body
   in
 
   ignore List.iter check_ctx contexts;
