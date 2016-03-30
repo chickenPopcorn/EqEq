@@ -104,12 +104,13 @@ let check (contexts, finds) =
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ findBlk.fname)
-      (List.map snd findBlk.locals);
+    ignore report_duplicate
+      (fun n -> "duplicate local " ^ n ^ " in " ^ findBlk.fname)
+      (List.map snd findBlk.locals)
 
-    check_have_context fidBlk.target;
-    check_stmt (Block findBlk.body);
+    ignore check_have_context fidBlk.target
+    check_stmt findBlk.body
   in
 
-  List.iter check_ctx contexts in
+  ignore List.iter check_ctx contexts;
   List.iter check_find finds
