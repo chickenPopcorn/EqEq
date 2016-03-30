@@ -18,19 +18,6 @@ let check (contexts, finds) =
   let bop_qt bop = quot (string_of_op bop) in
   let uop_qt uop = quot (string_of_uop uop) in
 
-  (* Raise an exception if the given list has a duplicate *)
-  let report_duplicate exceptf list =
-    let rec helper = function
-      n1 :: n2 :: _ when n1 = n2 -> fail (exceptf n1)
-          | _ :: t -> helper t
-          | [] -> ()
-    in helper (List.sort compare list)
-  in
-
-  report_duplicate
-    (fun n -> "duplicate context " ^ quot n)
-    (List.map (fun c -> c.context) contexts);
-
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
   let check_assign lvaluet rvaluet err =
@@ -89,7 +76,7 @@ let check (contexts, finds) =
 
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
-    let knowns = [(*  *)] in
+    let knowns = [] in
     let unknowns = [] in
     *)
 
@@ -104,10 +91,6 @@ let check (contexts, finds) =
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    ignore report_duplicate
-      (fun n -> "duplicate local " ^ n ^ " in " ^ findBlk.fname)
-      (List.map snd findBlk.locals)
-
     ignore check_have_context fidBlk.target
     check_stmt findBlk.body
   in
