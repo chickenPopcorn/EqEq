@@ -25,7 +25,7 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (**** List of known Context blocks  ****)
+  (**** Map of known Context blocks keyed by their names ****)
   let known_ctxs =
     List.fold_left
       (fun existing ctx ->
@@ -53,7 +53,8 @@ let check (contexts, finds) =
             | [] -> ()
           in check_block sl
       | A.Expr e -> (
-          match e with (* Verify an expression or throw an exception *)
+          (* Verify an expression or throw an exception *)
+          match e with
               | A.Literal(lit) -> ()
               | A.Strlit(str) -> ()
               | A.Id(id) -> ()
@@ -69,7 +70,7 @@ let check (contexts, finds) =
 
   (**** Checking Context blocks  ****)
   let check_ctx ctxBlk =
-    let check_eq eq = List.iter check_stmt eq.A.body in
+    let check_eq eq = List.iter check_stmt eq.A.fdbody in
 
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
@@ -83,14 +84,14 @@ let check (contexts, finds) =
       with Not_found -> raise (Failure ("unrecognized variable " ^ quot s))
     in
     *)
-    List.iter check_eq ctxBlk.A.body
+    List.iter check_eq ctxBlk.A.cbody
   in
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    ignore check_have_context fidBlk.A.target
-    check_stmt findBlk.A.body
+    check_have_context findBlk.A.ftarget;
+    List.iter check_stmt findBlk.A.fbody
   in
 
-  ignore List.iter check_ctx contexts;
+  List.iter check_ctx contexts;
   List.iter check_find finds

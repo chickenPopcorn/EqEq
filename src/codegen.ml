@@ -29,11 +29,11 @@ let translate (contexts, finds) =
     "double " ^
     funcdecl.A.fname ^
     " = " ^
-    String.concat "" (List.map gen_stmt funcdecl.A.body) ^
+    String.concat "" (List.map gen_stmt funcdecl.A.fdbody) ^
     "\n"
   in
   let gen_ctxdecl ctx =
-    String.concat "" (List.map gen_funcdecl ctx.A.body)
+    String.concat "" (List.map gen_funcdecl ctx.A.cbody)
   in
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody) ^

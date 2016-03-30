@@ -49,11 +49,11 @@ decls:
 /* TODO: improve funcdeclt_list to make it better */
 ctxtdecl:
    CTX ASSIGN LBRACE funcdecl_list RBRACE
-     { { context = $1; body = List.rev $4 } }
+     { { context = $1; cbody = List.rev $4 } }
 
 funcdecl:
    ID ASSIGN LBRACE stmt_list RBRACE
-     { { fname = $1; body = List.rev $4 } }
+     { { fname = $1; fdbody = List.rev $4 } }
 
 finddecl:
    FIND ID LBRACE stmt_list RBRACE

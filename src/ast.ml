@@ -23,12 +23,12 @@ type stmt =
 (* func: we call this a "multi-line equation" *)
 type func_decl = {
     fname : string;
-    body : stmt list;
+    fdbody : stmt list;
   }
 
 type ctx_decl = {
     context : string;
-    body : func_decl list;
+    cbody : func_decl list;
   }
 
 type find_decl = {
@@ -83,13 +83,13 @@ let rec string_of_stmt = function
 let string_of_funcdecl funcdecl =
   funcdecl.fname ^
   " = {\n" ^
-  String.concat "" (List.map string_of_stmt funcdecl.body) ^
+  String.concat "" (List.map string_of_stmt funcdecl.fdbody) ^
   "\n}\n"
 
 let string_of_ctxdecl ctx =
   ctx.context ^
   " = {\n" ^
-  String.concat "" (List.map string_of_funcdecl ctx.body) ^
+  String.concat "" (List.map string_of_funcdecl ctx.cbody) ^
   "\n}\n"
 
 let string_of_finddecl finddecl =
