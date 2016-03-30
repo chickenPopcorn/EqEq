@@ -311,4 +311,4 @@ printf '\n%s of %d tests:\t%s%s%s\n' \
   "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
   "$(col grn "$numPass PASSED")"
 
-exit $anyFailures
+[ "$numFail" -eq 0 ]
