@@ -42,8 +42,7 @@ To run **all end-to-end checks**, simply: `make e2e`.
   [1] "test-helloworld"   asserting target's behavior             Result: PASS
 
   Summary: PASSED
-
-```
+  ```
 
 ### Writing Tests
 So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's
