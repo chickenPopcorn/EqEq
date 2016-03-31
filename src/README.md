@@ -3,7 +3,7 @@ The "EqualsEquals" compiler
 
 Coded in OCaml, the "EqualsEquals" (aka "eqeq") language is designed for simple
 mathematical equation evaluation. For more details, see its [Reference
-Manual](https://docs.google.com/document/d/1uHGe2qazuy-I7Vem7u8muxDnWaysDX49lKMbMmlDml4)
+Manual](../notes/language-reference-manual.md)
 _("LRM" for "Language [RM]" in code and comments)_.
 
 ## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
@@ -14,7 +14,7 @@ Currently we're working towards a ["hello world" milestone](https://github.com/r
  - [x] **fixed** in issues #12 #15:
       - make real phases: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO)
       - replace [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16)
- - [ ] **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each of #2
+ - [ ] **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each new bit of functionality
  - [ ] **more interesting**: semant-analysis and codegen logic; eg: issues #14, #7, #24
 
 The codebase was recently refactored to represent the eqeq LRM, rather than MicroC's, so it's safe to assume if a line of code looks too simple, you're right! We were just trying to get somethin to compile, so we could all run `make test` reliably.
@@ -46,7 +46,7 @@ $ $EDIT tests/test-crazynewkeyword.eq  # ideal case, capturing the complexity yo
 $ $EDIT tests/test-crazynewkeyword.out # what your example compiled eq C program should do (just the output)
 $ make test
 $ $EDIT tests/fail-crazynewkeyword.eq  # misuse you can think of (an incorrect program)
-$ $EDIT tests/fail-crazynewkeyword.out # how our compiler should complain for your example eq source
+$ $EDIT tests/fail-crazynewkeyword.err # how our compiler should complain for your example eq source
 $ make test
 ```
 
