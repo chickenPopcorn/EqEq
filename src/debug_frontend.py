@@ -2,7 +2,7 @@
 import os, sys
 
 # run test file against scanner parser, and ast
-# $python acceptance_test.py TESTFILE_PATH
+# $python acceptance_test.py TESTFILE_PATH (with any third argument to prevent removing intermediate_files)
 if (len(sys.argv) >= 2):
     test_filepath = sys.argv[1]
     os.system("make clean")
