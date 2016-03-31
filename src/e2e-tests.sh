@@ -148,6 +148,13 @@ ensureFirstSibling() {
   echo "$path"
 }
 
+# usage: pass compiler's exit codes; $1=expected $2=actual
+isCompilerExitExpected() {
+  local expt="$1"; local actu="$2"
+  { [ "$expt" -eq 0 ] && [ "$actu" -eq 0 ]; } ||
+    { [ "$expt" -ne 0 ] && [ "$actu" -gt 0 ]; }
+}
+
 # usage: testprog EXPECTEXIT testNum
 #  Where EXPECTEXIT is 0 if expecting passing `testprog`, 1 otherwise
 CheckTest() {
@@ -188,9 +195,9 @@ CheckTest() {
   local diffR="$(ensureFirstSibling diff "$eqTestSrc")"
 
   # Actually run test program
-  "$eqCompiler" < "$eqTestSrc" > "$eqTarget" && actualExit=$? || actualExit=$?
+  "$eqCompiler" < "$eqTestSrc" > "$eqTarget" 2> "$compilerErrs" && actualExit=$? || actualExit=$?
 
-  if [ "$actualExit" -eq "$expectExit" ]; then
+  if isCompilerExitExpected "$expectExit" "$actualExit"; then
     # EqEq compiler treated sample source as expected
 
     local left="$expected" right="$actual"
