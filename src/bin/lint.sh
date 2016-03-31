@@ -30,7 +30,7 @@ declare -r expectedOcamlDep="$(
 declare -r expectedLineCount="$(echo "$expectedOcamlDep" | wc -l)"
 
 "$diffExec" --unified \
-  <(tail --lines "$expectedLineCount" ./Makefile) \
+  <(tail -n "$expectedLineCount" ./Makefile) \
   <(echo "$expectedOcamlDep") ||
   recordLint 'generated `ocamldep` in Makefile is out of date'
 
