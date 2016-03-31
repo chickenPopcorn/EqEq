@@ -68,3 +68,13 @@ Q: I'm Tianci, how do I get Jon's fork back into my branch? A:
 4. Merge the fork of your branch back in: `git merge origin/jon-cool-feature`
 
 It helps if you're talking to each other, of course, to avoid confusion :)
+
+Q: I read this whole doc, and I'm stuck on something `git` related :(
+A: No worries! We'll figure it out: share [Pastie](https://dpaste.de) of all of:
+
+  ```sh
+  $ git rev-list --format=%B --max-count=1 HEAD
+  $ git branch -v --all
+  $ git status
+  $ git diff
+  ```
