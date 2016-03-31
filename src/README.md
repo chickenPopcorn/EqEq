@@ -8,7 +8,7 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 ## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
 
-Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20%22Hello%20World%22%20of%20our%20Language); eg:
+Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World); eg:
 
  - [x] **fixed** in testing: **keeping our build passing** at every commit on `master` branch
  - [x] **fixed** in issues #12 #15:
