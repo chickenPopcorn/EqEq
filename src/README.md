@@ -47,6 +47,7 @@ Say you're working on `fancyNewBuiltin()`
 5. do these **until tests pass** and you're done:
   - write code
   - `make test`
+  - `git diff` & **ensure** you like the diff!!
   - commit as you like
   - address questions in pull request
 6. [merge your branch](https://help.github.com/articles/merging-a-pull-request/)
