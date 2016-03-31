@@ -76,8 +76,8 @@ stmt_list:
 stmt:
     expr SEMI { Expr $1 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN LBRACE stmt RBRACE %prec NOELSE { If($3, $6, Block([])) }
-  | IF LPAREN expr RPAREN LBRACE stmt RBRACE ELSE LBRACE stmt RBRACE   { If($3, $6, $10) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block(List.rev $6), Block([])) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block(List.rev $6), Block(List.rev $10)) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | FIND stmt_list RBRACE { Block(List.rev $2) }
 
