@@ -4,24 +4,8 @@ Use any editor you like, but **follow these steps for `git`**.
 
 ## How & Where to Code
 
-The high-level overview of git is:
-
-1. `git checkout` a **branch** to [isolate your work](#code-in-branches)
-  - `git branch` to **verify** you're in your branch
-2. Edit files _(open your text editor, change stuff, **save**)_
-3. `git status && git diff` to **really** verify step #2 went as planned!
-4. `make test` to see what our **tests think** you did
-5. happy with #3 & #4? No matter how small the change _(smaller is better)_:
-  - tell git about *just* what to commit: `git add path/to/speicific-file`
-  - `git commit 'fixed typo, dog not spelled "doog"'`
-  - `git status` to verify it worked
-6. share with everyone: `git push origin your-branch-name`
-7. merge your branch:
-  - **assign** your pul request to someone to quickly review
-  - once they're done, click **merge pull request**
-
-Each of these ^ steps is detailed more below and in ["Coding, Building,
-Testing"](#coding-building-testing).
+The high-level overview: we use `branch`es, pull-requests, and travis-ci.org's
+automatic `make test` integration.
 
 ### Code in Branches
 
@@ -30,19 +14,25 @@ Say you're working on `fancyNewBuiltin()`
 **tl;dr** _new_ branch for _every_ feature, `git diff` before committing!!
 
 1. `git checkout -b [yourhandle]-add-fancy-new-builtin`
-2. **test your feature**, before create it:
-  - [write new tests](../src/#writing-tests) for your `fancyNewBuiltin()`
+ - tip: make sure `git branch` shows that ^ worked
+2. before creating `fancyNewBuiltin()`, **write tests for it**:
+  - [write & save new tests in a text editor](../src/#writing-tests) for your `fancyNewBuiltin()`
   - ensure it `FAIL`s, since you haven't coded yet
-  - `git push origin [yourhandle]-add-fancy-new-builtin`
+  - commit tests: `git add ./tests/your-new /tests/test-files`
+  - share tests: `git push origin [yourhandle]-add-fancy-new-builtin`
 3. [open pull request](https://help.github.com/articles/creating-a-pull-request/) for `[yourhandle]-add-fancy-new-builtin`
 4. **do in loop**, until tests `PASS`:
   - write code for `fancyNewBuiltin()`
-  - `make test`
-  - `git diff` & `git commit` whatever small pieces you like
-  - answer any questions in pull request
-5. [merge your branch](https://help.github.com/articles/merging-a-pull-request/)
-  when its: **green** and **comments are resolved**
-6. to **cleanup on laptop**:
+  - save in your text editor
+  - `make test` to see what happened
+  - double-check `git diff` makes sense to you (fix now otherwise)
+  - if you have small changes you like: `git add file/you/changed && git commit`
+5. repeat step 4 until `make test` passes
+6. **assign** your pull-request to someone for a last-minute check
+ - address (ie: git `commit` and `push`) problems they point out
+ - fix (ie: git `commit` and `push`) [anything your pull-request shows broken](https://cloud.githubusercontent.com/assets/156228/14194012/fad8247a-f777-11e5-8a67-d5e23c3cd2d9.png)
+7. click ["merge your pull request"](https://help.github.com/articles/merging-a-pull-request/) button
+8. **cleanup on laptop** before moving onto next thing:
   - fetch your new merge: `git checkout master && git fetch --all && git pull origin master`
   - delete yor laptop's branch: `git branch -d [yourhandle]-add-fancy-new-builtin`
 
