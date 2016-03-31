@@ -40,8 +40,9 @@ Say you're working on `fancyNewBuiltin()`
 
 Say tianci is working on "cool-feature". I (jon) want to use her work:
 
-Q: How do I work with someone else's in-progress branch, `tianci-cool-feature`?
-A:
+**Q**: How do I work with someone else's in-progress branch, `tianci-cool-feature`?
+
+**A**:
 
 1. ensure you're in a clean repo: `git status` _(should output nothing)_
 2. ensure your laptop's updated: `git fetch --all`
@@ -50,7 +51,7 @@ A:
 
 Now just continue with a normal ["Code in Branches"](#code-in-branches) process.
 
-Q: I'm Tianci, how do I get Jon's fork back into my branch? A:
+**Q**: I'm Tianci, how do I get Jon's fork back into my branch? **A**:
 
 1. ensure you're in a clean repo: `git status` _(should output nothing)_
 2. ensure your laptop's updated: `git fetch --all`
@@ -59,8 +60,9 @@ Q: I'm Tianci, how do I get Jon's fork back into my branch? A:
 
 It helps if you're talking to each other, of course, to avoid confusion :)
 
-Q: I read this whole doc, and I'm stuck on something `git` related :(
-A: No worries! We'll figure it out: share [Pastie](https://dpaste.de) of all of:
+**Q**: I read this whole doc, and I'm stuck on something `git` related :(
+
+**A**: No worries! Share [Pastie](https://dpaste.de) of these, for debugging:
 
   ```sh
   $ git rev-list --format=%B --max-count=1 HEAD
