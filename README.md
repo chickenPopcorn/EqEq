@@ -1,5 +1,9 @@
 # Columbia's CS "[PLT 2016 Spring](http://www.cs.columbia.edu/~sedwards/classes/2016/4115-spring/index.html)"
 
+**tl;dr** jump to [src/]()'s README if you're a team member!
+
+---
+
 ## Project Files & Documents
 
 [goo.gl/ST9I3s](https://goo.gl/ST9I3s) contains all our drafts, documents, final
