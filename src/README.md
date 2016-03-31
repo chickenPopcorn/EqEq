@@ -17,7 +17,10 @@ Currently we're working towards a ["hello world" milestone](https://github.com/r
  - [ ] **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each new bit of functionality
  - [ ] **more interesting**: [semantic analysis:#24](https://github.com/rxie25/PLT2016Spring/issues/24) and [code generation:#14](https://github.com/rxie25/PLT2016Spring/issues/14)
 
-The codebase was recently refactored to represent the eqeq LRM, rather than MicroC's, so it's safe to assume if a line of code looks too simple, you're right! We were just trying to get somethin to compile, so we could all run `make test` reliably.
+The codebase was recently refactored to represent the eqeq LRM, rather than
+MicroC's, so it's safe to assume if a line of code looks too simple, you're
+right! We were just trying to get somethin to compile, so we could all run `make
+test` reliably.
 
 ## Building & Testing
 
@@ -40,7 +43,8 @@ Summary: PASSED
 Be sure to run `make lint` from time to time.
 
 ### Writing Tests
-So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's computer? Great! Do this:
+So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's
+computer? Great! Do this:
 ```sh
 $ $EDIT tests/test-crazynewkeyword.eq  # ideal case, capturing the complexity you've added (a correct program)
 $ $EDIT tests/test-crazynewkeyword.out # what your example compiled eq C program should do (just the output)
@@ -50,7 +54,9 @@ $ $EDIT tests/fail-crazynewkeyword.err # how our compiler should complain for yo
 $ make test
 ```
 
-Note: currently we're trying to only test the behavior of our *compiled* C programs _(that is: we're not testing what our compiler outputs, but what its output programs do)_.
+Note: currently we're trying to only test the behavior of our *compiled* C
+programs _(that is: we're not testing what our compiler outputs, but what its
+output programs do)_.
 
 ### Debugging Tools
 See what our scanner thinks of source programs, with `debugtokens` target:
