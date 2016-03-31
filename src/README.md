@@ -54,13 +54,25 @@ Say you're working on `fancyNewBuiltin()`
 
 ### Collaborating in Branches
 
-How do I work with someone else's in-progress branch, `tianci-cool-feature`?
+Say tianci is working on "cool-feature". I (jon) want to use her work:
+
+Q: How do I work with someone else's in-progress branch, `tianci-cool-feature`?
+
 1. ensure you're in a clean repo: `git status` _(should output nothing)_
 2. ensure your laptop's updated: `git fetch --all`
-3. **start your own branch**, eg: for `myusername-cool-feature` do:
-   `git checkout -b myusername-cool-feature origin/tianci-cool-feature`
+3. **start your own branch**, eg: for `jon-cool-feature` do:
+   `git checkout -b jon-cool-feature origin/tianci-cool-feature`
 
 Now just continue with a normal ["Code in Branches"](#code-in-branches) process.
+
+Q: I'm Tianci, how do I get Jon's fork back into my branch?
+1. ensure you're in a clean repo: `git status` _(should output nothing)_
+2. ensure your laptop's updated: `git fetch --all`
+3. ensure your'e in original branch: `git branch` outputs  `tianci-cool-feature`
+4. Merge the fork of your branch back in: `git merge origin/jon-cool-feature`
+
+It helps if you're talking to each other, of course, to avoid confusion :)
+
 
 ## Building & Testing
 
