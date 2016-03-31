@@ -15,7 +15,7 @@ Currently we're working towards a ["hello world" milestone](https://github.com/r
       - make real phases: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO)
       - replace [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16)
  - [ ] **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each new bit of functionality
- - [ ] **more interesting**: semant-analysis and codegen logic; eg: issues #14, #7, #24
+ - [ ] **more interesting**: [semantic analysis:#24](https://github.com/rxie25/PLT2016Spring/issues/24) and [code generation:#14](https://github.com/rxie25/PLT2016Spring/issues/14)
 
 The codebase was recently refactored to represent the eqeq LRM, rather than MicroC's, so it's safe to assume if a line of code looks too simple, you're right! We were just trying to get somethin to compile, so we could all run `make test` reliably.
 
