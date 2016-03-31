@@ -9,9 +9,11 @@ _("LRM" for "Language [RM]" in code and comments)_.
 ## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
 
 Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20%22Hello%20World%22%20of%20our%20Language) which means we're:
- 1. testing: **keeping our build passing** at every commit on `master` branch
- 2. **real phases**: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO) and [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16), and [closing issues](https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20%22Hello%20World%22%20of%20our%20Language) for the real thing
- 3. **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each of #2
+ [x] **fixed** in testing: **keeping our build passing** at every commit on `master` branch
+ [x] **fixed** in issues #12 #15:
+    **real phases**: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO) and [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16)
+ [ ] **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each of #2
+ [ ] **more interesting**: semant-analysis and codegen logic; eg: issues #14, #7, #24
 
 The codebase was recently refactored to represent the eqeq LRM, rather than MicroC's, so it's safe to assume if a line of code looks too simple, you're right! We were just trying to get somethin to compile, so we could all run `make test` reliably.
 
