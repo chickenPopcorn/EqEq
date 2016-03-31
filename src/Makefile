@@ -28,7 +28,9 @@ parser parser.ml parser.mli : parser.mly
 debugtokens : debugtokens.ml
 	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) ./$@.native'
 
-.PHONY : clean test eqeq all
+.PHONY : clean test eqeq all e2e
+
+e2e : test lint
 
 test : clean eqeq $(TEST_SUITE).sh
 	./$(TEST_SUITE).sh $(TEST_OPTS)
