@@ -26,23 +26,22 @@ Say you're working on `fancyNewBuiltin()`
 
 **tl;dr** _new_ branch for _every_ feature, `git diff` before committing!!
 
-1. ensure your git repo is clean: `git status` _(and no output)_
-2. `git checkout -b [yourhandle]-add-fancy-new-builtin`
-3. before writing code:
-  - [write tests](../src/#writing-tests)
-  - ensure they `FAIL`, since you haven't coded yet
+1. `git checkout -b [yourhandle]-add-fancy-new-builtin`
+2. **test your feature**, before create it:
+  - [write new tests](../src/#writing-tests) for your `fancyNewBuiltin()`
+  - ensure it `FAIL`s, since you haven't coded yet
   - `git push origin [yourhandle]-add-fancy-new-builtin`
-4. [open a pull request](https://help.github.com/articles/creating-a-pull-request/)
-5. do these **until tests pass** and you're done:
-  - write code
+3. [open pull request](https://help.github.com/articles/creating-a-pull-request/) for `[yourhandle]-add-fancy-new-builtin`
+4. **do in loop**, until tests `PASS`:
+  - write code for `fancyNewBuiltin()`
   - `make test`
-  - `git diff` & **ensure** you like the diff!!
-  - commit as you like
-  - address questions in pull request
-6. [merge your branch](https://help.github.com/articles/merging-a-pull-request/)
+  - `git diff` & `git commit` whatever small pieces you like
+  - answer any questions in pull request
+5. [merge your branch](https://help.github.com/articles/merging-a-pull-request/)
   when its: **green** and **comments are resolved**
-7. `git branch -d [yourhandle]-add-fancy-new-builtin`
-8. back to step #1 with for **new branch name**
+6. to **cleanup on laptop**:
+  - fetch your new merge: `git checkout master && git fetch --all && git pull origin master`
+  - delete yor laptop's branch: `git branch -d [yourhandle]-add-fancy-new-builtin`
 
 ### Collaborating in Branches
 
