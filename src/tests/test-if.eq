@@ -3,8 +3,12 @@ SomeContext = {
 }
 SomeContext: find a {
  if(a==1){
-   a;;  
+   a;
+   b;
+   c;  
 }else{
    a;
+   b;
+   c;
   }
 }
