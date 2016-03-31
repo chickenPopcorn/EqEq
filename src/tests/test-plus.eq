@@ -1,6 +1,6 @@
 SomeContext = {
-   a = 1;
-   a = a+5 ;
+   a = {1;}
+   a = {a+5;}
 }
 
 SomeContext: find a {
