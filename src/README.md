@@ -37,6 +37,8 @@ Use any editor you like, but **follow these steps for `git`**.
 
 Say you're working on `fancyNewBuiltin()`
 
+**tl;dr** _new_ branch for _every_ feature, `git diff` before committing!!
+
 1. ensure your git repo is clean: `git status` _(and no output)_
 2. `git checkout -b [yourhandle]-add-fancy-new-builtin`
 3. before writing code:
