@@ -283,7 +283,9 @@ for testFile in "${testFiles[@]}"; do
   esac
 
   if ! isTestPresent "$testFile";then
-    skip $testNum "expect .out/.err matching '$testFile'"
+    printf '[%d] %s\tBad test: no .out/.err for "%s"\tResult: %s\n' \
+      $testNum "$(col red ERROR)" "$testFile" "$(col red FAIL)"
+    numFail=$(( numFail + 1 ))
     continue;
   fi
 
