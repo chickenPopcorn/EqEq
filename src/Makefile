@@ -1,4 +1,5 @@
 OPAM_INIT      = ~/.opam/opam-init/init.sh
+BIN_DIR        = ./bin/
 OCAM_BLD_OPTS  = -use-ocamlfind
 PARSER_GENR   := ocamlyacc
 TEST_OPTS     := -v
@@ -32,15 +33,15 @@ debugtokens : debugtokens.ml
 
 e2e : test lint
 
-test : clean eqeq $(TEST_SUITE).sh
-	./$(TEST_SUITE).sh $(TEST_OPTS)
+test : clean eqeq $(BIN_DIR)/$(TEST_SUITE).sh
+	$(BIN_DIR)/$(TEST_SUITE).sh $(TEST_OPTS)
 
 lint:
-	@./lint.sh
+	@$(BIN_DIR)/lint.sh
 
 clean :
 	ocamlbuild -clean
-	./$(TEST_SUITE).sh -c
+	$(BIN_DIR)/$(TEST_SUITE).sh -c
 	$(RM) ./$(TEST_SUITE).log
 	$(RM) *.diff *.native scanner.ml
 	$(RM) parser.ml parser.mli parser.output parser.conflicts

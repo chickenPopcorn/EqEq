@@ -16,6 +16,7 @@ declare -r srcExt=eq
 
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
+declare -r eqToObj="$(dirname "$0")/eq-to-obj.sh"
 declare -r allopts=kvhdcs
 opt_runSkip=0 # s
 opt_verbose=0 # v
@@ -202,7 +203,7 @@ CheckTest() {
 
     local left="$expected" right="$actual"
     if [ "$expectExit" -eq 0 ];then
-      if ! cc "$eqTarget" -o "$eqTargetObj" 2>&1;then
+      if ! "$eqToObj" "$eqTarget" -o "$eqTargetObj" 2>&1;then
         printf \
           "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" \
           >> "$suiteLog"
