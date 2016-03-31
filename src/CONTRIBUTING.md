@@ -1,8 +1,24 @@
 # Development Workflow
 
+Use any editor you like, but **follow these steps for `git`**.
+
 ## How & Where to Code
 
-Use any editor you like, but **follow these steps for `git`**.
+The high-level overview of git is:
+
+1. `git checkout` a **branch** to [isolate your work](#code-in-branches)
+  - `git branch` to **verify** you're in your branch
+2. Edit files _(open your text editor, change stuff, **save**)_
+3. `git status && git diff` to **really** verify step #2 went as planned!
+4. `make test` to see what our **tests think** you did
+5. happy with #3 & #4? No matter how small the change _(smaller is better)_:
+  - tell git about *just* what to commit: `git add path/to/speicific-file`
+  - `git commit 'fixed typo, dog not spelled "doog"'`
+  - `git status` to verify it worked
+6. share with everyone: `git push origin your-branch-name`
+
+Each of these ^ steps is detailed more below and in ["Coding, Building,
+Testing"](#coding-building-testing).
 
 ### Code in Branches
 
