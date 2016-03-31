@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 type uop = Neg | Not
 
 type expr =
-    Literal of int
+    Literal of float
   | Id of string
   | Strlit of string
   | Binop of expr * op * expr
@@ -63,7 +63,7 @@ let string_of_uop = function
 
 let rec string_of_expr = function
     Strlit(l) -> l
-  | Literal(l) -> string_of_int l
+  | Literal(l) -> string_of_float l
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -76,9 +76,9 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
-  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
-      string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
+  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ "){\n" ^ string_of_stmt s^"}"
+  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ "){\n" ^
+      string_of_stmt s1 ^ "}else{\n" ^ string_of_stmt s2^"}"
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_multieq multieq =
