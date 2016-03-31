@@ -9,8 +9,11 @@ let translate (contexts, finds) =
     | A.Strlit(l) -> "\"" ^ l ^ "\""
     | A.Literal(l) -> string_of_float l
     | A.Id(s) -> s
-    | A.Binop(e1, o, e2) ->
-        gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2
+    | A.Binop(e1, o, e2) -> let check_op o =
+                                match A.string_of_op o with
+                                | "%" -> "fmod(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
+                                | "^" -> "pow(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
+                                | _ -> gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2 in check_op o
     | A.Unop(o, e) -> A.string_of_uop o ^ gen_expr e
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
@@ -39,7 +42,7 @@ let translate (contexts, finds) =
     String.concat "" (List.map gen_stmt finddecl.A.fbody) ^
     "\n"
   in
-  "#include <stdio.h>\n" ^
+  "#include <stdio.h>\n#include <math.h>\n" ^
   "int main() {\n" ^
   String.concat "" (List.map gen_ctxdecl contexts) ^
   String.concat "" (List.map gen_finddecl finds) ^
