@@ -32,6 +32,8 @@ To write code, please **read these quick-guides** below
 
 Use any editor you like, but **follow these steps for `git`**.
 
+### Code in Branches
+
 Say you're working on `fancyNewBuiltin()`
 1. ensure your git repo is clean: `git status` _(and no output)_
 2. `git checkout -b [yourhandle]-add-fancy-new-builtin`
@@ -49,6 +51,16 @@ Say you're working on `fancyNewBuiltin()`
   when its: **green** and **comments are resolved**
 7. `git branch -d [yourhandle]-add-fancy-new-builtin`
 8. back to step #1 with for **new branch name**
+
+### Collaborating in Branches
+
+How do I work with someone else's in-progress branch, `tianci-cool-feature`?
+1. ensure you're in a clean repo: `git status` _(should output nothing)_
+2. ensure your laptop's updated: `git fetch --all`
+3. **start your own branch**, eg: for `myusername-cool-feature` do:
+   `git checkout -b myusername-cool-feature origin/tianci-cool-feature`
+
+Now just continue with a normal ["Code in Branches"](#code-in-branches) process.
 
 ## Building & Testing
 
