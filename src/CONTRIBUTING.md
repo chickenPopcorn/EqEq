@@ -13,7 +13,7 @@ Say you're working on `fancyNewBuiltin()`
 1. ensure your git repo is clean: `git status` _(and no output)_
 2. `git checkout -b [yourhandle]-add-fancy-new-builtin`
 3. before writing code:
-  - [write tests](../#writing-tests)
+  - [write tests](../src/#writing-tests)
   - ensure they `FAIL`, since you haven't coded yet
   - `git push origin [yourhandle]-add-fancy-new-builtin`
 4. [open a pull request](https://help.github.com/articles/creating-a-pull-request/)
