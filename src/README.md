@@ -40,15 +40,15 @@ Say you're working on `fancyNewBuiltin()`
 1. ensure your git repo is clean: `git status` _(and no output)_
 2. `git checkout -b [yourhandle]-add-fancy-new-builtin`
 3. before writing code:
-  1. [write tests](#writing-tests)
-  2. ensure they `FAIL`, since you haven't coded yet
-  3. `git push origin [yourhandle]-add-fancy-new-builtin`
+  - [write tests](#writing-tests)
+  - ensure they `FAIL`, since you haven't coded yet
+  - `git push origin [yourhandle]-add-fancy-new-builtin`
 4. [open a pull request](https://help.github.com/articles/creating-a-pull-request/)
 5. do these **until tests pass** and you're done:
-  1. write code
-  2. `make test`
-  3. commit as you like
-  4. address questions in pull request
+  - write code
+  - `make test`
+  - commit as you like
+  - address questions in pull request
 6. [merge your branch](https://help.github.com/articles/merging-a-pull-request/)
   when its: **green** and **comments are resolved**
 7. `git branch -d [yourhandle]-add-fancy-new-builtin`
