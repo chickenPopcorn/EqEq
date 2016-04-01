@@ -5,6 +5,12 @@
 let identifier = ['a'-'z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let context = ['A'-'Z'] identifier
 
+let digit = ['0'-'9']
+let e = ['e''E']
+let sign = ['+''-']
+let component = e sign? digit+
+
+
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
@@ -36,7 +42,11 @@ rule token = parse
 | "while"  { WHILE }
 | "find"   { FIND }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
-| ['0'-'9']+|(['0'-'9']+['.']['0'-'9']*) as lxm { LITERAL(float_of_string lxm) }
+| digit+'.'digit*component? as lxm { LITERAL(float_of_string lxm) }
+| digit*'.'digit+component? as lxm { LITERAL(float_of_string lxm) }
+| digit+'.'?digit*component as lxm { LITERAL(float_of_string lxm) }
+| digit+'.'?digit+component as lxm { LITERAL(float_of_string lxm) }
+| digit+ as lxm { LITERAL(float_of_string lxm) }
 | identifier as lxm { ID(lxm) }
 | context as lxm { CTX(lxm) }
 | eof { EOF }
