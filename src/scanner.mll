@@ -35,6 +35,7 @@ rule token = parse
 | "else"   { ELSE }
 | "while"  { WHILE }
 | "find"   { FIND }
+| "with"   { WITH }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
 | ['0'-'9']+|(['0'-'9']+['.']['0'-'9']*) as lxm { LITERAL(float_of_string lxm) }
 | identifier as lxm { ID(lxm) }
