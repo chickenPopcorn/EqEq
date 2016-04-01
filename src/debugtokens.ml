@@ -15,6 +15,7 @@ let stringify = function
   | DIVIDE -> "DIVIDE"
   | MOD -> "MOD"
   | POW -> "POW"
+  | ABS -> "ABS"
   | ASSIGN -> "ASSIGN"
   | EQ -> "EQ"
   | NEQ -> "NEQ"
