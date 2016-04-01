@@ -4,6 +4,8 @@ SomeCtx = {
   c = { 0.42; }
   d = { .42; }
   e = { 0e1; }
+  f = { 4.2e4; }
+  g = { -42; }
 
 }
 
@@ -13,4 +15,6 @@ SomeCtx:find a {
   printf("%0.2f\n", c);
   printf("%0.2f\n", d);
   printf("%0.1f\n", e);
+  printf("%0.0f\n", f);
+  printf("%0.0f\n", g);
 }
