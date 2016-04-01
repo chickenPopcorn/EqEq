@@ -64,6 +64,14 @@ finddecl:
      { { fcontext = $1;
          ftarget = $4;
          fbody = List.rev $6 } }
+ | FIND ID LBRACE WITH expr stmt_list RBRACE
+     { { fcontext = ""; (* global context *)
+         ftarget = $2;
+         fbody = List.rev $6 } }
+ | CTX COLON FIND ID WITH expr LBRACE stmt_list RBRACE
+     { { fcontext = $1;
+         ftarget = $4;
+         fbody = List.rev ($6::$8) } }
 
 funcdecl_list:
     /* nothing */  { [] }
