@@ -45,4 +45,13 @@ declare -r skippedPassing="$(make TEST_OPTS=-ps test 2>&1 | scrapePassed)"
       "$(echo "$skippedPassing - $currentPassing" | bc)"
   )"
 
+clean # before running new lint check...
+isPatternMatchOld() { grep 'Warning.*this.pattern.matching.is.not.exhaustive'; }
+makeDebugTokens() { clean && make debugtokens; }
+if ! makeDebugTokens >/dev/null 2>&1 ||
+  makeDebugTokens 2>&1 | isPatternMatchOld;then
+  recordLint \
+    'Scanner&Parser changes not shared w/debugtokens! See: `make debugtokens`'
+fi
+
 exit $lintFound
