@@ -17,7 +17,7 @@ let translate (contexts, finds) =
     | A.Unop(o, e) -> let check_unop o = 
                           match A.string_of_uop o with 
                           | "|" -> "fabs(" ^ gen_expr e ^ ")"
-                          | _ -> A.string_of_uop o ^ gen_expr e in check_unop o
+                          | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
