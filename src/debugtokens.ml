@@ -13,6 +13,8 @@ let stringify = function
   | MINUS -> "MINUS"
   | TIMES -> "TIMES"
   | DIVIDE -> "DIVIDE"
+  | MOD -> "MOD"
+  | POW -> "POW"
   | ASSIGN -> "ASSIGN"
   | EQ -> "EQ"
   | NEQ -> "NEQ"
