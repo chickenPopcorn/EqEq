@@ -180,7 +180,7 @@ CheckTest() {
       echo 'compilation fails'
     fi
   )"
-  printf '[%d] "%s"\tasserting %s\t' \
+  printf '[%2d] "%s"\tasserting %s\t' \
     $testNum "$(col blu "$(labelOfSource "$eqTestSrc")")" "$expectSummary" |
     tee -a "$suiteLog"
 
@@ -265,7 +265,7 @@ printf '\nRunning %s:\n\t%s\n\n' \
 testNum=0; numFail=0; numSkip=0; numPass=0;
 skip() {
   local testNum="$1"; shift 1;
-  printf '[%d] %s\t%s\tResult: %s\n' \
+  printf '[%2d] %s\t%s\tResult: %s\n' \
     $testNum "$(col blu WARNING)" "$*" "$(col ylw SKIP)"
   numSkip=$(( numSkip + 1 ))
 }
@@ -292,7 +292,7 @@ for testFile in "${testFiles[@]}"; do
   esac
 
   if ! isTestPresent "$testFile";then
-    printf '[%d] %s\tBad test: no .out/.err for "%s"\tResult: %s\n' \
+    printf '[%2d] %s\tBad test: no .out/.err for "%s"\tResult: %s\n' \
       $testNum "$(col red ERROR)" "$testFile" "$(col red FAIL)"
     numFail=$(( numFail + 1 ))
     continue;
