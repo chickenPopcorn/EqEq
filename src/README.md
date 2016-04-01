@@ -6,7 +6,14 @@ mathematical equation evaluation. For more details, see its [Reference
 Manual](../notes/language-reference-manual.md)
 _("LRM" for "Language [RM]" in code and comments)_.
 
-# Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
+- [Status](#status-)
+- [Coding, Building, Testing](#coding-building-testing)
+  - [Writing Tests](#writing-tests)
+  - [Debugging Tools](#debugging-tools)
+  - [One-time Setup](#one-time-setup)
+    - [Quickstart](#quickstart)
+
+## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
 
 Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World); eg:
 
