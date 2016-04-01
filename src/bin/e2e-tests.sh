@@ -70,12 +70,13 @@ cleanGeneratedFiles() {
 }
 
 col() {
+  local c=$1  esc=0 ;shift
+
   if [ "$(uname -s)" = Darwin ];then
     echo -ne "$@"
     return
   fi
 
-  local c=$1  esc=0 ;shift
   case "$c" in
     red) esc='\e[1;31m';;
     grn) esc='\e[1;32m';;
