@@ -17,11 +17,12 @@ declare -r srcExt=eq
 # CLI arguments & APIs
 declare -r thisScript="$(basename "$0")"
 declare -r eqToObj="$(dirname "$0")/eq-to-obj.sh"
-declare -r allopts=kvhdcs
+declare -r allopts=kvhdcsp
 opt_runSkip=0 # s
 opt_verbose=0 # v
 opt_keep=0    # k
 opt_debug=0   # d
+opt_plain=0   # p
 Usage() {     # h
   echo -e "
   Usage: $thisScript -[$allopts] [LANG_SOURCE_FILES]
@@ -41,12 +42,16 @@ Usage() {     # h
            - TEST_SOURCE.a\tTEST_SOURCE's compiled target.
 
     -v    Verbose print of failures' actual vs. expected; default: $opt_verbose
+          Note: -p flag takes precedence over this flag
 
     -d    Debug this script's behavior, with bash commands/args printed.
 
     -c    Cleanup generated files and exit; default: false
 
     -s    Run [s]kipped tests despite being marked 'skip'; default: $opt_runSkip
+
+    -p    [P]laintext output for script consumption; default: $opt_plain
+          Note: overrides -v flag
 
     -h    Print this help message
     \r" >&2
@@ -70,12 +75,13 @@ cleanGeneratedFiles() {
 }
 
 col() {
-  if [ "$(uname -s)" = Darwin ];then
+  local c=$1  esc=0 ;shift
+
+  if [ "$opt_plain" -eq 1 ] || [ "$(uname -s)" = Darwin ];then
     echo -ne "$@"
     return
   fi
 
-  local c=$1  esc=0 ;shift
   case "$c" in
     red) esc='\e[1;31m';;
     grn) esc='\e[1;32m';;
@@ -100,9 +106,11 @@ while getopts "$allopts" c; do
       exit 0
       ;;
     s) opt_runSkip=1;;
+    p) opt_plain=1;;
     h) Usage ;;
   esac
 done
+if [ "$opt_plain" -eq 1 ];then opt_verbose=0;fi
 shift $(( OPTIND - 1 ))
 
 
@@ -314,11 +322,17 @@ for testFile in "${testFiles[@]}"; do
 done
 
 # Print test suite summary
-printf '\n%s of %d tests:\t%s%s%s\n' \
-  "$(col blu Summary)" \
-  "${#testFiles[@]}" \
-  "$(if [ "$numFail" -gt 0 ];then col red "$numFail FAILED\t";fi)" \
-  "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
-  "$(col grn "$numPass PASSED")"
+if [ "$opt_plain" -eq 0 ];then
+  printf '\n%s of %d tests:\t%s%s%s\n' \
+    "$(col blu Summary)" \
+    "${#testFiles[@]}" \
+    "$(if [ "$numFail" -gt 0 ];then col red "$numFail FAILED\t";fi)" \
+    "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
+    "$(col grn "$numPass PASSED")"
+else
+    echo "FAILED $numFail"
+    echo "SKIPPED $numSkip"
+    echo "PASSED $numPass"
+fi
 
 [ "$numFail" -eq 0 ]

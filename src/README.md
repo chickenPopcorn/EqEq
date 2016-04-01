@@ -6,7 +6,14 @@ mathematical equation evaluation. For more details, see its [Reference
 Manual](../notes/language-reference-manual.md)
 _("LRM" for "Language [RM]" in code and comments)_.
 
-# Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
+- [Status](#status-)
+- [Coding, Building, Testing](#coding-building-testing)
+  - [Writing Tests](#writing-tests)
+  - [Debugging Tools](#debugging-tools)
+  - [One-time Setup](#one-time-setup)
+    - [Quickstart](#quickstart)
+
+## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
 
 Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World); eg:
 
@@ -14,7 +21,7 @@ Currently we're working towards a ["hello world" milestone](https://github.com/r
  - [x] **fixed** in issues #12 #15:
       - make real phases: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO)
       - replace [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16)
- - [ ] **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each new bit of functionality
+ - [ ] **adding new** [tests for each new feature](#writing-tests)
  - [ ] **more interesting**: [semantic analysis:#24](https://github.com/rxie25/PLT2016Spring/issues/24) and [code generation:#14](https://github.com/rxie25/PLT2016Spring/issues/14)
 
 The codebase was recently refactored to represent the eqeq LRM, rather than
