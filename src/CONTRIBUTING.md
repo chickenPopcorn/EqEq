@@ -16,6 +16,9 @@ The high-level overview of git is:
   - `git commit 'fixed typo, dog not spelled "doog"'`
   - `git status` to verify it worked
 6. share with everyone: `git push origin your-branch-name`
+7. merge your branch:
+  - **assign** your pul request to someone to quickly review
+  - once they're done, click **merge pull request**
 
 Each of these ^ steps is detailed more below and in ["Coding, Building,
 Testing"](#coding-building-testing).
