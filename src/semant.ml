@@ -93,5 +93,15 @@ let check (contexts, finds) =
     List.iter check_stmt findBlk.A.fbody
   in
 
+  (* create ctxmap *)
+  let create_ctxmap ctxmap ctx =
+    ctxmap
+  in
+
   List.iter check_ctx contexts;
-  List.iter check_find finds
+  List.iter check_find finds;
+
+  (* create a context map *)
+  let ctxmap = List.fold_left create_ctxmap CtxMap.empty contexts in
+
+  (contexts, finds, ctxmap)
