@@ -6,3 +6,4 @@ SomeCtx = {
 SomeCtx:find a {
   print("%0.0f\n", a^2);
 }
+
