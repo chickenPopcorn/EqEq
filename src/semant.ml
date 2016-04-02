@@ -93,12 +93,25 @@ let check (contexts, finds) =
     List.iter check_stmt findBlk.A.fbody
   in
 
+  (* return: {key: funcdecl.fname, val: funcdecl} *)
+  let create_symbolmap map funcdecl =
+    let map =
+      if CtxMap.mem funcdecl.A.fname map
+      then CtxMap.remove funcdecl.A.fname map
+      else map
+    in
+    CtxMap.add funcdecl.A.fname funcdecl map
+  in
+
+  (* return: {key: ctx.context, val: <ReturnValueOf`create_symbolmap`>} *)
   let create_varmap map ctx =
-    if CtxMap.mem ctx.A.context map then
-      fail ("duplicate context, " ^ (quot ctx.A.context))
+    if CtxMap.mem ctx.A.context map
+    then fail ("duplicate context, " ^ (quot ctx.A.context))
     else
-      (* TODO now the value is just an empty map. write a function to create the for variables *)
-      CtxMap.add ctx.A.context CtxMap.empty map
+      CtxMap.add
+        ctx.A.context
+        (List.fold_left create_symbolmap CtxMap.empty ctx.A.cbody)
+        map
   in
 
   List.iter check_ctx contexts;
@@ -110,4 +123,4 @@ let check (contexts, finds) =
    *)
   let varmap = List.fold_left create_varmap CtxMap.empty contexts in
 
-  (contexts, finds, varmap)
+  (contexts, finds)
