@@ -6,7 +6,7 @@ let integer = ['0'-'9']
 let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
 let identifier = lowercase (lowercase | uppercase | integer | '_')*
-let context = uppercase identifier
+let context_id = uppercase identifier
 
 let num = integer+'.'integer*(['e''E']['+''-']?integer+)?
   | integer*'.'integer+(['e''E']['+''-']?integer+)?
@@ -48,7 +48,7 @@ rule token = parse
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
 | num as lxm { LITERAL(float_of_string lxm) }
 | identifier as lxm { ID(lxm) }
-| context as lxm { CTX(lxm) }
+| context_id as lxm { CTX(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
