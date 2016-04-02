@@ -17,42 +17,42 @@ let num = integer+'.'integer*(['e''E']['+''-']?integer+)?
 let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
-| whitespace { token lexbuf }
-| "/*"     { comment lexbuf }
-| '('      { LPAREN }
-| ')'      { RPAREN }
-| '{'      { LBRACE }
-| '}'      { RBRACE }
-| ';'      { SEMI }
-| ':'      { COLON }
-| ','      { COMMA }
-| '+'      { PLUS }
-| '-'      { MINUS }
-| '*'      { TIMES }
-| '/'      { DIVIDE }
-| '%'      { MOD }
-| '^'      { POW }
-| '|'      { ABS }
-| '='      { ASSIGN }
-| "=="     { EQ }
-| "!="     { NEQ }
-| '<'      { LT }
-| "<="     { LEQ }
-| ">"      { GT }
-| ">="     { GEQ }
-| "&&"     { AND }
-| "||"     { OR }
-| "!"      { NOT }
-| "if"     { IF }
-| "else"   { ELSE }
-| "while"  { WHILE }
-| "find"   { FIND }
+| whitespace                 { token lexbuf }
+| "/*"                       { comment lexbuf }
+| '('                        { LPAREN }
+| ')'                        { RPAREN }
+| '{'                        { LBRACE }
+| '}'                        { RBRACE }
+| ';'                        { SEMI }
+| ':'                        { COLON }
+| ','                        { COMMA }
+| '+'                        { PLUS }
+| '-'                        { MINUS }
+| '*'                        { TIMES }
+| '/'                        { DIVIDE }
+| '%'                        { MOD }
+| '^'                        { POW }
+| '|'                        { ABS }
+| '='                        { ASSIGN }
+| "=="                       { EQ }
+| "!="                       { NEQ }
+| '<'                        { LT }
+| "<="                       { LEQ }
+| ">"                        { GT }
+| ">="                       { GEQ }
+| "&&"                       { AND }
+| "||"                       { OR }
+| "!"                        { NOT }
+| "if"                       { IF }
+| "else"                     { ELSE }
+| "while"                    { WHILE }
+| "find"                     { FIND }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
-| num as lxm { LITERAL(float_of_string lxm) }
-| identifier as lxm { ID(lxm) }
-| context_id as lxm { CTX(lxm) }
+| num as lxm                 { LITERAL(float_of_string lxm) }
+| identifier as lxm          { ID(lxm) }
+| context_id as lxm          { CTX(lxm) }
 | eof { EOF }
-| _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
+| _ as char                  { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
   "*/" { token lexbuf }
