@@ -84,7 +84,7 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr $1 }
-  | WITH expr LBRACE{ Expr $2 }
+  | WITH expr SEMI { Expr $2 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block(List.rev $6), Block([])) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block(List.rev $6), Block(List.rev $10)) }
