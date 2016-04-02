@@ -10,7 +10,12 @@ let sign = ('+' | '-')
 let expo = ('e' | 'E')
 let frac = (expo sign? intgr+)
 
-let num = intgr* '.'? intgr+ frac?
+let num = intgr+
+        | intgr+ '.'  intgr* frac?
+        | intgr* '.'  intgr+ frac?
+        | intgr+ '.'? intgr* frac
+        | intgr+ '.'? intgr+ frac
+
 
 let identifier = lowercase (alpha_num | '_')*
 let context_id = uppercase identifier
