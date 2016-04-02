@@ -1,7 +1,7 @@
 (* Semantic checking for the EqualsEquals compiler *)
 
 module A = Ast
-module CtxMap = Map.Make(String)
+module StringMap = Map.Make(String)
 
 (* Semantic checking of a program. Returns void if successful,
    throws an exception if something is wrong.
@@ -28,18 +28,18 @@ let check (contexts, finds) =
   (**** Map of known Context blocks keyed by their names ****)
   let known_ctxs =
     List.fold_left
-      (fun map ctx ->
-         if CtxMap.mem ctx.A.context map then
+      (fun existing ctx ->
+         if StringMap.mem ctx.A.context existing then
            fail ("duplicate context, " ^ (quot ctx.A.context))
          else
-           CtxMap.add ctx.A.context ctx map
+           StringMap.add ctx.A.context ctx existing
       )
-      CtxMap.empty
+      StringMap.empty
       contexts
   in
 
   let check_have_context ctx_name =
-    try CtxMap.find ctx_name known_ctxs
+    try StringMap.find ctx_name known_ctxs
     with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
   in
 
@@ -80,7 +80,7 @@ let check (contexts, finds) =
 
     (* vanilla logic;
     let equation_decl var =
-      try CtxMap.find s function_decls
+      try StringMap.find s function_decls
       with Not_found -> raise (Failure ("unrecognized variable " ^ quot s))
     in
     *)
