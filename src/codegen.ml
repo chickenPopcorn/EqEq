@@ -4,7 +4,7 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
-let translate (contexts, finds) =
+let translate (contexts, finds, varmap) =
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
     | A.Literal(l) -> string_of_float l
@@ -14,8 +14,8 @@ let translate (contexts, finds) =
                                 | "%" -> "fmod(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
                                 | "^" -> "pow(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
                                 | _ -> gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2 in check_op o
-    | A.Unop(o, e) -> let check_unop o = 
-                          match A.string_of_uop o with 
+    | A.Unop(o, e) -> let check_unop o =
+                          match A.string_of_uop o with
                           | "|" -> "fabs(" ^ gen_expr e ^ ")"
                           | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
@@ -31,8 +31,15 @@ let translate (contexts, finds) =
         gen_stmt s1 ^ "else\n" ^ gen_stmt s2
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
   in
+  let gen_decl_var varname funcdecl str =
+    "double " ^ varname ^ ";\n" ^ str
+  in
+  let gen_decl_ctx ctx =
+    if StringMap.mem ctx.A.context varmap
+    then StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
+    else ""
+  in
   let gen_multieq multieq =
-    "double " ^
     multieq.A.fname ^
     " = " ^
     String.concat "" (List.map gen_stmt multieq.A.fdbody) ^
@@ -47,6 +54,7 @@ let translate (contexts, finds) =
   in
   "#include <stdio.h>\n#include <math.h>\n" ^
   "int main() {\n" ^
+  String.concat "" (List.map gen_decl_ctx contexts) ^
   String.concat "" (List.map gen_ctxdecl contexts) ^
   String.concat "" (List.map gen_finddecl finds) ^
   "return 0;\n}\n"

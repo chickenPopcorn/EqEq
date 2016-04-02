@@ -119,4 +119,4 @@ let check (contexts, finds) =
 
   let varmap = List.fold_left create_varmap StringMap.empty contexts in
 
-  (contexts, finds)
+  (contexts, finds, varmap)
