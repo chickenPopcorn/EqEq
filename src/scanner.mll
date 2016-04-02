@@ -14,9 +14,11 @@ let num = integer+'.'integer*(['e''E']['+''-']?integer+)?
   | integer+'.'?integer+['e''E']['+''-']?integer+
   | integer+
 
+let whitespace = [' ' '\t' '\r' '\n']
+
 rule token = parse
-  [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| "/*"     { comment lexbuf }           (* Comments *)
+| whitespace { token lexbuf }
+| "/*"     { comment lexbuf }
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
