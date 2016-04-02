@@ -5,7 +5,7 @@ open Ast
 %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
-%token PLUS MINUS TIMES DIVIDE MOD POW ASSIGN NOT
+%token PLUS MINUS TIMES DIVIDE MOD POW ABS ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token IF ELSE WHILE FIND WITH
 %token <float> LITERAL
@@ -22,7 +22,8 @@ open Ast
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE MOD POW
+%left TIMES DIVIDE MOD POW 
+%right ABS
 %right NOT NEG
 
 %start program
@@ -98,7 +99,8 @@ expr:
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
   | expr MOD    expr { Binop($1, Mod,   $3) }
-  | expr POW    expr { Binop($1, Pow,   $3)}
+  | expr POW    expr { Binop($1, Pow,   $3) }
+  | ABS expr ABS     { Unop(Abs, $2) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }

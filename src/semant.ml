@@ -94,4 +94,5 @@ let check (contexts, finds) =
   in
 
   List.iter check_ctx contexts;
-  List.iter check_find finds
+  List.iter check_find finds;
+  (contexts, finds)

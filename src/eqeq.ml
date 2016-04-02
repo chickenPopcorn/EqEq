@@ -20,9 +20,9 @@ let _ =
   let ast = Parser.program Scanner.token lexbuf in
 
   (* Step 1: Scanner & Parser *)
-  Semant.check ast;
+  let sast = Semant.check ast in
 
   (* Steps 2 3 *)
   match cli_arg with
     Ast -> print_string (Ast.string_of_program ast)
-  | Compile -> print_string (Codegen.translate ast)
+  | Compile -> print_string (Codegen.translate sast)

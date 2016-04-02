@@ -14,7 +14,10 @@ let translate (contexts, finds) =
                                 | "%" -> "fmod(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
                                 | "^" -> "pow(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
                                 | _ -> gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2 in check_op o
-    | A.Unop(o, e) -> A.string_of_uop o ^ gen_expr e
+    | A.Unop(o, e) -> let check_unop o = 
+                          match A.string_of_uop o with 
+                          | "|" -> "fabs(" ^ gen_expr e ^ ")"
+                          | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
