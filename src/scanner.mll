@@ -2,17 +2,18 @@
 
 { open Parser }
 
-let integer = ['0'-'9']
+let intgr = ['0'-'9']
 let lowercase = ['a'-'z']
 let uppercase = ['A'-'Z']
-let identifier = lowercase (lowercase | uppercase | integer | '_')*
-let context_id = uppercase identifier
+let alpha_num = lowercase | uppercase | intgr
+let sign = ('+' | '-')
+let expo = ('e' | 'E')
+let frac = (expo sign? intgr+)
 
-let num = integer+'.'integer*(['e''E']['+''-']?integer+)?
-  | integer*'.'integer+(['e''E']['+''-']?integer+)?
-  | integer+'.'?integer*['e''E']['+''-']?integer+
-  | integer+'.'?integer+['e''E']['+''-']?integer+
-  | integer+
+let num = intgr* '.'? intgr+ frac?
+
+let identifier = lowercase (alpha_num | '_')*
+let context_id = uppercase identifier
 
 let whitespace = [' ' '\t' '\r' '\n']
 
