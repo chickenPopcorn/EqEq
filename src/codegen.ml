@@ -7,11 +7,17 @@ module StringMap = Map.Make(String)
 let translate (contexts, finds) =
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
-    | A.Literal(l) -> string_of_int l
+    | A.Literal(l) -> string_of_float l
     | A.Id(s) -> s
-    | A.Binop(e1, o, e2) ->
-        gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2
-    | A.Unop(o, e) -> A.string_of_uop o ^ gen_expr e
+    | A.Binop(e1, o, e2) -> let check_op o =
+                                match A.string_of_op o with
+                                | "%" -> "fmod(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
+                                | "^" -> "pow(" ^ gen_expr e1 ^ ", " ^ gen_expr e2 ^ ")"
+                                | _ -> gen_expr e1 ^ " " ^ A.string_of_op o ^ " " ^ gen_expr e2 in check_op o
+    | A.Unop(o, e) -> let check_unop o = 
+                          match A.string_of_uop o with 
+                          | "|" -> "fabs(" ^ gen_expr e ^ ")"
+                          | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
@@ -25,21 +31,21 @@ let translate (contexts, finds) =
         gen_stmt s1 ^ "else\n" ^ gen_stmt s2
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
   in
-  let gen_funcdecl funcdecl =
+  let gen_multieq multieq =
     "double " ^
-    funcdecl.A.fname ^
+    multieq.A.fname ^
     " = " ^
-    String.concat "" (List.map gen_stmt funcdecl.A.fdbody) ^
+    String.concat "" (List.map gen_stmt multieq.A.fdbody) ^
     "\n"
   in
   let gen_ctxdecl ctx =
-    String.concat "" (List.map gen_funcdecl ctx.A.cbody)
+    String.concat "" (List.map gen_multieq ctx.A.cbody)
   in
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody) ^
     "\n"
   in
-  "#include <stdio.h>\n" ^
+  "#include <stdio.h>\n#include <math.h>\n" ^
   "int main() {\n" ^
   String.concat "" (List.map gen_ctxdecl contexts) ^
   String.concat "" (List.map gen_finddecl finds) ^

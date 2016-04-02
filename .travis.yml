@@ -9,5 +9,4 @@ before_install:
   - opam install --yes llvm.3.4 ocamlfind
 script:
   - cd src/
-  - make test
-  - make lint
+  - make e2e

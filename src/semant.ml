@@ -117,10 +117,6 @@ let check (contexts, finds) =
   List.iter check_ctx contexts;
   List.iter check_find finds;
 
-  (*create varmap {
-      key: ctx.context,
-      value: anothermap { key: func.fname, val: func } }
-   *)
   let varmap = List.fold_left create_varmap CtxMap.empty contexts in
 
   (contexts, finds)

@@ -1,12 +1,12 @@
 (* Abstract Syntax Tree and functions for printing it   :*)
 
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
+type op = Add | Sub | Mult | Div | Mod | Pow | Equal | Neq | Less | Leq | Greater | Geq |
           And | Or
 
-type uop = Neg | Not
+type uop = Neg | Not | Abs
 
 type expr =
-    Literal of int
+    Literal of float
   | Id of string
   | Strlit of string
   | Binop of expr * op * expr
@@ -21,14 +21,14 @@ type stmt =
   | While of expr * stmt
 
 (* func: we call this a "multi-line equation" *)
-type func_decl = {
+type multi_eq = {
     fname : string;
     fdbody : stmt list;
   }
 
 type ctx_decl = {
     context : string;
-    cbody : func_decl list;
+    cbody : multi_eq list;
   }
 
 type find_decl = {
@@ -38,7 +38,7 @@ type find_decl = {
   }
 
 type program = ctx_decl list * find_decl list
-(* TODO: add this back when we get global equations func_decl list*)
+(* TODO: add this back when we get global equations multi_eq list*)
 
 (* Pretty-printing functions *)
 
@@ -47,6 +47,8 @@ let string_of_op = function
   | Sub -> "-"
   | Mult -> "*"
   | Div -> "/"
+  | Mod -> "%"
+  | Pow -> "^"
   | Equal -> "=="
   | Neq -> "!="
   | Less -> "<"
@@ -59,10 +61,11 @@ let string_of_op = function
 let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
+  | Abs -> "|"
 
 let rec string_of_expr = function
     Strlit(l) -> l
-  | Literal(l) -> string_of_int l
+  | Literal(l) -> string_of_float l
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -75,21 +78,21 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
-  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
-      string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
+  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ "){\n" ^string_of_stmt s^"}"
+  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ "){\n" ^
+      string_of_stmt s1 ^ "}else{\n" ^ string_of_stmt s2 ^"}"
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-let string_of_funcdecl funcdecl =
-  funcdecl.fname ^
+let string_of_multieq multieq =
+  multieq.fname ^
   " = {\n" ^
-  String.concat "" (List.map string_of_stmt funcdecl.fdbody) ^
+  String.concat "" (List.map string_of_stmt multieq.fdbody) ^
   "\n}\n"
 
 let string_of_ctxdecl ctx =
   ctx.context ^
   " = {\n" ^
-  String.concat "" (List.map string_of_funcdecl ctx.cbody) ^
+  String.concat "" (List.map string_of_multieq ctx.cbody) ^
   "\n}\n"
 
 let string_of_finddecl finddecl =

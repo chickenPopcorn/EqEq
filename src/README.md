@@ -3,50 +3,75 @@ The "EqualsEquals" compiler
 
 Coded in OCaml, the "EqualsEquals" (aka "eqeq") language is designed for simple
 mathematical equation evaluation. For more details, see its [Reference
-Manual](https://docs.google.com/document/d/1uHGe2qazuy-I7Vem7u8muxDnWaysDX49lKMbMmlDml4)
+Manual](../notes/language-reference-manual.md)
 _("LRM" for "Language [RM]" in code and comments)_.
+
+- [Status](#status-)
+- [Coding, Building, Testing](#coding-building-testing)
+  - [Writing Tests](#writing-tests)
+  - [Debugging Tools](#debugging-tools)
+  - [One-time Setup](#one-time-setup)
+    - [Quickstart](#quickstart)
 
 ## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
 
-Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20%22Hello%20World%22%20of%20our%20Language) which means we're:
- 1. testing: **keeping our build passing** at every commit on `master` branch
- 2. **real phases**: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO) and [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16), and [closing issues](https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20%22Hello%20World%22%20of%20our%20Language) for the real thing
- 3. **adding new** tests: `tests/test-*.eq` and `tests/fail-*eq` for each of #2
+Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World); eg:
 
-The codebase was recently refactored to represent the eqeq LRM, rather than MicroC's, so it's safe to assume if a line of code looks too simple, you're right! We were just trying to get somethin to compile, so we could all run `make test` reliably.
+ - [x] **fixed** in testing: **keeping our build passing** at every commit on `master` branch
+ - [x] **fixed** in issues #12 #15:
+      - make real phases: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO)
+      - replace [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16)
+ - [ ] **adding new** [tests for each new feature](#writing-tests)
+ - [ ] **more interesting**: [semantic analysis:#24](https://github.com/rxie25/PLT2016Spring/issues/24) and [code generation:#14](https://github.com/rxie25/PLT2016Spring/issues/14)
 
-## Building & Testing
+The codebase was recently refactored to represent the eqeq LRM, rather than
+MicroC's, so it's safe to assume if a line of code looks too simple, you're
+right! We were just trying to get somethin to compile, so we could all run `make
+test` reliably.
 
-To build, simply: `make`
+## Coding, Building, Testing
 
-To Run end-to-end test suite:
-```sh
-$ make test # or: `make TEST_OPTS=-h test` or any other options it takes
+To **code**, please see [contributing](CONTRIBUTING.md) quickguide.
 
-#... {clean, build, etc.}-output snipped...
+To **build**, simply: `make`
 
-Running 1 tests:
-        tests/test-helloworld.eq,
-[1] "test-helloworld"   asserting target's behavior             Result: PASS
+To run **all end-to-end checks**, simply: `make e2e`.
+- or just run `make lint` to see non-test checks
+- or just run `make test` to see input/output checks:
 
-Summary: PASSED
+  ```sh
+  $ make test # or: `make TEST_OPTS=-h test` or any other options it takes
 
-```
+  #... {clean, build, etc.}-output snipped...
 
-Be sure to run `make lint` from time to time.
+  Running 1 tests:
+          tests/test-helloworld.eq,
+  [1] "test-helloworld"   asserting target's behavior             Result: PASS
+
+  Summary: PASSED
+  ```
 
 ### Writing Tests
-So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's computer? Great! Do this:
+So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's
+computer? Great! Do this:
 ```sh
-$ $EDIT tests/test-crazynewkeyword.eq  # ideal case, capturing the complexity you've added (a correct program)
-$ $EDIT tests/test-crazynewkeyword.out # what your example compiled eq C program should do (just the output)
-$ make test
-$ $EDIT tests/fail-crazynewkeyword.eq  # misuse you can think of (an incorrect program)
-$ $EDIT tests/fail-crazynewkeyword.out # how our compiler should complain for your example eq source
-$ make test
+$ $EDIT tests/test-crazynewkeyword.eq
+  # ... ideal case, capturing the complexity you've added (a correct program)
+
+$ $EDIT tests/test-crazynewkeyword.out
+  # ... what your example compiled eq C program should do (just the output)
+$ make test # ensure its result is "PASS"!
+
+$ $EDIT tests/fail-crazynewkeyword.eq
+  # ... any misuse you can think of (an incorrect program)
+$ $EDIT tests/fail-crazynewkeyword.err
+  # ... how our compiler should complain for your example eq source
+$ make test # ensure its result is "PASS"!
 ```
 
-Note: currently we're trying to only test the behavior of our *compiled* C programs _(that is: we're not testing what our compiler outputs, but what its output programs do)_.
+Note: currently we're trying to only test the behavior of our *compiled* C
+programs _(that is: we're not testing what our compiler outputs, but what its
+output programs do)_.
 
 ### Debugging Tools
 See what our scanner thinks of source programs, with `debugtokens` target:
@@ -108,7 +133,7 @@ make && ./eqeq.native < $YOUR_TEST_FILE
 The above assumes you've done the one-time installation of dependencies for your
 machine, thoroughly documented in `./INSTALL`
 
-### Quickstart
+#### Quickstart
 
 Can't remember if you've done the one-time setup on your machine?
 
