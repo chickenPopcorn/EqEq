@@ -31,6 +31,7 @@ let stringify = function
   | WHILE -> "WHILE"
   | STRLIT(lxm) -> "STRLIT"
   | FIND -> "FIND"
+  | WITH -> "WITH"
   | LITERAL(lxm) -> "LITERAL"
   | ID(lxm) -> "ID"
   | CTX(lxm) -> "CTX"

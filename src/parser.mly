@@ -22,7 +22,7 @@ open Ast
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE MOD POW 
+%left TIMES DIVIDE MOD POW
 %right ABS
 %right NOT NEG
 
@@ -65,10 +65,10 @@ finddecl:
      { { fcontext = $1;
          ftarget = $4;
          fbody = List.rev $6 } }
- | FIND ID LBRACE stmt stmt_list RBRACE
+ | FIND ID stmt LBRACE stmt_list RBRACE
      { { fcontext = ""; (* global context *)
          ftarget = $2;
-         fbody = $4::(List.rev $5) } }
+         fbody = $3::(List.rev $5) } }
  | CTX COLON FIND ID stmt LBRACE stmt_list RBRACE
      { { fcontext = $1;
          ftarget = $4;
@@ -84,7 +84,7 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr $1 }
-  | WITH expr { Expr $2 }
+  | WITH expr LBRACE{ Expr $2 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block(List.rev $6), Block([])) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block(List.rev $6), Block(List.rev $10)) }
