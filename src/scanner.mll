@@ -2,13 +2,17 @@
 
 { open Parser }
 
-let identifier = ['a'-'z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-let context = ['A'-'Z'] identifier
-let num = ['0'-'9']+'.'['0'-'9']*(['e''E']['+''-']?['0'-'9']+)?
-  |['0'-'9']*'.'['0'-'9']+(['e''E']['+''-']?['0'-'9']+)?
-  | ['0'-'9']+'.'?['0'-'9']*['e''E']['+''-']?['0'-'9']+
-  | ['0'-'9']+'.'?['0'-'9']+['e''E']['+''-']?['0'-'9']+
-  | ['0'-'9']+
+let integer = ['0'-'9']
+let lowercase = ['a'-'z']
+let uppercase = ['A'-'Z']
+let identifier = lowercase (lowercase | uppercase | integer | '_')*
+let context = uppercase identifier
+
+let num = integer+'.'integer*(['e''E']['+''-']?integer+)?
+  | integer*'.'integer+(['e''E']['+''-']?integer+)?
+  | integer+'.'?integer*['e''E']['+''-']?integer+
+  | integer+'.'?integer+['e''E']['+''-']?integer+
+  | integer+
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
