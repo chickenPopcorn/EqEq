@@ -43,6 +43,24 @@ let check (contexts, finds) =
 
   let varmap = List.fold_left create_varmap StringMap.empty contexts in
 
+  let update_varmap map find =
+    if not StringMap.mem find.A.fcontext map
+    then fail ("unrecognized context, " ^ quot ctx_name)
+    else
+      let symbolmap = StringMap.find find.A.fcontext map in
+      let get_id_expr = match stmt with
+         | A.Expr e ->
+            match e with
+             | A.Assign(left, expr) ->(left, expr)
+             | _ -> ""
+         | _ -> ""
+      in
+        let asignment_list = list.map get_id_expr find_body.A.fbody in
+        let add_to_map =
+            List.map (fun (id, expr) -> StringMap.add id expr symbolmap)
+            asignment_list
+  in
+
   let check_have_var ctx_name var =
     let symbolmap =
       try StringMap.find ctx_name varmap
