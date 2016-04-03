@@ -1,4 +1,4 @@
-SomeCtx {
+SomeCtx = {
   a = { b + 40 }
   /** ^ Note we are missing a semi-colon */
 }
