@@ -1,1 +1,1 @@
-tries to show line number #1
+Fatal error: exception Eqeq.Error("line 1 (char 8): '('")

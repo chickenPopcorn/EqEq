@@ -18,9 +18,10 @@ let _ =
     else Compile
   in
 
-  (* Step 1: Scanner & Parser *)
+  (* Step 1: Scanner *)
   let lexbuf = Lexing.from_channel stdin in
 
+  (* Step 2: Parser *)
   let ast =
     try
       Parser.program Scanner.token lexbuf
@@ -31,19 +32,20 @@ let _ =
         let cnum = string_of_int (curr.Lexing.pos_cnum - curr.Lexing.pos_bol) in
         let tok = Lexing.lexeme lexbuf in
         let tail = Scanner.ruleTail "" lexbuf in
-        let seq e =
+
+        let messageForError e =
           "line " ^ line ^
-          " (char " ^ cnum ^ "): '" ^
-          tok ^ "'\n" ^
-          tok ^ tail
+          " (char " ^ cnum ^ "): " ^
+          "'" ^ tok ^ "'" ^ ""
+          (* TODO: call `^ "\n" ^ tail` here on limited for 40 chars or so *)
         in
-        raise (Error(seq exn))
+        raise (Error(messageForError exn))
       end
   in
 
   let sast = Semant.check ast in
 
-  (* Steps 2 3 *)
+  (* Steps 3: Either print AST or actually compile source *)
   match cli_arg with
     Ast -> print_string (Ast.string_of_program ast)
   | Compile -> print_string (Codegen.translate sast)
