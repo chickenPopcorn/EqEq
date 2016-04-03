@@ -6,6 +6,8 @@
 
 type cli_arg = Ast | Compile
 
+exception Error of exn * (int * int * string * string)
+
 let _ =
   let cli_arg =
     if Array.length Sys.argv > 1 then
@@ -16,10 +18,23 @@ let _ =
     else Compile
   in
 
-  let lexbuf = Lexing.from_channel stdin in
-  let ast = Parser.program Scanner.token lexbuf in
-
   (* Step 1: Scanner & Parser *)
+  let lexbuf = Lexing.from_channel stdin in
+
+  let ast =
+    try
+      Parser.program Scanner.token lexbuf
+    with exn ->
+      begin
+        let curr = lexbuf.Lexing.lex_curr_p in
+        let line = curr.Lexing.pos_lnum in
+        let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
+        let tok = Lexing.lexeme lexbuf in
+        let tail = "rest of chars" in (* TODO *)
+        raise (Error(exn,(line,cnum,tok,tail)))
+      end
+  in
+
   let sast = Semant.check ast in
 
   (* Steps 2 3 *)
