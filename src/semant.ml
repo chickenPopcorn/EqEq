@@ -43,9 +43,13 @@ let check (contexts, finds) =
 
   let varmap = List.fold_left create_varmap StringMap.empty contexts in
 
-  let check_have_context ctx_name =
-    try StringMap.find ctx_name varmap
-    with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
+  let check_have_var ctx_name var =
+    let symbolmap =
+      try StringMap.find ctx_name varmap
+      with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
+    in
+    try StringMap.find var symbolmap
+    with Not_found -> fail ("variable not defined, " ^ quot var)
   in
 
   (* Verify a statement or throw an exception *)
@@ -94,7 +98,7 @@ let check (contexts, finds) =
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    check_have_context findBlk.A.fcontext;
+    check_have_var findBlk.A.fcontext findBlk.A.ftarget;
     List.iter check_stmt findBlk.A.fbody
   in
 
