@@ -35,9 +35,7 @@ let translate (contexts, finds, varmap) =
     "double " ^ varname ^ ";\n" ^ str
   in
   let gen_decl_ctx ctx =
-    if StringMap.mem ctx.A.context varmap
-    then StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
-    else ""
+    StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
   in
   let gen_multieq multieq =
     multieq.A.fname ^
