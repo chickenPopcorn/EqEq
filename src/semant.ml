@@ -43,11 +43,7 @@ let check (contexts, finds) =
     in
     List.fold_left create_varmap StringMap.empty contexts in
 
-  let check_have_var ctx_name var =
-    let symbolmap =
-      try StringMap.find ctx_name varmap
-      with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
-    in
+  let check_have_var var symbolmap =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
@@ -98,8 +94,39 @@ let check (contexts, finds) =
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    check_have_var findBlk.A.fcontext findBlk.A.ftarget;
-    List.iter check_stmt findBlk.A.fbody
+    let symbolmap =
+      let ctx_name = findBlk.A.fcontext in
+      try StringMap.find ctx_name varmap
+      with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
+    in
+
+  (* Verify a particular `statement` in `find` or throw an exception *)
+  let rec check_stmt_for_find = function
+      | A.Block sl ->
+          (* effectively unravel statements out of their block *)
+          let rec check_block = function
+            | A.Block sl :: ss -> check_block (sl @ ss)
+            | s :: ss -> check_stmt_for_find s; check_block ss
+            | [] -> ()
+          in check_block sl
+      | A.Expr e -> (
+          (* Verify an expression or throw an exception *)
+          match e with
+              | A.Literal(lit) -> ()
+              | A.Strlit(str) -> ()
+              | A.Id(id) -> ()
+              | A.Binop(left, op, right) -> ()
+              | A.Unop(op, expr) -> ()
+              | A.Assign(left, expr) -> ()
+              | A.Builtin(name, expr) -> ()
+        )
+      | A.If(p, b1, b2) ->
+          check_stmt_for_find (A.Expr p); check_stmt_for_find b1; check_stmt_for_find b2
+      | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
+  in
+
+    check_have_var findBlk.A.ftarget symbolmap;
+    List.iter check_stmt_for_find findBlk.A.fbody
   in
 
   List.iter check_ctx contexts;
