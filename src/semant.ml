@@ -100,7 +100,7 @@ let check (contexts, finds) =
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
     in
 
-  (* Verify a statement or throw an exception *)
+  (* Verify a particular `statement` in `find` or throw an exception *)
   let rec check_stmt_for_find = function
       | A.Block sl ->
           (* effectively unravel statements out of their block *)
