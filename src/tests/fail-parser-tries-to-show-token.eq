@@ -1,7 +1,6 @@
-SomeCtx() {
-  /** ^ Note we don't have a "Ctx()" syntax */
-
-  a = { b + 40; }
+SomeCtx {
+  a = { b + 40 }
+  /** ^ Note we are missing a semi-colon */
 }
 
 SomeCtx:find a with b = 2 {
