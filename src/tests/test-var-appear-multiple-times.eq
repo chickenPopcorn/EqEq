@@ -1,6 +1,6 @@
 SomeContext = {
   a = { 42.22; }
-  a = { 42; }
+  a = { 25; }
 }
 
 SomeContext:find a {

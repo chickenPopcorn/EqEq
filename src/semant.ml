@@ -25,41 +25,23 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (* return: {key: funcdecl.fname, val: funcdecl} *)
-  let create_symbolmap map funcdecl =
-    let map =
-      if StringMap.mem funcdecl.A.fname map
-      then StringMap.remove funcdecl.A.fname map
-      else map
-    in
-    StringMap.add funcdecl.A.fname funcdecl map
-  in
-
-  (* return: {key: ctx.context, val: <ReturnValueOf`create_symbolmap`>} *)
+  (* return: {key: ctx.context, val: <AnotherMap>} *)
+  (* AnotherMap: {key: funcdecl.fname, val: funcdecl} *)
   let create_varmap map ctx =
     if StringMap.mem ctx.A.context map
     then fail ("duplicate context, " ^ (quot ctx.A.context))
     else
       StringMap.add
         ctx.A.context
-        (List.fold_left create_symbolmap StringMap.empty ctx.A.cbody)
+        (List.fold_left
+          (fun map funcdecl -> StringMap.add funcdecl.A.fname funcdecl map)
+          StringMap.empty
+          ctx.A.cbody
+        )
         map
   in
 
   let varmap = List.fold_left create_varmap StringMap.empty contexts in
-
-  (**** Map of known Context blocks keyed by their names ****)
-  let known_ctxs =
-    List.fold_left
-      (fun existing ctx ->
-         if StringMap.mem ctx.A.context existing then
-           fail ("duplicate context, " ^ (quot ctx.A.context))
-         else
-           StringMap.add ctx.A.context ctx existing
-      )
-      StringMap.empty
-      contexts
-  in
 
   let check_have_var ctx_name var =
     let symbolmap =
