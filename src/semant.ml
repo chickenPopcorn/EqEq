@@ -25,21 +25,26 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (**** Map of known Context blocks keyed by their names ****)
-  let known_ctxs =
-    List.fold_left
-      (fun existing ctx ->
-         if StringMap.mem ctx.A.context existing then
-           fail ("duplicate context, " ^ (quot ctx.A.context))
-         else
-           StringMap.add ctx.A.context ctx existing
-      )
-      StringMap.empty
-      contexts
+  (* return: {key: ctx.context, val: <AnotherMap>} *)
+  (* AnotherMap: {key: funcdecl.fname, val: funcdecl} *)
+  let create_varmap map ctx =
+    if StringMap.mem ctx.A.context map
+    then fail ("duplicate context, " ^ (quot ctx.A.context))
+    else
+      StringMap.add
+        ctx.A.context
+        (List.fold_left
+          (fun map funcdecl -> StringMap.add funcdecl.A.fname funcdecl map)
+          StringMap.empty
+          ctx.A.cbody
+        )
+        map
   in
 
+  let varmap = List.fold_left create_varmap StringMap.empty contexts in
+
   let check_have_context ctx_name =
-    try StringMap.find ctx_name known_ctxs
+    try StringMap.find ctx_name varmap
     with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
   in
 
@@ -95,4 +100,5 @@ let check (contexts, finds) =
 
   List.iter check_ctx contexts;
   List.iter check_find finds;
-  (contexts, finds)
+
+  (contexts, finds, varmap)
