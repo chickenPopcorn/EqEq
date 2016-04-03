@@ -93,24 +93,19 @@ let check (contexts, finds) =
     List.iter check_stmt findBlk.A.fbody
   in
 
-  (* return: {key: funcdecl.fname, val: funcdecl} *)
-  let create_symbolmap map funcdecl =
-    let map =
-      if StringMap.mem funcdecl.A.fname map
-      then StringMap.remove funcdecl.A.fname map
-      else map
-    in
-    StringMap.add funcdecl.A.fname funcdecl map
-  in
-
-  (* return: {key: ctx.context, val: <ReturnValueOf`create_symbolmap`>} *)
+  (* return: {key: ctx.context, val: <AnotherMap>} *)
+  (* AnotherMap: {key: funcdecl.fname, val: funcdecl} *)
   let create_varmap map ctx =
     if StringMap.mem ctx.A.context map
     then fail ("duplicate context, " ^ (quot ctx.A.context))
     else
       StringMap.add
         ctx.A.context
-        (List.fold_left create_symbolmap StringMap.empty ctx.A.cbody)
+        (List.fold_left
+          (fun map funcdecl -> StringMap.add funcdecl.A.fname funcdecl map)
+          StringMap.empty
+          ctx.A.cbody
+        )
         map
   in
 
