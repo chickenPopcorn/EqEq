@@ -3,11 +3,13 @@ Foo1 = {
 }
 
 Foo1: find a {
+  print("previous a = %.0f\n", a);
   a = 3;
-  print("%.0f\n", a);
+  print("after a = %.0f\n", a);
 }
 
 Foo1: find a {
+  print("previous a = %.0f\n", a);
   a = 5;
-  print("%.0f\n", a);
+  print("after a = %.0f\n", a);
 }

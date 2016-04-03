@@ -69,7 +69,6 @@ let translate (contexts, finds, varmap) =
   in
 
   "#include <stdio.h>\n#include <math.h>\n" ^
-  (*String.concat "" (List.map gen_ctxdecl contexts) ^*)
   String.concat "" (List.map2 gen_find_function (gen_find_funcname_list finds) finds) ^
   "int main() {\n" ^
   String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^
