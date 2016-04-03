@@ -6,7 +6,7 @@
 
 type cli_arg = Ast | Compile
 
-exception Error of exn * (int * int * string * string)
+exception Error of string
 
 let _ =
   let cli_arg =
@@ -27,11 +27,17 @@ let _ =
     with exn ->
       begin
         let curr = lexbuf.Lexing.lex_curr_p in
-        let line = curr.Lexing.pos_lnum in
-        let cnum = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
+        let line = string_of_int curr.Lexing.pos_lnum in
+        let cnum = string_of_int (curr.Lexing.pos_cnum - curr.Lexing.pos_bol) in
         let tok = Lexing.lexeme lexbuf in
-        let tail = "rest of chars" in (* TODO *)
-        raise (Error(exn,(line,cnum,tok,tail)))
+        let tail = Scanner.ruleTail "" lexbuf in
+        let seq e =
+          "line " ^ line ^
+          " (char " ^ cnum ^ "): '" ^
+          tok ^ "'\n" ^
+          tok ^ tail
+        in
+        raise (Error(seq exn))
       end
   in
 
