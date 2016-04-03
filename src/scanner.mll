@@ -63,3 +63,7 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and ruleTail acc = parse
+| eof { acc }
+| _* as str { ruleTail (acc ^ str) lexbuf }
