@@ -21,12 +21,12 @@ let identifier = lowercase (alpha_num | '_')*
 let context_id = uppercase identifier
 
 let whitespace = [' ' '\t' '\r']
-let newline = ('\n' | '\r''\n')
+let newline = '\n' | "\r\n"
 
 rule token = parse
 | whitespace                 { token lexbuf }
 | "/*"                       { comment lexbuf }
-| newline                       { Lexing.new_line lexbuf; token lexbuf }
+| newline                    { Lexing.new_line lexbuf; token lexbuf }
 | '('                        { LPAREN }
 | ')'                        { RPAREN }
 | '{'                        { LBRACE }
