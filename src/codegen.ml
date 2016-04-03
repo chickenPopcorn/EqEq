@@ -41,12 +41,19 @@ let translate (contexts, finds) =
   let gen_ctxdecl ctx =
     String.concat "" (List.map gen_multieq ctx.A.cbody)
   in
-  let gen_finddecl finddecl =
-    String.concat "" (List.map gen_stmt finddecl.A.fbody) ^
+  let gen_finddecl finddecl = 
+    String.concat "" (List.map gen_stmt finddecl.A.fbody)
+  in
+  let gen_cfunction ctx finddecl = 
+    "void " ^ finddecl.A.fcontext ^ "() {\n  " ^ (gen_ctxdecl ctx) ^ "  " ^ (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
+  let gen_cfuncname finddecl = 
+    "  " ^ finddecl.A.fcontext ^ "();\n"
+  in 
   "#include <stdio.h>\n#include <math.h>\n" ^
+  (*String.concat "" (List.map gen_ctxdecl contexts) ^*)
+  String.concat "" (List.map2 gen_cfunction contexts finds) ^
   "int main() {\n" ^
-  String.concat "" (List.map gen_ctxdecl contexts) ^
-  String.concat "" (List.map gen_finddecl finds) ^
-  "return 0;\n}\n"
+  String.concat "" (List.map gen_cfuncname finds)^
+  "  return 0;\n}\n"
