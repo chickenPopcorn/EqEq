@@ -336,9 +336,9 @@ if [ "$opt_plain" -eq 0 ];then
     "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
     "$(col grn "$numPass PASSED")"
 else
-    echo "FAILED $numFail"
-    echo "SKIPPED $numSkip"
-    echo "PASSED $numPass"
+  echo "FAILED $numFail"
+  echo "SKIPPED $numSkip"
+  echo "PASSED $numPass"
 fi
 
 [ "$numFail" -eq 0 ]
