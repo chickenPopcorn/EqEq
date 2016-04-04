@@ -46,13 +46,30 @@ let translate (contexts, finds, varmap) =
   let gen_ctxdecl ctx =
     String.concat "" (List.map gen_multieq ctx.A.cbody)
   in
-  let gen_finddecl finddecl =
-    String.concat "" (List.map gen_stmt finddecl.A.fbody) ^
+  let gen_finddecl finddecl = 
+    String.concat "" (List.map gen_stmt finddecl.A.fbody)
+  in
+  let gen_find_funcname_list finddecl_list = 
+    let rec gen_find_funcname count find_list = 
+      match find_list with
+      | [] -> []
+      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count))::(gen_find_funcname (count+1) tl)
+    in List.rev (gen_find_funcname 0 finddecl_list)
+  in 
+  let gen_find_function find_funcname finddecl = 
+    (* naming of the function: find_(context_name)_(golabl_counting_num) *)
+    "void " ^ find_funcname ^ " () {\n  " ^ 
+    String.concat ""(List.map gen_decl_ctx contexts) ^ 
+    String.concat ""(List.map gen_ctxdecl contexts) ^
+    (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
+  let gen_findfunc_call find_funcname finddecl = 
+    find_funcname ^ " ();\n"
+  in
+
   "#include <stdio.h>\n#include <math.h>\n" ^
+  String.concat "" (List.map2 gen_find_function (gen_find_funcname_list finds) finds) ^
   "int main() {\n" ^
-  String.concat "" (List.map gen_decl_ctx contexts) ^
-  String.concat "" (List.map gen_ctxdecl contexts) ^
-  String.concat "" (List.map gen_finddecl finds) ^
-  "return 0;\n}\n"
+  String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^
+  " return 0;\n}\n"

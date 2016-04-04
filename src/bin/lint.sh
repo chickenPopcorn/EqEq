@@ -35,14 +35,16 @@ declare -r expectedLineCount="$(echo "$expectedOcamlDep" | wc -l)"
   recordLint 'generated `ocamldep` in Makefile is out of date'
 
 clean # before running new lint check...
-scrapePassed() { grep '^PASSED\s\d*' | cut -f 2 -d ' '; }
-declare -r currentPassing="$(make TEST_OPTS=-p test 2>&1 | scrapePassed)"
-declare -r skippedPassing="$(make TEST_OPTS=-ps test 2>&1 | scrapePassed)"
-[ "$currentPassing" -eq "$skippedPassing" ] ||
-  recordLint "Some PASSING tests are unnecessarily skipped $(
-    printf \
-      '(probably %d should be enabled)' \
-      "$(echo "$skippedPassing - $currentPassing" | bc)"
+getPassingTests() { make TEST_OPTS="$@" test 2>&1 | \grep '^PASS' | cut -f 2 | \sort; }
+declare -r currentPassing="$(getPassingTests -p)"
+declare -r skippedPassing="$(getPassingTests -ps)"
+[ "$currentPassing" != "$skippedPassing" ] &&
+  recordLint "Some PASSING tests are unnecessarily skipped: $(
+    printf '\n%s' "$(
+      grep -vf \
+        <(printf '%s\n' "$currentPassing") \
+        <(printf '%s\n' "$skippedPassing")
+    )"
   )"
 
 clean # before running new lint check...
@@ -54,4 +56,5 @@ if ! makeDebugTokens >/dev/null 2>&1 ||
     'Scanner&Parser changes not shared w/debugtokens! See: `make debugtokens`'
 fi
 
+printf '\n' >&2 # visual bumper
 exit $lintFound
