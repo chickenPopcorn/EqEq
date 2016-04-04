@@ -236,9 +236,9 @@ CheckTest() {
 
     printUnitResult $(unitTagFromExit 1) | tee -a "$suiteLog"
     if [ "$expectExit" -eq 0 ];then
-      printf '\tEqEq source unexpectedly failed to compile\n' >> "$suiteLog"
+      printf '\tEqEq source unexpectedly failed to compile\n' | tee -a "$suiteLog"
     else
-      printf '\tBad EqEq source compiled, but failure expected\n' >> "$suiteLog"
+      printf '\tBad EqEq source compiled, but failure expected\n' | tee -a "$suiteLog"
     fi
     return 1
   fi
