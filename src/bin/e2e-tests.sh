@@ -171,6 +171,7 @@ CheckTest() {
   local testDir="$(dirname "$eqTestSrc")"
   local expectExit=$2; { [ "$expectExit" -eq 0 ] || [ "$expectExit" -eq 1 ]; }
   local testNum=$3
+  local labelBlu="$(col blu "$(labelOfSource "$eqTestSrc")")"
 
   # Print what we're up to
   local expectSummary="$(
@@ -180,8 +181,7 @@ CheckTest() {
       echo 'compilation fails'
     fi
   )"
-  printf '[%2d] "%s"\tasserting %s\t' \
-    $testNum "$(col blu "$(labelOfSource "$eqTestSrc")")" "$expectSummary" |
+  printf '[%2d] "%s"\tasserting %s\t' $testNum "$labelBlu" "$expectSummary" |
     tee -a "$suiteLog"
 
   # Derivative files we expect present
