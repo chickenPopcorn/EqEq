@@ -54,11 +54,56 @@ _(eg: "expression 4" in our main example doesn't interfere with "expression
 
 ### Algorithm in Pseudocode
 
-TODO: explain
+Most helpful is the table shown in [TODO add link to whiteboard of nam's]()
+
+```c
+for CTX'
+  for EQ' = { ID', ASSGN, EXPR' } // note: only ASSIGN exprs exist
+    if EXPR' contains IDs
+      sast.get(CTX').deps.add(ID', getListOfIdsFromExpr(EXPR'))
+    else
+      sast.get(CTX').indeps.add(ID', EXPR')
+
+  FIND_INDEX = 0
+  for FIND' = { CTX', FIND_DECL' }
+    NAME = "find_%s_%s_%d" FIND' CTX' FIND_INDEX
+
+    EXPR_INDEX = 0
+
+    FIND_MAP = (sast.get(CTX').deps, sast.get(CTX').indeps)
+    EXPR_MAP = <EXPR_INDEX, FIND_MAP>
+    sast.get(CTX').FindMap.add(NAME, EXPR_MAP)
+
+    for EXPR'
+      EXPR_MAP = sast.get(CTX').FindMap.get(NAME).get(EXPR_INDEX) || EXPR_MAP
+
+      Match EXPR' with:
+        | ASSIGN' = { ID', ASSGN, EXPR" } ->
+            for ID" in EXPR"
+                if ID" is not in FIND_MAP.indeps
+                    throw "unresolvable expression"
+
+            if ID' exists in FIND_MAP
+              EXPR_MAP = sast.get(CTX').FindMap.get(NAME).add(
+                  EXPR_INDEX,
+                  copy(EXPR_MAP))
+
+              FIND_MAP.indeps.add(ID', EXPR")
+            else
+              FIND_MAP.indeps.add(ID', EXPR")
+        | _ ->
+            for ID' in EXPR'
+                throw if ID' unresolvable per FIND_MAP
+
+      ++EXPR_INDEX
+
+    ++FIND_INDEX
+
+```
 
 ## Codegen from SAST
 
-TODO: explain
+TODO: explain how to unwrap/utilize sast
 
 ### Questions
 
