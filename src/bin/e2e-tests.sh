@@ -217,7 +217,7 @@ CheckTest() {
 
     local left="$expected" right="$actual"
     if [ "$expectExit" -eq 0 ];then
-      if ! "$eqToObj" "$eqTarget" -o "$eqTargetObj" 2>&1;then
+      if ! "$eqToObj" "$eqTarget" -o "$eqTargetObj" 2>&1 | log;then
         printf \
           "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
           log
@@ -233,7 +233,7 @@ CheckTest() {
     diffFiles "$left" "$right" > "$diffR"
     printUnitResult "$(unitTagFromExit $?)"
     if [ "$opt_verbose" -eq 1 ];then
-      cat "$diffR"
+      cat "$diffR" | log
     fi
 
     [ "$(wc -l < "$diffR")" -eq 0 ]; return $?
@@ -259,7 +259,7 @@ isTestPresent() {
 }
 
 # Running with *previously* generated files just makes my brain explode...
-cleanGeneratedFiles
+cleanGeneratedFiles | log
 touch "$suiteLog"
 
 # Print test suite outline
