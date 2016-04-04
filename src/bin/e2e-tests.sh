@@ -257,9 +257,15 @@ cleanGeneratedFiles
 touch "$suiteLog"
 
 # Print test suite outline
-printf '\nRunning %s:\n\t%s\n\n' \
+printf '\nRunning %s:\n%s\n' \
   "$(col blu "$(printf '%d tests' ${#testFiles[@]})")" \
-  "$(printf '%s, ' "${testFiles[@]}")"
+  "$(pr -tw90 -2 <(
+    for file in ${testFiles[@]}; do
+      printf '  "%s"\n' "$(
+        labelOfSource "$file" | sed -e 's|^test-||' -e 's|^fail-||' -e 's|-| |g'
+      )"
+    done
+  ))"
 
 # Test suite's stats:
 testNum=0; numFail=0; numSkip=0; numPass=0;
