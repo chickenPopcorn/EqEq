@@ -138,8 +138,14 @@ else
   ))
 fi
 
+log() {
+  local maybeStderr=2
+  if [ "$opt_plain" -eq 1 ];then maybeStderr=/dev/null; fi
+  cat /dev/stdin | tee -a "$suiteLog" >&"$maybeStderr"
+}
+
 diffFiles()  { \diff --ignore-space-change "$1" "$2"; }
-printUnitResult() { printf '\tResult:\t%s\n' "$1"; } # usage: [PASS|FAIL]
+printUnitResult() { printf '\tResult:\t%s\n' "$1" | log; } # usage: [PASS|FAIL]
 unitTagFromExit() { if [ $1 -eq 0 ];then col grn PASS; else col red FAIL;fi }
 # Get path to sibling we'll be generating with suffix $1 as sibling to $2
 pathToGenSib() {
@@ -171,9 +177,9 @@ CheckTest() {
   local testDir="$(dirname "$eqTestSrc")"
   local expectExit=$2; { [ "$expectExit" -eq 0 ] || [ "$expectExit" -eq 1 ]; }
   local testNum=$3
-  local labelBlu="$(col blu "$(labelOfSource "$eqTestSrc")")"
 
   # Print what we're up to
+  local labelBlu="$(col blu "$(labelOfSource "$eqTestSrc")")"
   local expectSummary="$(
     if [ "$expectExit" -eq 0 ];then
       echo "target's behavior"
@@ -181,18 +187,18 @@ CheckTest() {
       echo 'compilation fails'
     fi
   )"
-  printf '[%2d] "%s"\tasserting %s\t' $testNum "$labelBlu" "$expectSummary" |
-    tee -a "$suiteLog"
+  printf '[%2d] "%s"\tasserting %s\t' \
+    $testNum "$labelBlu" "$expectSummary" | log
 
   # Derivative files we expect present
   local expected="$(pathToGenSib "$(
     if [ "$expectExit" -eq 0 ];then printf out; else printf err;fi
   )" "$eqTestSrc")";
   if ! [ -f "$expected" ];then
-    printUnitResult $(unitTagFromExit 1) | tee -a "$suiteLog"
+    printUnitResult $(unitTagFromExit 1)
     printf \
       'BUG: cannot test without expecation file:\n\t%s\n' \
-      "$expected" >> "$suiteLog"
+      "$expected" | log
     return 1
   fi
 
@@ -213,9 +219,9 @@ CheckTest() {
     if [ "$expectExit" -eq 0 ];then
       if ! "$eqToObj" "$eqTarget" -o "$eqTargetObj" 2>&1;then
         printf \
-          "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" \
-          >> "$suiteLog"
-          return 1
+          "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
+          log
+        return 1
       fi
 
       # Run our compield test target (itself compiled with eqCompiler)
@@ -225,7 +231,7 @@ CheckTest() {
     fi
 
     diffFiles "$left" "$right" > "$diffR"
-    printUnitResult "$(unitTagFromExit $?)" | tee -a "$suiteLog"
+    printUnitResult "$(unitTagFromExit $?)"
     if [ "$opt_verbose" -eq 1 ];then
       cat "$diffR"
     fi
@@ -234,11 +240,11 @@ CheckTest() {
   else
     # EqEq compiler did opposite of what we expected with sample source
 
-    printUnitResult $(unitTagFromExit 1) | tee -a "$suiteLog"
+    printUnitResult $(unitTagFromExit 1)
     if [ "$expectExit" -eq 0 ];then
-      printf '\tEqEq source unexpectedly failed to compile\n' | tee -a "$suiteLog"
+      printf '\tEqEq source unexpectedly failed to compile\n' | log
     else
-      printf '\tBad EqEq source compiled, but failure expected\n' | tee -a "$suiteLog"
+      printf '\tBad EqEq source compiled, but failure expected\n' | log
     fi
     return 1
   fi
@@ -257,25 +263,33 @@ cleanGeneratedFiles
 touch "$suiteLog"
 
 # Print test suite outline
-printf '\nRunning %s:\n%s\n' \
-  "$(col blu "$(printf '%d tests' ${#testFiles[@]})")" \
-  "$(pr -tw90 -2 <(
-    for file in ${testFiles[@]}; do
-      printf '  "%s"\n' "$(
-        labelOfSource "$file" | sed -e 's|^test-||' -e 's|^fail-||' -e 's|-| |g'
-      )"
-    done
-  ))"
+if [ "$opt_plain" -eq 0 ];then
+  printf '\nRunning %s:\n%s\n' \
+    "$(col blu "$(printf '%d tests' ${#testFiles[@]})")" \
+    "$(pr -tw90 -3 <(
+      for file in ${testFiles[@]}; do
+        printf '  "%s"\n' "$(
+          labelOfSource "$file" |
+            sed -e 's|^test-||' -e 's|^fail-||' -e 's|-| |g'
+        )"
+      done
+    ))"
+fi
 
 # Test suite's stats:
 testNum=0; numFail=0; numSkip=0; numPass=0;
+logPlain() {
+  if [ "$opt_plain" -eq 0 ];then return 0; fi
+
+  local label="$1" status="$2"
+  printf '%s\t%s\n' "$status" "$label"
+}
 skip() {
   local testNum="$1"; shift 1;
   printf '[%2d] %s\t%s\tResult: %s\n' \
-    $testNum "$(col blu WARNING)" "$*" "$(col ylw SKIP)"
+    $testNum "$(col blu WARNING)" "$*" "$(col ylw SKIP)" | log
   numSkip=$(( numSkip + 1 ))
 }
-
 isMarkedSkip() { echo "$1" | \grep -E ".*-.*\.skip\.$srcExt" >/dev/null; }
 
 sincePreviousTestLine=1
@@ -285,6 +299,7 @@ for testFile in "${testFiles[@]}"; do
 
   if isMarkedSkip "$testFile" && [ "$opt_runSkip" -eq 0 ];then
     skip $testNum "'$label' not implemented"
+    logPlain "$label" SKIP
     continue;
   fi
 
@@ -293,6 +308,7 @@ for testFile in "${testFiles[@]}"; do
     fail-*.$srcExt) expectExit=1;;
     *)
       skip $testNum "not a fail or test file '$testFile'"
+      logPlain "$label" SKIP
       continue;
       ;;
   esac
@@ -306,8 +322,10 @@ for testFile in "${testFiles[@]}"; do
 
   # Run test
   if CheckTest "$testFile" "$expectExit" "$testNum";then
+    logPlain "$label" PASS
     numPass=$(( numPass + 1 ))
   else
+    logPlain "$label" FAIL
     numFail=$(( numFail + 1 ))
   fi
 
@@ -336,9 +354,9 @@ if [ "$opt_plain" -eq 0 ];then
     "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
     "$(col grn "$numPass PASSED")"
 else
-  echo "FAILED $numFail"
-  echo "SKIPPED $numSkip"
-  echo "PASSED $numPass"
+  echo "TOTAL FAILED $numFail"
+  echo "TOTAL SKIPPED $numSkip"
+  echo "TOTAL PASSED $numPass"
 fi
 
 [ "$numFail" -eq 0 ]

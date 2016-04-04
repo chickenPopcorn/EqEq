@@ -35,7 +35,7 @@ declare -r expectedLineCount="$(echo "$expectedOcamlDep" | wc -l)"
   recordLint 'generated `ocamldep` in Makefile is out of date'
 
 clean # before running new lint check...
-scrapePassed() { grep '^PASSED\s\d*' | cut -f 2 -d ' '; }
+scrapePassed() { grep '^TOTAL PASSED\s\d*' | cut -f 3 -d ' '; }
 declare -r currentPassing="$(make TEST_OPTS=-p test 2>&1 | scrapePassed)"
 declare -r skippedPassing="$(make TEST_OPTS=-ps test 2>&1 | scrapePassed)"
 [ "$currentPassing" -eq "$skippedPassing" ] ||
