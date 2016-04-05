@@ -103,7 +103,39 @@ for CTX'
 
 ## Codegen from SAST
 
-TODO: explain how to unwrap/utilize sast
+```c
+for CTX' in AST
+  for (EQNAME,DEPS) sast.get(CTX').deps
+      C_FUNC_NAME = '%s_eq_%s' CTX' EQNAME
+      generate C function called C_FUNC_NAME with params DEPS
+
+FIND_INDEX = 0
+for FIND' = {CTX', FIND_TARG} in AST
+  FIND_NAME = "find_%s_%d" CTX' FIND_INDEX
+
+  generate C function called FIND_NAME where body is remainder of this for loop:
+
+  EXPR_INDEX = 1 // TODO: fix code above (and here) to use 0-index
+  for EXPR' in FIND'
+    FIND_MAP = sast.get(CTX').FindMap.get(EXPR_INDEX) || FIND_MAP
+    match EXPR' with
+      | ASSIGN ->
+          {ID', ASSGN, EXPR"} = EXPR'
+          for ID' in EXPR"
+            if ID' in FIND_DEPS.indeps
+              print ID' (in-place) as is
+            else
+              print ID' (in-place) as a function call with its deps provided
+      | _ ->
+          for ID' in EXPR'
+            if ID' in FIND_DEPS.indeps
+              print ID' as is
+            else
+              print ID' as a function call with its deps provided
+    ++EXPR_INDEX
+
+  ++FIND_INDEX
+```
 
 ### Questions
 
