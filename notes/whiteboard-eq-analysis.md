@@ -106,7 +106,7 @@ for CTX'
 
   FIND_INDEX = 0
   for FIND' = { CTX', FIND_DECL' }
-    NAME = "find_%s_%s_%d" FIND' CTX' FIND_INDEX
+    NAME = "find_%s_%d" CTX' FIND_INDEX
 
     EXPR_INDEX = 0
 
