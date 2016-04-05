@@ -8,8 +8,12 @@ our semantic analysis outputs for codegen's use)_.
 
 ## EqualsEquals Demonstration
 
-```js
-FooCtx = { y = mx + 3; }
+Examples below may make note of this EqualsEquals example:
+```c
+FooCtx = {
+  y = mx + 3;
+  w = 2;
+}
 
 FooCtx:find {
   m = 3; x = 4;  // expresions 1 and 2
@@ -19,6 +23,42 @@ FooCtx:find {
 }
 
 FooCtx:find { print(99); }
+```
+
+Such an EqualsEquals program would generate the SAST, described below, _(written
+as JSON for convenience here)_:
+```js
+{
+  "FooCtx": [
+    { "y": ["m", "x"] },
+    { "w": Ast.Expr(Ast.Lit(2)) },
+    {
+      "find_FooCtx_0": {
+        1: [
+          { "y": ["m", "x"] },
+          {
+            "w": Ast.Expr(Ast.Lit(2)),
+            "m": Ast.Expr(Ast.Lit(3)),
+            "x": Ast.Expr(Ast.Lit(4))
+          },
+        ]
+        4: [
+          { },
+          {
+            "w": Ast.Expr(Ast.Lit(2)),
+            "m": Ast.Expr(Ast.Lit(3)),
+            "x": Ast.Expr(Ast.Lit(4)),
+            "y": Ast.Expr(Ast.Lit(8))
+          },
+        ]
+      },
+      "find_FooCtx_1": [
+        { "y": ["m", "x"] },
+        { "w": Ast.Expr(Ast.Lit(2)) }
+      ]
+    }
+  ]
+}
 ```
 
 ## Semantic Analysis
@@ -141,9 +181,3 @@ for FIND' = {CTX', FIND_TARG} in AST
 
 1. What does the ocaml look like for our SAST struct?
 2. What have we not considered for `if`/`else`/`while` statemnets
-
----
-
-# Whiteboard Photos
-
-TODO: inline whiteboardified photos
