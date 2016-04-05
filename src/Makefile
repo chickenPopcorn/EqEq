@@ -63,6 +63,8 @@ eqeq.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
 eqeq.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
+sast.cmo : ast.cmo
+sast.cmx : ast.cmx
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
 semant.cmo : ast.cmo
