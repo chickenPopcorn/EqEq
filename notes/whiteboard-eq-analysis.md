@@ -6,6 +6,15 @@ _(with dependencies full features allowed in our LRM, ie: dependencies)_.
 Note "SAST" below refers to Edwards' "semanticly-annotated"-AST _(ie: whatever
 our semantic analysis outputs for codegen's use)_.
 
+  - [EqualsEquals Demonstration](#equalsequals-demonstration)
+  - [Semantic Analysis](#semantic-analysis)
+    - [SAST API Exposed to Codegen](#sast-api-exposed-to-codegen)
+    - [Algorithm in Pseudocode](#algorithm-in-pseudocode)
+  - [Codegen from SAST](#codegen-from-sast)
+    - [Questions](#questions)
+
+---
+
 ## EqualsEquals Demonstration
 
 Examples below may make note of this EqualsEquals example:
