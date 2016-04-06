@@ -67,10 +67,13 @@ let check (contexts, finds) =
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
               | A.Builtin(name, expr) -> ()
+
         )
       | A.If(p, b1, b2) ->
           check_stmt (A.Expr p); check_stmt b1; check_stmt b2
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
+      | A.Continue() -> ()
+      | A.Break() -> ()
   in
 
   (**** Checking Context blocks  ****)
@@ -119,10 +122,13 @@ let check (contexts, finds) =
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
               | A.Builtin(name, expr) -> ()
+
         )
       | A.If(p, b1, b2) ->
           check_stmt_for_find (A.Expr p); check_stmt_for_find b1; check_stmt_for_find b2
       | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
+      | A.Continue() -> ()
+      | A.Break() -> ()
   in
 
     check_have_var findBlk.A.ftarget symbolmap;

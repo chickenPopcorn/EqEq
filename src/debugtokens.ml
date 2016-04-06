@@ -29,6 +29,8 @@ let stringify = function
   | IF -> "IF"
   | ELSE -> "ELSE"
   | WHILE -> "WHILE"
+  | BREAK -> "BREAK"
+  | CONTINUE -> "CONTINUE"
   | STRLIT(lxm) -> "STRLIT"
   | FIND -> "FIND"
   | LITERAL(lxm) -> "LITERAL"

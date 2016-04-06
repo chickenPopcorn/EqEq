@@ -7,7 +7,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
 %token PLUS MINUS TIMES DIVIDE MOD POW ABS ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token IF ELSE WHILE FIND
+%token IF ELSE WHILE FIND BREAK CONTINUE
 %token <float> LITERAL
 %token <string> ID
 %token <string> STRLIT
@@ -81,6 +81,9 @@ stmt:
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block(List.rev $6), Block(List.rev $10)) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | FIND stmt_list RBRACE { Block(List.rev $2) }
+  | BREAK SEMI {Break()}
+  | CONTINUE SEMI {Continue()}
+
 
 expr:
     literal          { $1 }

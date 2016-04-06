@@ -14,11 +14,14 @@ type expr =
   | Assign of string * expr
   | Builtin of string * expr list
 
+
 type stmt =
     Block of stmt list
   | Expr of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
+  | Break of unit
+  | Continue of unit
 
 (* func: we call this a "multi-line equation" *)
 type multi_eq = {
@@ -74,6 +77,7 @@ let rec string_of_expr = function
   | Builtin(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
 
+
 let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
@@ -82,6 +86,8 @@ let rec string_of_stmt = function
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ "){\n" ^
       string_of_stmt s1 ^ "}else{\n" ^ string_of_stmt s2 ^"}"
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | Break() -> "break"
+  | Continue() -> "continue"
 
 let string_of_multieq multieq =
   multieq.fname ^

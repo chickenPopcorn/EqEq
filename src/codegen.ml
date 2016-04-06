@@ -21,6 +21,7 @@ let translate (contexts, finds, varmap) =
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
     | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
+
   in
   let rec gen_stmt = function
     | A.Block(stmts) ->
@@ -30,6 +31,8 @@ let translate (contexts, finds, varmap) =
     | A.If(e, s1, s2) ->  "if (" ^ gen_expr e ^ ")\n" ^
         gen_stmt s1 ^ "else\n" ^ gen_stmt s2
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
+    | A.Continue() -> "continue ;\n"
+    | A.Break() -> "break ;\n" 
   in
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
