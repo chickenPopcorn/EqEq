@@ -103,8 +103,6 @@ _(eg: "expression 4" in our main example doesn't interfere with "expression
 
 ### Algorithm in Pseudocode
 
-Most helpful is the table shown in [TODO add link to whiteboard of nam's]()
-
 ```c
 for CTX'
   for EQ' = { ID', ASSGN, EXPR' } // note: only ASSIGN exprs exist
