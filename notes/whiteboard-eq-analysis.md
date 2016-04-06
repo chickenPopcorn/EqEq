@@ -1,9 +1,9 @@
-# Brainstorm Whiteboarding & Notes
+# Brainstorm White-boarding & Notes
 
 Below we describe the API between semantic analysis and codegen of equations
 _(with dependencies full features allowed in our LRM, ie: dependencies)_.
 
-Note "SAST" below refers to Edwards' "semanticly-annotated"-AST _(ie: whatever
+Note "SAST" below refers to Edwards' "semantically-annotated"-AST _(ie: whatever
 our semantic analysis outputs for codegen's use)_.
 
   - [EqualsEquals Demonstration](#equalsequals-demonstration)
@@ -25,10 +25,10 @@ FooCtx = {
 }
 
 FooCtx:find {
-  m = 3; x = 4;  // expresions 1 and 2
-  print(y);      // expresion  3
-  y = 8;         // expresion  4
-  print(y);      // expresion  5
+  m = 3; x = 4;  // expressions 1 and 2
+  print(y);      // expression  3
+  y = 8;         // expression  4
+  print(y);      // expression  5
 }
 
 FooCtx:find { print(99); }
@@ -93,7 +93,7 @@ the string `FooCtx`), where values are tuples with three items:
   2. `indeps` built for `FooCtx` _(described above)_
   3. "FindMap": a map specific to `FootCtx`, described below.
 
-"FindMap" is a map of our analsys of each `Ast.find_decl` for a given context.
+"FindMap" is a map of our analysis of each `Ast.find_decl` for a given context.
 The keys of a "FindMap" map are the relative expression index in said
 `find_decl` where value is `(deps, indeps)` as inherited and modified up to that
 particular expression in the find block. This is the key design choice that
@@ -189,4 +189,4 @@ for FIND' = {CTX', FIND_TARG} in AST
 ### Questions
 
 1. What does the ocaml look like for our SAST struct?
-2. What have we not considered for `if`/`else`/`while` statemnets
+2. What have we not considered for `if`/`else`/`while` statements
