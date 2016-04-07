@@ -7,14 +7,14 @@ SomeContext:find a {
     a = 3;
 
   }
-  elif (3>4){
+  else if (3>4){
     a = 4;
   }
-  elif (3>4){
+  else if (3>4){
     a = 4;
 
   }
-  elif (3>4){
+  else if (3>4){
     a = 4;
   }
   else{
