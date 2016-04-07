@@ -14,7 +14,6 @@ open Ast
 %token <string> CTX
 %token EOF
 
-%nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
 %left OR
@@ -77,13 +76,16 @@ stmt_list:
 stmt:
     expr SEMI { Expr $1 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ $8 @ [ ConStmts(Some($3), List.rev $6) ])) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [ ConStmts(Some($3), List.rev $6) ])) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | FIND stmt_list RBRACE { Block(List.rev $2) }
 
 elif_stmt_list:
     /* nothing */ { [] }
-    | ELIF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list { $8 @ [ ConStmts(Some($3), List.rev $6) ] }
+    | elif_stmt_list elif_stmt { $1 @ $2 }
+
+elif_stmt:
+    | ELSE IF LPAREN expr RPAREN LBRACE stmt_list RBRACE { [ConStmts(Some($4), List.rev $7)] }
 
 else_stmt:
     /* nothing */ { [] }
