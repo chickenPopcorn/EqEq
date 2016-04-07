@@ -1,13 +1,14 @@
 alpha(3) squared is 9
 alpha minus 2 is 1
 alpha plus alpha is 6
-alpha divided by 2 is 1
+alpha divided by 2 is 1.50
 alpha modulo 2 is 1
 negative alpha is -3
-alpha negated is 1
-alpha double negated is 0
-alpha greater than 2 is 1 (1:tr, 0:fls)
-alpha greater than or equal to 2 is 1 (1:tr, 0:fls)
-alpha less than 2 is 0 (1:tr, 0:fls)
-alpha less than or equal to 2 is 0 (1:tr, 0:fls)
+1 is true, 0 is false
+alpha negated is 0
+alpha double negated is 1
+alpha greater than 2 is 1
+alpha greater than or equal to 2 is 1
+alpha less than 2 is 0
+alpha less than or equal to 2 is 0
 alpha times 2 plus 1 is 7
