@@ -11,17 +11,17 @@ BasicMaths:find alpha {
   print("negative alpha is %0.f\n", -alpha);
 
   print("1 is true, 0 is false\n");
-  print("alpha negated is %d\n", !alpha);
-  print("alpha double negated is %d\n", !!alpha);
+  print("alpha negated is %0.f\n", !alpha);
+  print("alpha double negated is %0.f\n", !!alpha);
 
-  print("alpha greater than %0.f is %d\n", 2, alpha > 2);
+  print("alpha greater than %0.f is %0.f\n", 2, alpha > 2);
   print(
-    "alpha greater than or equal to %0.f is %d\n",
+    "alpha greater than or equal to %0.f is %0.f\n",
     2, alpha >= 2);
 
-  print("alpha less than %0.f is %d\n", 2, alpha < 2);
+  print("alpha less than %0.f is %0.f\n", 2, alpha < 2);
   print(
-    "alpha less than or equal to %0.f is %d\n",
+    "alpha less than or equal to %0.f is %0.f\n",
     2, alpha <= 2);
 
   print(
