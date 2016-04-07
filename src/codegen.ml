@@ -28,8 +28,16 @@ let translate (contexts, finds, varmap) =
         "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n"
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
-    | A.If (l) ->  A.string_of_first_cond_exec (List.hd l) ^ "\n" ^
-    (String.concat "\n" (List.map A.string_of_cond_exec (List.tl l)))
+    | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
+    (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
+
+  and string_of_first_cond_exec = function
+    | A.ConStmts(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts))
+    | A.ConStmts(Some(expr), stmts) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
+
+  and string_of_cond_exec = function
+    | A.ConStmts(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^"}\n"
+    | A.ConStmts(Some(expr), stmts) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
 
   in
   let gen_decl_var varname funcdecl str =

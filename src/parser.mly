@@ -77,19 +77,17 @@ stmt_list:
 stmt:
     expr SEMI { Expr $1 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ $8 @ [ CondExec(Some($3), $6) ])) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ $8 @ [ ConStmts(Some($3), List.rev $6) ])) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | FIND stmt_list RBRACE { Block(List.rev $2) }
 
 elif_stmt_list:
     /* nothing */ { [] }
-    | ELIF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list { $8 @ [ CondExec(Some($3), $6) ] }
+    | ELIF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list { $8 @ [ ConStmts(Some($3), List.rev $6) ] }
 
 else_stmt:
     /* nothing */ { [] }
-    | ELSE LBRACE stmt_list RBRACE { [CondExec(None, $3)] }
-
-
+    | ELSE LBRACE stmt_list RBRACE { [ConStmts(None, List.rev $3)] }
 
 expr:
     literal          { $1 }
