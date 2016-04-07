@@ -17,8 +17,11 @@ type expr =
 type stmt =
     Block of stmt list
   | Expr of expr
-  | If of expr * stmt * stmt
+  | If of cond_exec list
   | While of expr * stmt
+
+and cond_exec =
+   CondExec of expr option * stmt list
 
 (* func: we call this a "multi-line equation" *)
 type multi_eq = {
@@ -78,10 +81,17 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ "){\n" ^string_of_stmt s^"}"
-  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ "){\n" ^
-      string_of_stmt s1 ^ "}else{\n" ^ string_of_stmt s2 ^"}"
+  | If(conds) -> string_of_first_cond_exec (List.hd conds) ^ "\n" ^
+  (String.concat "\n" (List.map string_of_cond_exec (List.tl conds)))
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+
+and string_of_first_cond_exec = function
+  | CondExec(None, stmts) -> "else:" ^ (String.concat "\n" (List.map string_of_stmt stmts))
+  | CondExec(Some(expr), stmts) -> "if " ^ (string_of_expr expr) ^ ":\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
+
+and string_of_cond_exec = function
+  | CondExec(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^"}\n"
+  | CondExec(Some(expr), stmts) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
 
 let string_of_multieq multieq =
   multieq.fname ^
