@@ -7,20 +7,21 @@ SomeContext:find a {
     a = 3;
 
   }
-  elif (4>3){
-    a = 4;
-    print("%.0f\n", a);
-    print("%.0f\n", a+1);
-    print("%.0f\n", a+2);
-  }
-  elif (4>3){
+  elif (3>4){
     a = 4;
   }
-  elif (4>3){
+  elif (3>4){
+    a = 4;
+
+  }
+  elif (3>4){
     a = 4;
   }
   else{
     a =0;
+    print("%.0f\n", a);
+    print("%.0f\n", a+1);
+    print("%.0f\n", a+2);
   }
   print("%.0f\n", a);
 }
