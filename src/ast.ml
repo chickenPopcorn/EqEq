@@ -66,16 +66,16 @@ let string_of_uop = function
   | Not -> "!"
   | Abs -> "|"
 
-let rec string_of_expr = function
-    Strlit(l) -> "\"" ^ l ^ "\""
-  | Literal(l) -> string_of_float l
-  | Id(s) -> s
-  | Binop(e1, o, e2) ->
-      string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
-  | Unop(o, e) -> string_of_uop o ^ string_of_expr e
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
-  | Builtin(f, el) ->
-      f ^ "f(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  let rec string_of_expr = function
+      Strlit(l) -> l
+    | Literal(l) -> string_of_float l
+    | Id(s) -> s
+    | Binop(e1, o, e2) ->
+        string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
+    | Unop(o, e) -> string_of_uop o ^ string_of_expr e
+    | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+    | Builtin(f, el) ->
+        f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
 
 let rec string_of_stmt = function
     Block(stmts) ->
