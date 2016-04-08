@@ -4,7 +4,7 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
-let translate (contexts, finds, varmap) =
+let translate (contexts, finds, varmap, liblist) =
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
     | A.Literal(l) -> string_of_float l
@@ -73,8 +73,17 @@ let translate (contexts, finds, varmap) =
   let gen_findfunc_call find_funcname finddecl = 
     find_funcname ^ " ();\n"
   in
-
-  "#include <stdio.h>\n#include <math.h>\n" ^
+  let lib=
+    let header head elem=
+      match elem with
+      |"%" -> if (not(List.mem "#include <math.h>\n" head)) then "#include <math.h>\n"::head else head
+      |"^" -> if (not(List.mem "#include <math.h>\n" head)) then "#include <math.h>\n"::head else head
+      |"|" -> if (not(List.mem "#include <math.h>\n" head)) then "#include <math.h>\n"::head else head
+      |"print" -> if (not(List.mem "#include <stdio.h>\n" head)) then "#include <stdio.h>\n"::head else head
+      |_ -> head 
+    in (List.fold_left header [] liblist)
+  in 
+  String.concat "" lib ^ 
   String.concat "" (List.map2 gen_find_function (gen_find_funcname_list finds) finds) ^
   "int main() {\n" ^
   String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^

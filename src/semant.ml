@@ -41,7 +41,49 @@ let check (contexts, finds) =
           )
           map
     in
-    List.fold_left create_varmap StringMap.empty contexts in
+    List.fold_left create_varmap StringMap.empty contexts 
+   in
+   let liblist = 
+    let rec add_lib_expre lis expre =
+        match expre with
+        | A.Binop(left,op,right)-> (
+            match op with 
+            |A.Mod -> "%"::lis
+            |A.Pow -> "^"::lis 
+            |_ -> ""::lis )
+        | A.Unop(op, expr) -> (
+            match op with
+            |A.Abs -> "|"::lis
+            |_ -> ""::lis )
+        | A.Builtin(name, expr) -> (
+            match name with
+            |"print" -> "print"::(List.fold_left add_lib_expre lis expr)
+            |_ -> List.fold_left add_lib_expre lis expr )
+        |_ -> lis
+    in
+    let rec add_lib_stmt lis stmt =
+        match stmt with 
+            |A.Expr e-> add_lib_expre lis e 
+            |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
+            |A.If(p, b1, b2) -> List.append (add_lib_stmt lis b1) (add_lib_stmt lis b2)
+            |A.While(p, s) -> add_lib_stmt lis s
+    in 
+    let create_liblist_finds lis finds = 
+      List.fold_left 
+        add_lib_stmt
+        lis
+        finds.A.fbody
+    in
+    let create_liblist_ctx lis ctx = 
+      List.fold_left 
+        add_lib_stmt
+        lis
+        ctx.A.fdbody
+    in 
+    List.append 
+    (List.fold_left create_liblist_finds [] finds)
+    (List.fold_left (fun lis eq -> List.fold_left create_liblist_ctx lis eq.A.cbody) [] contexts)
+  in 
 
   let check_have_var var symbolmap =
     try StringMap.find var symbolmap
@@ -132,4 +174,4 @@ let check (contexts, finds) =
   List.iter check_ctx contexts;
   List.iter check_find finds;
 
-  (contexts, finds, varmap)
+  (contexts, finds, varmap, liblist)
