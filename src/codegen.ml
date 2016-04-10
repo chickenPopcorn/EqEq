@@ -19,7 +19,13 @@ let translate (contexts, finds, varmap) =
                           | "|" -> "fabs(" ^ gen_expr e ^ ")"
                           | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
-    | A.Builtin("print", el) -> "printf(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
+    | A.Builtin("print", el) -> let generate_expr el = List.map gen_expr el in 
+                                let check_type expr_str = 
+                                    match expr_str with
+                                    | [] -> "printf()"
+                                    | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^ String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^ ")"
+                                                else "printf(" ^ hd ^ ")"
+                                in check_type (generate_expr el)
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
   in
 
