@@ -55,8 +55,8 @@ clean :
 #      ocamldep *.ml *.mli
 ast.cmo :
 ast.cmx :
-codegen.cmo : ast.cmo
-codegen.cmx : ast.cmx
+codegen.cmo : sast.cmo ast.cmo
+codegen.cmx : sast.cmx ast.cmx
 debugtokens.cmo : scanner.cmo parser.cmi ast.cmo
 debugtokens.cmx : scanner.cmx parser.cmx ast.cmx
 eqeq.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
@@ -67,6 +67,6 @@ sast.cmo : ast.cmo
 sast.cmx : ast.cmx
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
-semant.cmo : ast.cmo
-semant.cmx : ast.cmx
+semant.cmo : sast.cmo ast.cmo
+semant.cmx : sast.cmx ast.cmx
 parser.cmi : ast.cmo
