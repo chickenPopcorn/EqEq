@@ -27,31 +27,25 @@ let check (contexts, finds) =
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
   let eqrelations =
-    let rec hasAssignContainingId isPresent stmt =
-      if isPresent then true
-      else
-        let rec isExprWithIdPresent = function
-              A.Literal(_) -> false
-            | A.Id(_) -> true
-            | A.Strlit(_) -> false
-            | A.Binop(e1,_,e2) -> isExprWithIdPresent e1 || isExprWithIdPresent e2
-            | A.Unop(_,e) -> isExprWithIdPresent e
-            | A.Assign(_,e) -> isExprWithIdPresent e
-            | A.Builtin(_,eList) -> List.fold_left (fun x e -> x || isExprWithIdPresent e) false eList
-        in
+    let rec findDepsInAssignStmt foundDeps stmt =
+      let rec findIdsInExpr foundIds = function
+            A.Literal(_) -> foundIds
+          | A.Id(id) -> id::foundIds
+          | A.Strlit(_) -> foundIds
+          | A.Binop(e1,_,e2) -> findIdsInExpr (findIdsInExpr foundIds e2) e1
+          | A.Unop(_,e) -> findIdsInExpr foundIds e
+          | A.Assign(_,e) -> findIdsInExpr foundIds e
+          | A.Builtin(_,eList) -> List.fold_left (fun ls e -> findIdsInExpr ls e) foundIds eList
+      in
 
-        match stmt with
-          | A.Block(s) -> List.fold_left hasAssignContainingId isPresent s
-          | A.Expr(e) -> isExprWithIdPresent e
-          | A.If(e, s, s_else) ->
+      match stmt with
+        | A.Block(sList) -> List.fold_left (fun ls s -> findDepsInAssignStmt ls s) foundDeps sList
+        | A.Expr(e) -> findIdsInExpr foundDeps e
+        | A.If(e, s, s_else) ->
+            findIdsInExpr (findDepsInAssignStmt (findDepsInAssignStmt foundDeps s_else) s) e
 
-              isExprWithIdPresent e ||
-              hasAssignContainingId isPresent s ||
-              hasAssignContainingId isPresent s_else
-
-          | A.While(e, s) ->
-              isExprWithIdPresent e  ||
-              hasAssignContainingId isPresent s
+        | A.While(e, s) ->
+            findIdsInExpr (findDepsInAssignStmt foundDeps s) e
     in
 
     let ctxRelations =
@@ -61,8 +55,9 @@ let check (contexts, finds) =
           let (deps, indeps) =
             let ctx_body_folder (deps, indeps) mEq =
               let multi_eq_folder (deps, indeps) mEqBody =
-                if hasAssignContainingId false mEqBody
-                then (deps, indeps)
+                let foundDeps = findDepsInAssignStmt [] mEqBody in
+                if List.length foundDeps > 0
+                then (StringMap.add mEq.A.fname foundDeps deps, indeps)
                 else (deps, StringMap.add mEq.A.fname mEq.A.fdbody indeps)
               in
               List.fold_left multi_eq_folder (deps, indeps) mEq.A.fdbody
