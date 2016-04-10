@@ -14,14 +14,15 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 ## Status [![Build Status][buildbadge]][travisci]
 
-Currently we're working towards a ["hello world" milestone][milestone]; eg:
+Currently we're working towards a ["final report" milestone][milestone]; eg:
 
- - [x] **fixed** in testing: **keeping our build passing** at every commit on `master` branch
- - [x] **fixed** in issues #12 #15:
-      - make real phases: slowly [_unraveling TODOs_][TODOs]
-      - replace [_hard-coded behaviour_][dummycodegen]
+ - [x] **fixed** ~~in testing: keeping our build passing at every commit on `master` branch~~
+ - [x] **fixed** ~~in issues #12 #15:~~
+      - ~~make real phases~~
+      - ~~replace [_hard-coded behaviour_][dummycodegen]~~
  - [ ] **adding new** [tests for each new feature](#writing-tests)
  - [ ] **more interesting**: [semantic analysis:#24][GH24] and [code generation:#14][GH14]
+ - [ ] [unraveling TODOs] and large [meta-issues]
 
 The codebase was recently refactored to represent the eqeq LRM, rather than
 MicroC's, so it's safe to assume if a line of code looks too simple, you're
@@ -148,9 +149,10 @@ git checkout 1548af6bc79197445a203 &&
 
 [buildbadge]: https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master
 [travisci]: https://travis-ci.org/rxie25/PLT2016Spring
-[milestone]: https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World
+[milestone]: https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20Final%20Report
 [Reference Manual]: ../notes/language-reference-manual.md
-[TODOs]: https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO
+[unraveling TODOs]: https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO
 [dummycodegen]: https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16
 [GH24]: https://github.com/rxie25/PLT2016Spring/issues/24
 [GH14]: https://github.com/rxie25/PLT2016Spring/issues/14
+[meta-issues]: https://github.com/rxie25/PLT2016Spring/issues?q=is%3Aissue+is%3Aopen+label%3A%22issue+compilation%22
