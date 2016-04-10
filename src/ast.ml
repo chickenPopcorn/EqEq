@@ -78,18 +78,19 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | If(conds) -> ""(*string_of_first_con_stmts (List.hd conds) ^ "\n" ^
-  (String.concat "\n" (List.map string_of_con_stmts (List.tl conds))) *)
+  | If(conds) -> "\n" ^ string_of_first_cond_stmts (List.hd conds) ^ "\n" ^
+  (String.concat "\n" (List.map string_of_cond_stmts (List.tl conds)))
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
-(*and string_of_first_con_stmts = function
-  | ConStmts(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
-  | ConStmts(Some(expr), stmts) -> "if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
+  and string_of_first_cond_stmts = function
+    | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
+    | (Some(expr), Block(stmts)) -> "if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
+    | _ -> ""
+  and string_of_cond_stmts = function
+    | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^"}\n"
+    | (Some(expr), Block(stmts)) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
+    | _ -> ""
 
-and string_of_con_stmts = function
-  | ConStmts(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^"}\n"
-  | ConStmts(Some(expr), stmts) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
-*)
 let string_of_multieq multieq =
   multieq.fname ^
   " = {\n" ^
