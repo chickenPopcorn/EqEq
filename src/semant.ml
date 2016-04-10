@@ -25,6 +25,65 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
+  let eqrelations =
+    let rec hasExprWithIds eqStmtList =
+      let rec isStmtWithIdPresent isPresent stmt =
+        if isPresent then true
+        else
+          let rec isExprWithIdPresent e =
+            false (* never find anything... for now *)
+          in
+
+          match stmt with
+            | A.Block(s) -> hasExprWithIds s
+            | A.Expr(e) -> isExprWithIdPresent e
+            | A.If(e, s, s_else) ->
+
+                isExprWithIdPresent e ||
+                isStmtWithIdPresent isPresent s ||
+                isStmtWithIdPresent isPresent s_else
+
+            | A.While(e, s) ->
+                isExprWithIdPresent e  ||
+                isStmtWithIdPresent isPresent s
+
+      in List.fold_left isStmtWithIdPresent false eqStmtList
+    in
+
+    let ctxRelations =
+      let relationCtxFolder relations ctx =
+
+        let ctxScope =
+          (*
+          let multi_eq_folder rels mEq =
+            let eqName = mEq.fname in
+
+            if hasAssignContainingId mEq then
+            else
+
+          in List.fold_left multi_eq_folder relations ctx.cbody
+          *)
+
+          let deps = StringMap.empty in
+          let indeps = StringMap.empty
+
+
+          in {
+            Sast.ctx_deps = deps;
+            Sast.ctx_indeps = indeps;
+
+            (* taken care of in `relationFindFolder` later on ... *)
+            Sast.ctx_finds = StringMap.empty;
+          }
+        in StringMap.add ctx.A.context ctxScope relations
+      in List.fold_left relationCtxFolder StringMap.empty contexts
+    in
+
+    let relationFindFolder relations findDecl  =
+      relations (* noop: just pass for now... *)
+    in List.fold_left relationFindFolder ctxRelations finds
+  in
+
   (* Map of variables to their decls. For more, see: Sast.varMap *)
   let varmap =
     let create_varmap map ctx =
@@ -133,5 +192,6 @@ let check (contexts, finds) =
 
   {
     Sast.ast = (contexts, finds);
+    Sast.eqs = eqrelations;
     Sast.vars = varmap;
   }

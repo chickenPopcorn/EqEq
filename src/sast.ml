@@ -31,8 +31,8 @@ type eqResolutions = (ctx_scopes StringMap.t)
 (* Map: <ctx.context, <multieq.fname, multieq>> *)
 type varMap = (Ast.multi_eq StringMap.t) StringMap.t
 
-(* TODO: add `eqResolutions` here*)
 type checked = {
   ast: Ast.program;
+  eqs: eqResolutions;
   vars: varMap;
 }
