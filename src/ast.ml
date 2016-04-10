@@ -20,6 +20,9 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
+type range = 
+  | Range of string * expr * expr
+
 (* multieq: we call this a "multi-line equation" *)
 type multi_eq = {
     fname : string;
@@ -34,6 +37,7 @@ type ctx_decl = {
 type find_decl = {
     fcontext : string;
     ftarget : string;
+    frange: range list;
     fbody : stmt list;
   }
 

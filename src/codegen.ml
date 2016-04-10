@@ -41,6 +41,19 @@ let translate sast =
         gen_stmt s1 ^ "else\n" ^ gen_stmt s2
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
   in
+  let rec get_id_range = function
+    | A.Range(id, st, ed) -> id
+  in
+  let gen_arg finddecl =
+    match finddecl.A.frange with
+    | hd::tl -> get_id_range hd
+    | [] -> ""
+  in
+  let gen_prototype finddecl =
+    match finddecl.A.frange with
+    | hd::tl -> "double " ^ get_id_range hd
+    | [] -> ""
+  in 
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
   in
@@ -59,27 +72,37 @@ let translate sast =
   let gen_finddecl finddecl = 
     String.concat "" (List.map gen_stmt finddecl.A.fbody)
   in
+  let gen_find_func_prototype_list finddecl_list = 
+    let rec gen_find_funcname count find_list = 
+      match find_list with
+      | [] -> []
+      | hd::tl -> ("void " ^ "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
+                   " (" ^ (gen_prototype hd) ^ ")" )::(gen_find_funcname (count+1) tl)
+    in List.rev (gen_find_funcname 0 finddecl_list)
+  in 
   let gen_find_funcname_list finddecl_list = 
     let rec gen_find_funcname count find_list = 
       match find_list with
       | [] -> []
-      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count))::(gen_find_funcname (count+1) tl)
+      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
+                   " (" ^ (gen_arg hd) ^ ")" )::(gen_find_funcname (count+1) tl)
     in List.rev (gen_find_funcname 0 finddecl_list)
   in 
   let gen_find_function find_funcname finddecl = 
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
-    "void " ^ find_funcname ^ " () {\n  " ^ 
+    find_funcname ^ " {\n  " ^ 
     String.concat ""(List.map gen_decl_ctx contexts) ^ 
     String.concat ""(List.map gen_ctxdecl contexts) ^
     (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
   let gen_findfunc_call find_funcname finddecl = 
-    find_funcname ^ " ();\n"
+
+    find_funcname ^ ";\n"
   in
 
   "#include <stdio.h>\n#include <math.h>\n" ^
-  String.concat "" (List.map2 gen_find_function (gen_find_funcname_list finds) finds) ^
+  String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) finds) ^
   "int main() {\n" ^
   String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^
   " return 0;\n}\n"
