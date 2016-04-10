@@ -1,6 +1,7 @@
 (* Semantic checking for the EqualsEquals compiler *)
 
 module A = Ast
+module S = Sast
 module StringMap = Map.Make(String)
 
 (* Semantic checking of a program. Returns void if successful,
@@ -26,65 +27,68 @@ let check (contexts, finds) =
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
   let eqrelations =
-    let rec hasExprWithIds eqStmtList =
-      let rec isStmtWithIdPresent isPresent stmt =
-        if isPresent then true
-        else
-          let rec isExprWithIdPresent e =
-            false (* never find anything... for now *)
-          in
+    let rec hasAssignContainingId isPresent stmt =
+      if isPresent then true
+      else
+        let rec isExprWithIdPresent = function
+              A.Literal(_) -> false
+            | A.Id(_) -> true
+            | A.Strlit(_) -> false
+            | A.Binop(e1,_,e2) -> isExprWithIdPresent e1 || isExprWithIdPresent e2
+            | A.Unop(_,e) -> isExprWithIdPresent e
+            | A.Assign(_,e) -> isExprWithIdPresent e
+            | A.Builtin(_,eList) -> List.fold_left (fun x e -> x || isExprWithIdPresent e) false eList
+        in
 
-          match stmt with
-            | A.Block(s) -> hasExprWithIds s
-            | A.Expr(e) -> isExprWithIdPresent e
-            | A.If(e, s, s_else) ->
+        match stmt with
+          | A.Block(s) -> List.fold_left hasAssignContainingId isPresent s
+          | A.Expr(e) -> isExprWithIdPresent e
+          | A.If(e, s, s_else) ->
 
-                isExprWithIdPresent e ||
-                isStmtWithIdPresent isPresent s ||
-                isStmtWithIdPresent isPresent s_else
+              isExprWithIdPresent e ||
+              hasAssignContainingId isPresent s ||
+              hasAssignContainingId isPresent s_else
 
-            | A.While(e, s) ->
-                isExprWithIdPresent e  ||
-                isStmtWithIdPresent isPresent s
-
-      in List.fold_left isStmtWithIdPresent false eqStmtList
+          | A.While(e, s) ->
+              isExprWithIdPresent e  ||
+              hasAssignContainingId isPresent s
     in
 
     let ctxRelations =
       let relationCtxFolder relations ctx =
 
         let ctxScope =
-          (*
-          let multi_eq_folder rels mEq =
-            let eqName = mEq.fname in
+          let (deps, indeps) =
+            let ctx_body_folder (deps, indeps) mEq =
+              let multi_eq_folder (deps, indeps) mEqBody =
+                if hasAssignContainingId false mEqBody
+                then (deps, indeps)
+                else (deps, StringMap.add mEq.A.fname mEq.A.fdbody indeps)
+              in
+              List.fold_left multi_eq_folder (deps, indeps) mEq.A.fdbody
+            in
+            List.fold_left ctx_body_folder (StringMap.empty, StringMap.empty) ctx.A.cbody
+          in
 
-            if hasAssignContainingId mEq then
-            else
 
-          in List.fold_left multi_eq_folder relations ctx.cbody
-          *)
-
-          let deps = StringMap.empty in
-          let indeps = StringMap.empty
-
-
-          in {
-            Sast.ctx_deps = deps;
-            Sast.ctx_indeps = indeps;
+          {
+            S.ctx_deps = deps;
+            S.ctx_indeps = indeps;
 
             (* taken care of in `relationFindFolder` later on ... *)
-            Sast.ctx_finds = StringMap.empty;
+            S.ctx_finds = StringMap.empty;
           }
         in StringMap.add ctx.A.context ctxScope relations
       in List.fold_left relationCtxFolder StringMap.empty contexts
     in
 
     let relationFindFolder relations findDecl  =
+      (* let eqName = Printf.printf "find_%s_%d" ctx.A.context in *)
       relations (* noop: just pass for now... *)
     in List.fold_left relationFindFolder ctxRelations finds
   in
 
-  (* Map of variables to their decls. For more, see: Sast.varMap *)
+  (* Map of variables to their decls. For more, see: S.varMap *)
   let varmap =
     let create_varmap map ctx =
       if StringMap.mem ctx.A.context map
@@ -191,7 +195,7 @@ let check (contexts, finds) =
   List.iter check_find finds;
 
   {
-    Sast.ast = (contexts, finds);
-    Sast.eqs = eqrelations;
-    Sast.vars = varmap;
+    S.ast = (contexts, finds);
+    S.eqs = eqrelations;
+    S.vars = varmap;
   }

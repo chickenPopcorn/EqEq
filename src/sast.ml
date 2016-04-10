@@ -10,7 +10,7 @@ module IntMap = Map.Make(
 )
 
 type equation_deps = (string list) StringMap.t
-type variables_indeps = A.expr StringMap.t
+type variables_indeps = (A.stmt list) StringMap.t
 
 type equation_relations = {
   deps: equation_deps;
@@ -36,3 +36,4 @@ type checked = {
   eqs: eqResolutions;
   vars: varMap;
 }
+(* TODO implement string_of_checked *)
