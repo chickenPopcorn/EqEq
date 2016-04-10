@@ -2,8 +2,7 @@ The "EqualsEquals" compiler
 -------------------
 
 Coded in OCaml, the "EqualsEquals" (aka "eqeq") language is designed for simple
-mathematical equation evaluation. For more details, see its [Reference
-Manual](../notes/language-reference-manual.md)
+mathematical equation evaluation. For more details, see its [Reference Manual]
 _("LRM" for "Language [RM]" in code and comments)_.
 
 - [Status](#status-)
@@ -13,16 +12,16 @@ _("LRM" for "Language [RM]" in code and comments)_.
   - [One-time Setup](#one-time-setup)
     - [Quickstart](#quickstart)
 
-## Status [![Build Status](https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master)](https://travis-ci.org/rxie25/PLT2016Spring)
+## Status [![Build Status][buildbadge]][travisci]
 
-Currently we're working towards a ["hello world" milestone](https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World); eg:
+Currently we're working towards a ["hello world" milestone][milestone]; eg:
 
  - [x] **fixed** in testing: **keeping our build passing** at every commit on `master` branch
  - [x] **fixed** in issues #12 #15:
-      - make real phases: slowly [_unraveling TODOs_](https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO)
-      - replace [_hard-coded behaviour_](https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16)
+      - make real phases: slowly [_unraveling TODOs_][TODOs]
+      - replace [_hard-coded behaviour_][dummycodegen]
  - [ ] **adding new** [tests for each new feature](#writing-tests)
- - [ ] **more interesting**: [semantic analysis:#24](https://github.com/rxie25/PLT2016Spring/issues/24) and [code generation:#14](https://github.com/rxie25/PLT2016Spring/issues/14)
+ - [ ] **more interesting**: [semantic analysis:#24][GH24] and [code generation:#14][GH14]
 
 The codebase was recently refactored to represent the eqeq LRM, rather than
 MicroC's, so it's safe to assume if a line of code looks too simple, you're
@@ -146,3 +145,12 @@ git checkout 1548af6bc79197445a203 &&
   make clean >/dev/null &&
   git checkout master
 ```
+
+[buildbadge]: https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master
+[travisci]: https://travis-ci.org/rxie25/PLT2016Spring
+[milestone]: https://github.com/rxie25/PLT2016Spring/milestones/Hello%20World
+[Reference Manual]: ../notes/language-reference-manual.md
+[TODOs]: https://github.com/rxie25/PLT2016Spring/search?utf8=%E2%9C%93&q=TODO
+[dummycodegen]: https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16
+[GH24]: https://github.com/rxie25/PLT2016Spring/issues/24
+[GH14]: https://github.com/rxie25/PLT2016Spring/issues/14
