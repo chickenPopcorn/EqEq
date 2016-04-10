@@ -25,8 +25,7 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (* Map: {key: ctx.context, val: <AnotherMap>} *)
-  (* AnotherMap: {key: Ast.multi_eq.fname, val: Ast.multi_eq} *)
+  (* Map of variables to their decls. For more, see: Sast.varMap *)
   let varmap =
     let create_varmap map ctx =
       if StringMap.mem ctx.A.context map
@@ -135,4 +134,7 @@ let check (contexts, finds) =
   List.iter check_ctx contexts;
   List.iter check_find finds;
 
-  (contexts, finds, varmap)
+  {
+    Sast.ast = (contexts, finds);
+    Sast.vars = varmap;
+  }
