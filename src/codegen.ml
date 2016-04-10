@@ -1,10 +1,14 @@
 (* Code generation: translates semantically checked AST & produces vanilla C. *)
 
 module A = Ast
+module S = Sast
 
 module StringMap = Map.Make(String)
 
-let translate (contexts, finds, varmap) =
+let translate sast =
+  let (contexts, finds) = sast.S.ast in
+  let varmap = sast.S.vars in
+
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
     | A.Literal(l) -> string_of_float l
