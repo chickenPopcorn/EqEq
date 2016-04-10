@@ -38,12 +38,18 @@ let translate (contexts, finds, varmap) =
     (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
 
   and string_of_first_cond_exec = function
-    | (None, A.Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts))
-    | (Some(expr), A.Block(stmts)) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
+    | (Some(expr), A.Block(stmts)) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^
+                                          (String.concat "\n" (List.map gen_stmt stmts)) ^
+                                      "}\n"
     | _ -> ""
+
   and string_of_cond_exec = function
-    | (None, A.Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^"}\n"
-    | (Some(expr), A.Block(stmts)) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
+    | (None, A.Block(stmts)) -> "else {\n" ^
+                                    (String.concat "\n" (List.map gen_stmt stmts)) ^
+                                "}\n"
+    | (Some(expr), A.Block(stmts)) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^
+                                           (String.concat "\n" (List.map gen_stmt stmts)) ^
+                                      "}\n"
     | _ -> ""
   in
   let gen_decl_var varname funcdecl str =

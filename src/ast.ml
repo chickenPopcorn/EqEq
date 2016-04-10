@@ -84,11 +84,14 @@ let rec string_of_stmt = function
 
   and string_of_first_cond_stmts = function
     | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
-    | (Some(expr), Block(stmts)) -> "if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
+    | (Some(expr), Block(stmts)) -> "if (" ^ (string_of_expr expr) ^ ")\n {\n" ^
+                                        (String.concat "\n" (List.map string_of_stmt stmts)) ^
+                                    "}\n"
     | _ -> ""
   and string_of_cond_stmts = function
     | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^"}\n"
-    | (Some(expr), Block(stmts)) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
+    | (Some(expr), Block(stmts)) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^
+                                    (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
     | _ -> ""
 
 let string_of_multieq multieq =
