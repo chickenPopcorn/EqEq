@@ -17,7 +17,7 @@ type expr =
 type stmt =
     Block of stmt list
   | Expr of expr
-  | If of (expr option * stmt list) list
+  | If of (expr option * stmt) list
   | While of expr * stmt
 
 (* func: we call this a "multi-line equation" *)

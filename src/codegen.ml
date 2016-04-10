@@ -19,8 +19,8 @@ let translate (contexts, finds, varmap) =
                           | "|" -> "fabs(" ^ gen_expr e ^ ")"
                           | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
-    | A.Builtin("print", el) -> let generate_expr el = List.map gen_expr el in 
-                                let check_type expr_str = 
+    | A.Builtin("print", el) -> let generate_expr el = List.map gen_expr el in
+                                let check_type expr_str =
                                     match expr_str with
                                     | [] -> "printf()"
                                     | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^ String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^ ")"
@@ -38,13 +38,13 @@ let translate (contexts, finds, varmap) =
     (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
 
   and string_of_first_cond_exec = function
-    | A.ConStmts(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts))
-    | A.ConStmts(Some(expr), stmts) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
-
+    | (None, A.Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts))
+    | (Some(expr), A.Block(stmts)) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
+    | _ -> ""
   and string_of_cond_exec = function
-    | A.ConStmts(None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^"}\n"
-    | A.ConStmts(Some(expr), stmts) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
-
+    | (None, A.Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^"}\n"
+    | (Some(expr), A.Block(stmts)) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^ (String.concat "\n" (List.map gen_stmt stmts)) ^ "}\n"
+    | _ -> ""
   in
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str

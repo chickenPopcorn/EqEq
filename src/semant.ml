@@ -97,8 +97,11 @@ let check (contexts, finds) =
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
     in
-
   (* Verify a particular `statement` in `find` or throw an exception *)
+  let check_if = function
+    | (None, sl) -> check_stmt sl
+    | (Some(e), sl) -> check_stmt (A.Expr e); check_stmt sl
+  in
   let rec check_stmt_for_find = function
       | A.Block sl ->
           (* effectively unravel statements out of their block *)
@@ -118,7 +121,10 @@ let check (contexts, finds) =
               | A.Assign(left, expr) -> ()
               | A.Builtin(name, expr) -> ()
         )
-      | A.If(l) -> ()
+      | A.If(l) -> let rec check_if_list = function
+                    | [] -> ()
+                    | hd::tl -> check_if hd; check_if_list tl
+                    in check_if_list l
       | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
   in
 
