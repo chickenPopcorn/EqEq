@@ -36,4 +36,24 @@ type checked = {
   eqs: eqResolutions;
   vars: varMap;
 }
-(* TODO implement string_of_checked *)
+
+(* pretty print *)
+let string_of_checked chk = 
+  let string_of_deps deps = ""
+  in
+  let string_of_indeps indeps = ""
+  in
+  let string_of_finds finds = ""
+  in
+  let string_of_ctxscope ctxname scope str =
+    String.concat "\n" [
+      str;
+      ctxname ^ " = {";
+      string_of_deps scope.ctx_deps;
+      string_of_indeps scope.ctx_indeps;
+      string_of_finds scope.ctx_finds;
+      "}";
+    ]
+  in
+  StringMap.fold string_of_ctxscope chk.eqs "\n" ^
+  "\n\n"
