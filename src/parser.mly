@@ -65,14 +65,14 @@ finddecl:
      { { fcontext = $1;
          ftarget = $4;
          fbody = List.rev $6 } }
- | FIND ID stmt LBRACE stmt_list RBRACE
+ | FIND ID WITH stmt_list LBRACE stmt_list RBRACE
      { { fcontext = ""; (* global context *)
          ftarget = $2;
-         fbody = $3::(List.rev $5) } }
- | CTX COLON FIND ID stmt LBRACE stmt_list RBRACE
+         fbody = (List.rev $4) @ (List.rev $6) } }
+ | CTX COLON FIND ID WITH stmt_list LBRACE stmt_list RBRACE
      { { fcontext = $1;
          ftarget = $4;
-         fbody = $5::(List.rev $7) } }
+         fbody = (List.rev $6) @ (List.rev $8) } }
 
 funcdecl_list:
     /* nothing */  { [] }
@@ -84,12 +84,11 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr $1 }
-  | WITH expr SEMI { Expr $2 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block(List.rev $6), Block([])) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block(List.rev $6), Block(List.rev $10)) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
-  | FIND stmt_list RBRACE { Block(List.rev $2) }
+  /*| FIND stmt_list RBRACE { Block(List.rev $2) } */
 
 expr:
     literal          { $1 }
