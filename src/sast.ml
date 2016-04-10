@@ -2,19 +2,28 @@
 
 module A = Ast
 module StringMap = Map.Make(String)
+module IntMap = Map.Make(
+  struct
+    type t = int
+    let compare = compare
+  end
+)
 
-(* <EquationName(string), string list> *)
-type equation_deps = StringMap
+type equation_deps = (string list) StringMap.t
+type variables_indeps = A.expr StringMap.t
 
-(* <EquationName(string), A.Expr> *)
-type variables_indeps = StringMap
+type equation_relations = {
+  deps: equation_deps;
+  indeps: variables_indeps;
+}
 
-type equation_relations = equation_deps * variables_indeps
+type find_scopes = (equation_relations IntMap.t) StringMap.t
 
-(* <FindName(string), equation_relations> *)
-type find_scopes = StringMap
-
-type ctx_scopes = equation_deps * variables_indeps * find_scopes
+type ctx_scopes = {
+  ctx_deps: equation_deps;
+  ctx_indeps: variables_indeps;
+  ctx_finds: find_scopes;
+}
 
 (* <CtxName(string), ctx_scopes> *)
 type eqResolutions = (ctx_scopes StringMap.t)
