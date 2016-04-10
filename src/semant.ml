@@ -26,7 +26,7 @@ let check (contexts, finds) =
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
   (* Map: {key: ctx.context, val: <AnotherMap>} *)
-  (* AnotherMap: {key: funcdecl.fname, val: funcdecl} *)
+  (* AnotherMap: {key: Ast.multi_eq.fname, val: Ast.multi_eq} *)
   let varmap =
     let create_varmap map ctx =
       if StringMap.mem ctx.A.context map
@@ -35,7 +35,7 @@ let check (contexts, finds) =
         StringMap.add
           ctx.A.context
           (List.fold_left
-            (fun map funcdecl -> StringMap.add funcdecl.A.fname funcdecl map)
+            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
             StringMap.empty
             ctx.A.cbody
           )
