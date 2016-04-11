@@ -45,12 +45,11 @@ let check (contexts, finds) =
    (* list of EqualsEquals symbols that require external library support *)
    let liblist = 
     let rec add_lib_expre lis  = function
-          A.Binop(left,op,right)-> 
-            let  lib_binop lt rt = function
+          A.Binop(left,op,right)-> (
+               match op with 
                |A.Mod -> "%"::lis
                |A.Pow -> "^"::lis 
-               |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis 
-            in lib_binop left right op
+               |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis )
         | A.Unop(op, expr) -> (
             match op with
             |A.Abs -> "|"::lis
