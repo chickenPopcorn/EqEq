@@ -56,6 +56,7 @@ rule token = parse
 | "elif"                     { ELIF }
 | "while"                    { WHILE }
 | "find"                     { FIND }
+| "with"                     { WITH }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
 | num as lxm                 { LITERAL(float_of_string lxm) }
 | identifier as lxm          { ID(lxm) }
