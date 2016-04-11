@@ -132,10 +132,6 @@ let translate sast =
     (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
-  let gen_findfunc_call find_funcname finddecl = 
-    find_funcname ^ ";\n"
-  in
-
   "#include <stdio.h>\n#include <math.h>\n" ^
   String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
   "int main() {\n" ^
