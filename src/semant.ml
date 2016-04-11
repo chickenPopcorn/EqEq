@@ -25,8 +25,7 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (* Map: {key: ctx.context, val: <AnotherMap>} *)
-  (* AnotherMap: {key: funcdecl.fname, val: funcdecl} *)
+  (* Map of variables to their decls. For more, see: Sast.varMap *)
   let varmap =
     let create_varmap map ctx =
       if StringMap.mem ctx.A.context map
@@ -35,7 +34,7 @@ let check (contexts, finds) =
         StringMap.add
           ctx.A.context
           (List.fold_left
-            (fun map funcdecl -> StringMap.add funcdecl.A.fname funcdecl map)
+            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
             StringMap.empty
             ctx.A.cbody
           )
@@ -43,27 +42,26 @@ let check (contexts, finds) =
     in
     List.fold_left create_varmap StringMap.empty contexts 
    in
+   (* list of EqualsEquals symbols that require external library support *)
    let liblist = 
-    let rec add_lib_expre lis expre =
-        match expre with
-        | A.Binop(left,op,right)-> (
+    let rec add_lib_expre lis  = function
+          A.Binop(left,op,right)-> (
             match op with 
             |A.Mod -> "%"::lis
             |A.Pow -> "^"::lis 
-            |_ -> ""::lis )
+            |_ -> lis )
         | A.Unop(op, expr) -> (
             match op with
             |A.Abs -> "|"::lis
-            |_ -> ""::lis )
+            |_ -> lis )
         | A.Builtin(name, expr) -> (
             match name with
             |"print" -> "print"::(List.fold_left add_lib_expre lis expr)
             |_ -> List.fold_left add_lib_expre lis expr )
         |_ -> lis
     in
-    let rec add_lib_stmt lis stmt =
-        match stmt with 
-            |A.Expr e-> add_lib_expre lis e 
+    let rec add_lib_stmt lis  = function
+             A.Expr e-> add_lib_expre lis e 
             |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
             |A.If(p, b1, b2) -> List.append (add_lib_stmt lis b1) (add_lib_stmt lis b2)
             |A.While(p, s) -> add_lib_stmt lis s
@@ -80,9 +78,10 @@ let check (contexts, finds) =
         lis
         ctx.A.fdbody
     in 
+    (* append list from finds black with list from contexts block *)
     List.append 
-    (List.fold_left create_liblist_finds [] finds)
-    (List.fold_left (fun lis eq -> List.fold_left create_liblist_ctx lis eq.A.cbody) [] contexts)
+     (List.fold_left create_liblist_finds [] finds)
+     (List.fold_left (fun lis eq -> List.fold_left create_liblist_ctx lis eq.A.cbody) [] contexts)
   in 
 
   let check_have_var var symbolmap =
@@ -174,4 +173,9 @@ let check (contexts, finds) =
   List.iter check_ctx contexts;
   List.iter check_find finds;
 
-  (contexts, finds, varmap, liblist)
+  {
+    Sast.ast = (contexts, finds);
+    Sast.vars = varmap;
+    Sast.lib = liblist
+  }
+

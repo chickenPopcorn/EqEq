@@ -20,7 +20,7 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
-(* func: we call this a "multi-line equation" *)
+(* multieq: we call this a "multi-line equation" *)
 type multi_eq = {
     fname : string;
     fdbody : stmt list;
