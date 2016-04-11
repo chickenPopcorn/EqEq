@@ -116,7 +116,7 @@ let translate sast =
                    " (" ^ get_id_range hd ^ ");\n" )::(gen_find_funcname (count+1) tl)
                    | _ -> ("double " ^ get_id_range hd ^ ";\n" ^ 
                    "for ( " ^ get_id_range hd ^ "=" ^ get_st_range hd ^ "; " ^
-                   get_id_range hd ^ "<" ^ get_ed_range hd ^ "; " ^
+                   get_id_range hd ^ "<=" ^ get_ed_range hd ^ "; " ^
                    get_id_range hd ^ "++) {\n" ^
                    "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
                    " (" ^ get_id_range hd ^ ");\n" ^
