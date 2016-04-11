@@ -67,16 +67,16 @@ finddecl:
          ftarget = $4;
          frange = [];
          fbody = List.rev $6 } }
- | FIND ID WITH range_list LBRACE stmt_list RBRACE
+ | FIND ID WITH stmt_list range_list LBRACE stmt_list RBRACE
      { { fcontext = ""; (* global context *)
          ftarget = $2;
-         frange = List.rev $4;
-         fbody = (List.rev $6) } }
- | CTX COLON FIND ID WITH range_list LBRACE stmt_list RBRACE
+         frange = List.rev $5;
+         fbody = (List.rev $4) @ (List.rev $7) } }
+ | CTX COLON FIND ID WITH stmt_list range_list LBRACE stmt_list RBRACE
      { { fcontext = $1;
          ftarget = $4;
-         frange = List.rev $6;
-         fbody = (List.rev $8) } }
+         frange = List.rev $7;
+         fbody = (List.rev $6) @ (List.rev $9) } }
   
 
 funcdecl_list:
