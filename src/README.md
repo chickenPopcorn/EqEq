@@ -28,11 +28,6 @@ Currently we're working towards a ["final report" milestone][milestone]; eg:
  - [ ] **more interesting**: [semantic analysis:#24][GH24] and [code generation:#14][GH14]
  - [ ] Unraveling [TODOs] and large [meta-issues]
 
-The codebase was recently refactored to represent the eqeq LRM, rather than
-MicroC's, so it's safe to assume if a line of code looks too simple, you're
-right! We were just trying to get somethin to compile, so we could all run `make
-test` reliably.
-
 ## Coding, Building, Testing
 
 To **code**, please see [contributing](CONTRIBUTING.md) quickguide.
