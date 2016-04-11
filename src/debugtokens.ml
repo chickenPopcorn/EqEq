@@ -28,6 +28,7 @@ let stringify = function
   | NOT -> "NOT"
   | IF -> "IF"
   | ELSE -> "ELSE"
+  | ELIF -> "ELIF"
   | WHILE -> "WHILE"
   | STRLIT(lxm) -> "STRLIT"
   | FIND -> "FIND"
