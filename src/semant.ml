@@ -63,7 +63,10 @@ let check (contexts, finds) =
     let rec add_lib_stmt lis  = function
              A.Expr e-> add_lib_expre lis e 
             |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
-            |A.If(p, b1, b2) -> List.append (add_lib_stmt lis b1) (add_lib_stmt lis b2)
+            |A.If(l) -> let rec check_if_list_lib = function
+                                 | [] -> lis
+                                 | hd::tl -> add_lib_stmt lis (snd hd); check_if_list_lib tl
+                                in check_if_list_lib l
             |A.While(p, s) -> add_lib_stmt lis s
     in 
     let create_liblist_finds lis finds = 
