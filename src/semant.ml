@@ -64,7 +64,11 @@ let check (contexts, finds) =
               | A.Binop(left, op, right) -> ()
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> ()
+              | A.Builtin(name, expr) -> (
+                match name with
+                    | "print" -> ()
+                    | _ -> fail ("incorrect build-in function, " ^ quot name)
+                )
         )
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
@@ -118,7 +122,11 @@ let check (contexts, finds) =
               | A.Binop(left, op, right) -> ()
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> ()
+              | A.Builtin(name, expr) -> (
+                match name with
+                    | "print" -> ()
+                    | _ -> fail ("incorrect build-in function, " ^ quot name)
+                )
         )
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
