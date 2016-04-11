@@ -53,10 +53,12 @@ rule token = parse
 | "!"                        { NOT }
 | "if"                       { IF }
 | "else"                     { ELSE }
+| "elif"                     { ELIF }
 | "while"                    { WHILE }
 | "find"                     { FIND }
 | "break"                    { BREAK }
 | "continue"                 { CONTINUE }
+| "with"                     { WITH }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
 | num as lxm                 { LITERAL(float_of_string lxm) }
 | identifier as lxm          { ID(lxm) }

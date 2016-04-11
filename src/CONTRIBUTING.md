@@ -60,6 +60,15 @@ Now just continue with a normal ["Code in Branches"](#code-in-branches) process.
 
 It helps if you're talking to each other, of course, to avoid confusion :)
 
+**Q**: How to see the difference for a file "main.c" between now and two commits back? 
+
+**A**:
+  ```
+  $ git diff HEAD^^ HEAD main.c
+  $ git diff HEAD^^..HEAD -- main.c
+  $ git diff HEAD~2 HEAD -- main.c
+  ```
+
 **Q**: I read this whole doc, and I'm stuck on something `git` related :(
 
 **A**: No worries! Share [Pastie](https://dpaste.de) of these, for debugging:

@@ -25,8 +25,7 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (* Map: {key: ctx.context, val: <AnotherMap>} *)
-  (* AnotherMap: {key: funcdecl.fname, val: funcdecl} *)
+  (* Map of variables to their decls. For more, see: Sast.varMap *)
   let varmap =
     let create_varmap map ctx =
       if StringMap.mem ctx.A.context map
@@ -35,7 +34,7 @@ let check (contexts, finds) =
         StringMap.add
           ctx.A.context
           (List.fold_left
-            (fun map funcdecl -> StringMap.add funcdecl.A.fname funcdecl map)
+            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
             StringMap.empty
             ctx.A.cbody
           )
@@ -47,7 +46,6 @@ let check (contexts, finds) =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
-
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
       | A.Block sl ->
@@ -69,8 +67,7 @@ let check (contexts, finds) =
               | A.Builtin(name, expr) -> ()
 
         )
-      | A.If(p, b1, b2) ->
-          check_stmt (A.Expr p); check_stmt b1; check_stmt b2
+      | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
       | A.Continue() -> ()
       | A.Break() -> ()
@@ -102,8 +99,11 @@ let check (contexts, finds) =
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
     in
-
   (* Verify a particular `statement` in `find` or throw an exception *)
+  let check_if = function
+    | (None, sl) -> check_stmt sl
+    | (Some(e), sl) -> check_stmt (A.Expr e); check_stmt sl
+  in
   let rec check_stmt_for_find = function
       | A.Block sl ->
           (* effectively unravel statements out of their block *)
@@ -124,8 +124,10 @@ let check (contexts, finds) =
               | A.Builtin(name, expr) -> ()
 
         )
-      | A.If(p, b1, b2) ->
-          check_stmt_for_find (A.Expr p); check_stmt_for_find b1; check_stmt_for_find b2
+      | A.If(l) -> let rec check_if_list = function
+                    | [] -> ()
+                    | hd::tl -> check_if hd; check_if_list tl
+                    in check_if_list l
       | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
       | A.Continue() -> ()
       | A.Break() -> ()
@@ -138,4 +140,7 @@ let check (contexts, finds) =
   List.iter check_ctx contexts;
   List.iter check_find finds;
 
-  (contexts, finds, varmap)
+  {
+    Sast.ast = (contexts, finds);
+    Sast.vars = varmap;
+  }
