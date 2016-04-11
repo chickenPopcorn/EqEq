@@ -1,9 +1,15 @@
-42
-32
-0
-42
-32
-1
-42
-32
-2
+print for simple find
+a = 42
+b = 32
+print for find with range (0,3)
+a = 42
+b = 32
+c = 0
+print for find with range (0,3)
+a = 42
+b = 32
+c = 1
+print for find with range (0,3)
+a = 42
+b = 32
+c = 2

@@ -4,8 +4,15 @@ SomeCtx = {
 
 }
 
+SomeCtx:find a {
+   print("print for simple find\n");
+   print("a = %0.0f\n", a);
+   print("b = %0.0f\n", b);
+}
+
 SomeCtx:find a with c in range(0,3); {
-  print("%0.0f\n", a);
-  print("%0.0f\n", b);
-  print("%0.0f\n", c);
+  print("print for find with range (0,3)\n");
+  print("a = %0.0f\n", a);
+  print("b = %0.0f\n", b);
+  print("c = %0.0f\n", c);
 }

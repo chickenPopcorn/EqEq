@@ -137,7 +137,7 @@ let translate sast =
   in
 
   "#include <stdio.h>\n#include <math.h>\n" ^
-  String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) finds) ^
+  String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
   "int main() {\n" ^
-  String.concat "" (List.rev (gen_find_funcname_list finds)) ^
+  String.concat "" (gen_find_funcname_list finds) ^
   " return 0;\n}\n"
