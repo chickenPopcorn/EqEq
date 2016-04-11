@@ -18,7 +18,7 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 ## Status [![Build Status][buildbadge]][travisci]
 
-Currently we're working towards a ["final report" milestone][milestone]; eg:
+Currently we're working towards a ["LRM feature complete" milestone][milestone]; eg:
 
  - [x] **fixed** ~~in testing: keeping our build passing at every commit on `master` branch~~
  - [x] **fixed** ~~in issues #12 #15:~~
@@ -139,7 +139,7 @@ git checkout 1548af6bc79197445a203 &&
 
 [buildbadge]: https://travis-ci.org/rxie25/PLT2016Spring.png?branch=master
 [travisci]: https://travis-ci.org/rxie25/PLT2016Spring
-[milestone]: https://github.com/rxie25/PLT2016Spring/milestones/DUE:%20Final%20Report
+[milestone]: https://github.com/rxie25/PLT2016Spring/milestones/LRM%20Feature%20Complete
 [Reference Manual]: ../notes/language-reference-manual.md
 [dummycodegen]: https://github.com/rxie25/PLT2016Spring/blob/85e99570cd813398/src/codegen.ml#L14-L16
 [GH24]: https://github.com/rxie25/PLT2016Spring/issues/24
