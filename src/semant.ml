@@ -46,11 +46,11 @@ let check (contexts, finds) =
    let liblist = 
     let rec add_lib_expre lis  = function
           A.Binop(left,op,right)-> 
-            let  lib_binop left right = function
-            |A.Mod -> "%"::lis
-            |A.Pow -> "^"::lis 
-            |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis 
-          in lib_binop left right op
+            let  lib_binop lt rt = function
+               |A.Mod -> "%"::lis
+               |A.Pow -> "^"::lis 
+               |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis 
+            in lib_binop left right op
         | A.Unop(op, expr) -> (
             match op with
             |A.Abs -> "|"::lis
