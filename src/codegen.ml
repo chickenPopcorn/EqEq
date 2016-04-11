@@ -23,8 +23,8 @@ let translate sast =
                           | "|" -> "fabs(" ^ gen_expr e ^ ")"
                           | _ -> A.string_of_uop o ^ "(" ^ gen_expr e ^ ")" in check_unop o
     | A.Assign(v, e) -> v ^ " = " ^ gen_expr e
-    | A.Builtin("print", el) -> let generate_expr el = List.map gen_expr el in 
-                                let check_type expr_str = 
+    | A.Builtin("print", el) -> let generate_expr el = List.map gen_expr el in
+                                let check_type expr_str =
                                     match expr_str with
                                     | [] -> "printf()"
                                     | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^ String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^ ")"
@@ -32,14 +32,29 @@ let translate sast =
                                 in check_type (generate_expr el)
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
   in
+
   let rec gen_stmt = function
     | A.Block(stmts) ->
         "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n"
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
-    | A.If(e, s, Block([])) -> "if (" ^ gen_expr e ^ ")\n" ^ gen_stmt s
-    | A.If(e, s1, s2) ->  "if (" ^ gen_expr e ^ ")\n" ^
-        gen_stmt s1 ^ "else\n" ^ gen_stmt s2
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
+    | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
+    (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
+
+  and string_of_first_cond_exec = function
+    | (Some(expr), A.Block(stmts)) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^
+                                          (String.concat "\n" (List.map gen_stmt stmts)) ^
+                                      "}\n"
+    | _ -> ""
+
+  and string_of_cond_exec = function
+    | (None, A.Block(stmts)) -> "else {\n" ^
+                                    (String.concat "\n" (List.map gen_stmt stmts)) ^
+                                "}\n"
+    | (Some(expr), A.Block(stmts)) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^
+                                           (String.concat "\n" (List.map gen_stmt stmts)) ^
+                                      "}\n"
+    | _ -> ""
   in
   let rec get_id_range = function
     | A.Range(id, st, ed) -> id
@@ -69,7 +84,7 @@ let translate sast =
   let gen_ctxdecl ctx =
     String.concat "" (List.map gen_multieq ctx.A.cbody)
   in
-  let gen_finddecl finddecl = 
+  let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody)
   in
   let gen_find_func_prototype_list finddecl_list = 
@@ -87,8 +102,8 @@ let translate sast =
       | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
                    " (" ^ (gen_arg hd) ^ ")" )::(gen_find_funcname (count+1) tl)
     in List.rev (gen_find_funcname 0 finddecl_list)
-  in 
-  let gen_find_function find_funcname finddecl = 
+  in
+  let gen_find_function find_funcname finddecl =
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
     find_funcname ^ " {\n  " ^ 
     String.concat ""(List.map gen_decl_ctx contexts) ^ 
@@ -97,7 +112,6 @@ let translate sast =
     "\n"
   in
   let gen_findfunc_call find_funcname finddecl = 
-
     find_funcname ^ ";\n"
   in
 
