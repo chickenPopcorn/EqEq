@@ -7,4 +7,5 @@ SomeCtx = {
 SomeCtx:find a with c in range(0,3); {
   print("%0.0f\n", a);
   print("%0.0f\n", b);
+  print("%0.0f\n", c);
 }

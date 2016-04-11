@@ -27,7 +27,9 @@ let translate sast =
                                 let check_type expr_str =
                                     match expr_str with
                                     | [] -> "printf()"
-                                    | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^ String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^ ")"
+                                    | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^ 
+                                                                 String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^ 
+                                                                 ")"
                                                 else "printf(" ^ hd ^ ")"
                                 in check_type (generate_expr el)
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
@@ -56,19 +58,11 @@ let translate sast =
                                       "}\n"
     | _ -> ""
   in
-  let rec get_id_range = function
-    | A.Range(id, st, ed) -> id
-  in
-  let gen_arg finddecl =
+  let get_id_range finddecl =
     match finddecl.A.frange with
-    | hd::tl -> get_id_range hd
     | [] -> ""
+    | hd :: tl -> (match hd with A.Range(id, st, ed) -> id)
   in
-  let gen_prototype finddecl =
-    match finddecl.A.frange with
-    | hd::tl -> "double " ^ get_id_range hd
-    | [] -> ""
-  in 
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
   in
@@ -88,19 +82,46 @@ let translate sast =
     String.concat "" (List.map gen_stmt finddecl.A.fbody)
   in
   let gen_find_func_prototype_list finddecl_list = 
-    let rec gen_find_funcname count find_list = 
+    let rec gen_find_func_prototype count find_list = 
       match find_list with
       | [] -> []
       | hd::tl -> ("void " ^ "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
-                   " (" ^ (gen_prototype hd) ^ ")" )::(gen_find_funcname (count+1) tl)
-    in List.rev (gen_find_funcname 0 finddecl_list)
+                   " (" ^ ((fun x -> match x with "" -> " "
+                                                 | _ -> "double " ^ x ) (get_id_range hd)) ^ ")" 
+                  )::(gen_find_func_prototype (count+1) tl)
+    in List.rev (gen_find_func_prototype 0 finddecl_list)
   in 
   let gen_find_funcname_list finddecl_list = 
+    let get_st_range finddecl =
+      match finddecl.A.frange with
+      | [] -> ""
+      | hd :: tl -> (match hd with A.Range(id, st, ed) -> 
+                     (match st, ed with A.Literal(lst), A.Literal(led) -> 
+                                        if lst < led then string_of_float lst else string_of_float led
+                                        | _ -> ""))
+    in 
+    let get_ed_range finddecl =
+      match finddecl.A.frange with
+      | [] -> ""
+      | hd :: tl -> (match hd with A.Range(id, st, ed) -> 
+                     (match st, ed with A.Literal(lst), A.Literal(led) -> 
+                                        if lst < led then string_of_float led else string_of_float lst
+                                        | _ -> ""))
+    in
     let rec gen_find_funcname count find_list = 
       match find_list with
       | [] -> []
-      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
-                   " (" ^ (gen_arg hd) ^ ")" )::(gen_find_funcname (count+1) tl)
+      | hd::tl -> (match get_id_range hd with
+                   | "" ->  ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
+                   " (" ^ get_id_range hd ^ ");\n" )::(gen_find_funcname (count+1) tl)
+                   | _ -> ("double " ^ get_id_range hd ^ ";\n" ^ 
+                   "for ( " ^ get_id_range hd ^ "=" ^ get_st_range hd ^ "; " ^
+                   get_id_range hd ^ "<" ^ get_ed_range hd ^ "; " ^
+                   get_id_range hd ^ "++) {\n" ^
+                   "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
+                   " (" ^ get_id_range hd ^ ");\n" ^
+                   "}\n") ::(gen_find_funcname (count+1) tl) 
+                 )
     in List.rev (gen_find_funcname 0 finddecl_list)
   in
   let gen_find_function find_funcname finddecl =
@@ -118,5 +139,5 @@ let translate sast =
   "#include <stdio.h>\n#include <math.h>\n" ^
   String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) finds) ^
   "int main() {\n" ^
-  String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^
+  String.concat "" (List.rev (gen_find_funcname_list finds)) ^
   " return 0;\n}\n"
