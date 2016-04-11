@@ -71,9 +71,9 @@ let check (contexts, finds) =
                     | "sin" -> ()
                     | "sqrt" -> ()
                     | "tan" -> ()
-                    | "log" ->()
+                    | "log" -> ()
                     | _ -> fail ("incorrect build-in function, " ^ quot name)
-              )
+                )
         )
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
@@ -134,9 +134,21 @@ let check (contexts, finds) =
                     | "sin" -> ()
                     | "sqrt" -> ()
                     | "tan" -> ()
-                    | "log" ->()
+                    | "log" -> ()
                     | _ -> fail ("incorrect build-in function, " ^ quot name)
-                )
+                  )
+                    (* TO-DO check built-in input like log should not
+                    take negative input, but unfortunitely negative sign
+                    saved in unop
+                    List.iter
+                      (fun e -> (match e with
+                      | A.Literal(n) ->
+                        if n < 0.0 then fail ("illegal argument, " ^ quot (string_of_float n))
+                      | _ -> ()
+                        )
+                      ) expr
+                    | _ -> fail ("incorrect build-in function, " ^ quot name)
+                )*)
         )
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
