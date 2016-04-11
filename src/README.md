@@ -8,7 +8,11 @@ _("LRM" for "Language [RM]" in code and comments)_.
 - [Status](#status-)
 - [Coding, Building, Testing](#coding-building-testing)
   - [Writing Tests](#writing-tests)
-  - [Debugging Tools](#debugging-tools)
+  - [Debugging Compiler's Phases](#debugging-compilers-phases)
+    - [Scanner: Tokens We Generate](#scanner-tokens-we-generate)
+    - [Parser: Our Grammar](#parser-our-grammar)
+    - [SAST: Our Semantically-Checked AST](#sast-our-semantically-checked-ast)
+    - [Codegen: EqualsEquals compiler itself](#codegen-equalsequals-compiler-itself)
   - [One-time Setup](#one-time-setup)
     - [Quickstart](#quickstart)
 
@@ -73,38 +77,20 @@ Note: currently we're trying to only test the behavior of our *compiled* C
 programs _(that is: we're not testing what our compiler outputs, but what its
 output programs do)_.
 
-### Debugging Tools
-See what our scanner thinks of source programs, with `debugtokens` target:
+### Debugging Compiler's Phases
+
+#### Scanner: Tokens We Generate
+To see what our scanner thinks of source programs, with `debugtokens` target:
 ```sh
 $ make debugtokens && ./debugtokens.native < tests/test-helloworld.eq
-bash -c 'source ~/.opam/opam-init/init.sh && ocamlbuild -use-ocamlfind ./debugtokens.native'
-# .. snipped `ocamlfind` commands ...
-File "ast.ml", line 68, characters 25-390:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-Strlit _
-/usr/bin/ocamllex.opt -q scanner.mll
-# .. snipped `ocamlfind` commands ...
-File "ast.ml", line 68, characters 25-390:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-Strlit _
-# .. snipped `ocamlfind` commands ...
+# .. snipped ...
 CTX
 ASSIGN
 LBRACE
 ID
 ASSIGN
 LBRACE
-LITERAL
-SEMI
-RBRACE
-RBRACE
-CTX
-COLON
-FIND
-ID
-LBRACE
+# ... snipped ....
 ID
 LPAREN
 STRLIT
@@ -115,6 +101,7 @@ SEMI
 RBRACE
 ```
 
+#### Parser: Our Grammar
 Interactive mode with menhir and our parser:
 ```sh
 $ menhir --interpret --interpret-show-cst parser.mly # note missing ASSIGN
@@ -123,6 +110,14 @@ CTX LBRACE ID ASSIGN LITERAL SEMI RBRACE
 REJECT
 ```
 
+#### SAST: Our Semantically-Checked AST
+To see the output of our semantic analysis ([as of]):
+```bash
+make && ./eqeq.native -s < $YOUR_TEST_FILE
+```
+[as of]: https://github.com/rxie25/PLT2016Spring/commit/6e908c68afdec6fe183db3170f43dddd4c69d11c
+
+#### Codegen: EqualsEquals compiler itself
 To get the generated C code (ie. the output of code gen):
 ```bash
 make && ./eqeq.native < $YOUR_TEST_FILE
