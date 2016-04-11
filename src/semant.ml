@@ -45,28 +45,39 @@ let check (contexts, finds) =
    (* list of EqualsEquals symbols that require external library support *)
    let liblist = 
     let rec add_lib_expre lis  = function
-          A.Binop(left,op,right)-> (
-            match op with 
+          A.Binop(left,op,right)-> 
+            let  lib_binop left right = function
             |A.Mod -> "%"::lis
             |A.Pow -> "^"::lis 
-            |_ -> lis )
+            |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis 
+          in lib_binop left right op
         | A.Unop(op, expr) -> (
             match op with
             |A.Abs -> "|"::lis
-            |_ -> lis )
+            |_ -> add_lib_expre lis expr )
         | A.Builtin(name, expr) -> (
             match name with
             |"print" -> "print"::(List.fold_left add_lib_expre lis expr)
             |_ -> List.fold_left add_lib_expre lis expr )
-        |_ -> lis
+        |_ -> lis 
+    in
+    let rec add_lib_stmt_ctx lis = function
+             A.Expr e-> add_lib_expre lis e 
+            |A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)
+            |A.If(l) -> lis
+            |A.While(p, s) -> add_lib_stmt_ctx lis s
+    in
+    let check_if_lib lis = function
+        | (None, sl) -> add_lib_stmt_ctx lis sl
+        | (Some(e), sl) -> List.append (add_lib_expre lis e) (add_lib_stmt_ctx lis sl) 
     in
     let rec add_lib_stmt lis  = function
              A.Expr e-> add_lib_expre lis e 
             |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
-            |A.If(l) -> let rec check_if_list_lib = function
+            |A.If(l) -> let rec check_if_list_lib lis = function
                                  | [] -> lis
-                                 | hd::tl -> add_lib_stmt lis (snd hd); check_if_list_lib tl
-                                in check_if_list_lib l
+                                 | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
+                                in check_if_list_lib lis l 
             |A.While(p, s) -> add_lib_stmt lis s
     in 
     let create_liblist_finds lis finds = 
@@ -77,7 +88,7 @@ let check (contexts, finds) =
     in
     let create_liblist_ctx lis ctx = 
       List.fold_left 
-        add_lib_stmt
+        add_lib_stmt_ctx
         lis
         ctx.A.fdbody
     in 
