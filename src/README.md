@@ -9,7 +9,7 @@ _("LRM" for "Language [RM]" in code and comments)_.
 - [Coding, Building, Testing](#coding-building-testing)
   - [Writing Tests](#writing-tests)
   - [Debugging Compiler's Phases](#debugging-compilers-phases)
-    - [Scanner: Tokens We Generate](#scanners-tokens-we-generate)
+    - [Scanner: Tokens We Generate](#scanner-tokens-we-generate)
     - [Parser: Our Grammar](#parser-our-grammar)
     - [SAST: Our Semantically-Checked AST](#sast-our-semantically-checked-ast)
     - [Codegen: EqualsEquals compiler itself](#codegen-equalsequals-compiler-itself)
