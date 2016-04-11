@@ -67,8 +67,13 @@ let check (contexts, finds) =
               | A.Builtin(name, expr) -> (
                 match name with
                     | "print" -> ()
+                    | "cos" -> ()
+                    | "sin" -> ()
+                    | "sqrt" -> ()
+                    | "tan" -> ()
+                    | "log" ->()
                     | _ -> fail ("incorrect build-in function, " ^ quot name)
-                )
+              )
         )
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
@@ -125,6 +130,11 @@ let check (contexts, finds) =
               | A.Builtin(name, expr) -> (
                 match name with
                     | "print" -> ()
+                    | "cos" -> ()
+                    | "sin" -> ()
+                    | "sqrt" -> ()
+                    | "tan" -> ()
+                    | "log" ->()
                     | _ -> fail ("incorrect build-in function, " ^ quot name)
                 )
         )
