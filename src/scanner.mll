@@ -53,6 +53,7 @@ rule token = parse
 | "!"                        { NOT }
 | "if"                       { IF }
 | "else"                     { ELSE }
+| "elif"                     { ELIF }
 | "while"                    { WHILE }
 | "find"                     { FIND }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
