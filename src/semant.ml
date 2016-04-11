@@ -25,24 +25,27 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (**** Map of known Context blocks keyed by their names ****)
-  let known_ctxs =
-    List.fold_left
-      (fun existing ctx ->
-         if StringMap.mem ctx.A.context existing then
-           fail ("duplicate context, " ^ (quot ctx.A.context))
-         else
-           StringMap.add ctx.A.context ctx existing
-      )
-      StringMap.empty
-      contexts
-  in
+  (* Map of variables to their decls. For more, see: Sast.varMap *)
+  let varmap =
+    let create_varmap map ctx =
+      if StringMap.mem ctx.A.context map
+      then fail ("duplicate context, " ^ (quot ctx.A.context))
+      else
+        StringMap.add
+          ctx.A.context
+          (List.fold_left
+            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
+            StringMap.empty
+            ctx.A.cbody
+          )
+          map
+    in
+    List.fold_left create_varmap StringMap.empty contexts in
 
-  let check_have_context ctx_name =
-    try StringMap.find ctx_name known_ctxs
-    with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
+  let check_have_var var symbolmap =
+    try StringMap.find var symbolmap
+    with Not_found -> fail ("variable not defined, " ^ quot var)
   in
-
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
       | A.Block sl ->
@@ -63,8 +66,7 @@ let check (contexts, finds) =
               | A.Assign(left, expr) -> ()
               | A.Builtin(name, expr) -> ()
         )
-      | A.If(p, b1, b2) ->
-          check_stmt (A.Expr p); check_stmt b1; check_stmt b2
+      | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
   in
 
@@ -89,10 +91,50 @@ let check (contexts, finds) =
 
   (**** Checking Find blocks ****)
   let check_find findBlk =
-    check_have_context findBlk.A.fcontext;
-    List.iter check_stmt findBlk.A.fbody
+    let symbolmap =
+      let ctx_name = findBlk.A.fcontext in
+      try StringMap.find ctx_name varmap
+      with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
+    in
+  (* Verify a particular `statement` in `find` or throw an exception *)
+  let check_if = function
+    | (None, sl) -> check_stmt sl
+    | (Some(e), sl) -> check_stmt (A.Expr e); check_stmt sl
+  in
+  let rec check_stmt_for_find = function
+      | A.Block sl ->
+          (* effectively unravel statements out of their block *)
+          let rec check_block = function
+            | A.Block sl :: ss -> check_block (sl @ ss)
+            | s :: ss -> check_stmt_for_find s; check_block ss
+            | [] -> ()
+          in check_block sl
+      | A.Expr e -> (
+          (* Verify an expression or throw an exception *)
+          match e with
+              | A.Literal(lit) -> ()
+              | A.Strlit(str) -> ()
+              | A.Id(id) -> ()
+              | A.Binop(left, op, right) -> ()
+              | A.Unop(op, expr) -> ()
+              | A.Assign(left, expr) -> ()
+              | A.Builtin(name, expr) -> ()
+        )
+      | A.If(l) -> let rec check_if_list = function
+                    | [] -> ()
+                    | hd::tl -> check_if hd; check_if_list tl
+                    in check_if_list l
+      | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
+  in
+
+    check_have_var findBlk.A.ftarget symbolmap;
+    List.iter check_stmt_for_find findBlk.A.fbody
   in
 
   List.iter check_ctx contexts;
   List.iter check_find finds;
-  (contexts, finds)
+
+  {
+    Sast.ast = (contexts, finds);
+    Sast.vars = varmap;
+  }

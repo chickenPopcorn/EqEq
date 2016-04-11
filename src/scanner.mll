@@ -17,11 +17,13 @@ let num = sign? (intgr+ frac? | intgr* frac)
 let identifier = lowercase (alpha_num | '_')*
 let context_id = uppercase identifier
 
-let whitespace = [' ' '\t' '\r' '\n']
+let whitespace = [' ' '\t' '\r']
+let newline = '\n' | "\r\n"
 
 rule token = parse
 | whitespace                 { token lexbuf }
 | "/*"                       { comment lexbuf }
+| newline                    { Lexing.new_line lexbuf; token lexbuf }
 | '('                        { LPAREN }
 | ')'                        { RPAREN }
 | '{'                        { LBRACE }
@@ -48,8 +50,10 @@ rule token = parse
 | "!"                        { NOT }
 | "if"                       { IF }
 | "else"                     { ELSE }
+| "elif"                     { ELIF }
 | "while"                    { WHILE }
 | "find"                     { FIND }
+| "with"                     { WITH }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
 | num as lxm                 { LITERAL(float_of_string lxm) }
 | identifier as lxm          { ID(lxm) }
@@ -60,3 +64,7 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and ruleTail acc = parse
+| eof { acc }
+| _* as str { ruleTail (acc ^ str) lexbuf }
