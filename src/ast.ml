@@ -103,7 +103,7 @@ let string_of_range range =
   | [] -> ""
   | hd::tl -> (match hd with Range(id, st, ed) -> 
                (match st, ed with Literal(lst), Literal(led) ->
-                                  id ^ " in range(" ^ string_of_float lst ^ "," ^  string_of_float led ^ ")"
+                                  " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^  string_of_float led ^ ")"
                                   | _ -> ""))
 
 let string_of_multieq multieq =
