@@ -1,1 +1,1 @@
-Fatal error: exception Failure("incorrect build-in function, "pr"")
+Fatal error: exception Failure("unknown build-in function, "pr"")

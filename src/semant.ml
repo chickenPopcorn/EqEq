@@ -46,6 +46,16 @@ let check (contexts, finds) =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
+ let check_builtin name =
+    match name with
+        | "print" -> ()
+        | "cos" -> ()
+        | "sin" -> ()
+        | "sqrt" -> ()
+        | "tan" -> ()
+        | "log" -> ()
+        | _ -> fail ("unknown build-in function, " ^ quot name)
+    in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
       | A.Block sl ->
@@ -64,16 +74,7 @@ let check (contexts, finds) =
               | A.Binop(left, op, right) -> ()
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> (
-                match name with
-                    | "print" -> ()
-                    | "cos" -> ()
-                    | "sin" -> ()
-                    | "sqrt" -> ()
-                    | "tan" -> ()
-                    | "log" -> ()
-                    | _ -> fail ("incorrect build-in function, " ^ quot name)
-                )
+              | A.Builtin(name, expr) -> (check_builtin name)
         )
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
@@ -127,16 +128,7 @@ let check (contexts, finds) =
               | A.Binop(left, op, right) -> ()
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> (
-                match name with
-                    | "print" -> ()
-                    | "cos" -> ()
-                    | "sin" -> ()
-                    | "sqrt" -> ()
-                    | "tan" -> ()
-                    | "log" -> ()
-                    | _ -> fail ("incorrect build-in function, " ^ quot name)
-                  )
+              | A.Builtin(name, expr) -> (check_builtin name)
                     (* TO-DO check built-in input like log should not
                     take negative input, but unfortunitely negative sign
                     saved in unop
