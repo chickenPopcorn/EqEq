@@ -17,7 +17,7 @@ SomeCtx:find a with c in range(0,3); {
   print("c = %0.0f\n", c);
 }
 
-/*
+
 SomeCtx:find a with c in range(2,-1); {
   print("print for find with range (2,-1)\n");
   print("a = %0.0f\n", a);
@@ -39,4 +39,3 @@ SomeCtx:find a with b = 10; c in range(0,2); {
   print("b = %0.0f\n", b);
   print("c = %0.0f\n", c);
 }
-*/
