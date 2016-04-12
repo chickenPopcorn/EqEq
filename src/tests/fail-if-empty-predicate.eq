@@ -2,10 +2,7 @@ SomeContext = {
   a={1;}
 }
 SomeContext: find a {
- if(a==1){
+ if (  ) {
    print("%.0f\n",a);
-   print("%.0f\n",a+1);
-}else{
-   print("%.0f\n",a+2);
   }
 }

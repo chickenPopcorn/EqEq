@@ -7,14 +7,13 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
 %token PLUS MINUS TIMES DIVIDE MOD POW ABS ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token IF ELSE WHILE FIND
+%token IF ELSE WHILE FIND ELIF WITH
 %token <float> LITERAL
 %token <string> ID
 %token <string> STRLIT
 %token <string> CTX
 %token EOF
 
-%nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
 %left OR
@@ -22,7 +21,7 @@ open Ast
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE MOD POW 
+%left TIMES DIVIDE MOD POW
 %right ABS
 %right NOT NEG
 
@@ -65,6 +64,14 @@ finddecl:
      { { fcontext = $1;
          ftarget = $4;
          fbody = List.rev $6 } }
+ | FIND ID WITH stmt_list LBRACE stmt_list RBRACE
+     { { fcontext = ""; (* global context *)
+         ftarget = $2;
+         fbody = (List.rev $4) @ (List.rev $6) } }
+ | CTX COLON FIND ID WITH stmt_list LBRACE stmt_list RBRACE
+     { { fcontext = $1;
+         ftarget = $4;
+         fbody = (List.rev $6) @ (List.rev $8) } }
 
 funcdecl_list:
     /* nothing */  { [] }
@@ -77,10 +84,19 @@ stmt_list:
 stmt:
     expr SEMI { Expr $1 }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE %prec NOELSE { If($3, Block(List.rev $6), Block([])) }
-  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE   { If($3, Block(List.rev $6), Block(List.rev $10)) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [(Some($3), Block(List.rev $6)) ])) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
-  | FIND stmt_list RBRACE { Block(List.rev $2) }
+
+elif_stmt_list:
+    /* nothing */ { [] }
+    | elif_stmt_list elif_stmt { $1 @ $2 }
+
+elif_stmt:
+    | ELSE IF LPAREN expr RPAREN LBRACE stmt_list RBRACE { [(Some($4), Block(List.rev $7))] }
+
+else_stmt:
+    /* nothing */ { [] }
+    | ELSE LBRACE stmt_list RBRACE { [(None, Block(List.rev $3))] }
 
 expr:
     literal          { $1 }
