@@ -108,7 +108,7 @@ range_list:
 */
 
 range:
-  | ID IN RANGE LPAREN literal COMMA literal RPAREN SEMI {Range($1, $5, $7)}
+  | ID IN RANGE LPAREN literal COMMA literal COMMA literal RPAREN SEMI {Range($1, $5, $7, $9)}
 
 stmt:
     expr SEMI { Expr $1 }

@@ -1,51 +1,51 @@
 print for simple find
 a = 42
 b = 32
-print for find with range (0,3)
+print for find with range (0,3,1)
 a = 42
 b = 32
 c = 0
-print for find with range (0,3)
+print for find with range (0,3,1)
 a = 42
 b = 32
 c = 1
-print for find with range (0,3)
+print for find with range (0,3,1)
 a = 42
 b = 32
 c = 2
-print for find with range (0,3)
+print for find with range (0,3,1)
 a = 42
 b = 32
 c = 3
-print for find with range (2,-1)
+print for find with range (2,-1,-1)
 a = 42
 b = 32
 c = 2
-print for find with range (2,-1)
+print for find with range (2,-1,-1)
 a = 42
 b = 32
 c = 1
-print for find with range (2,-1)
+print for find with range (2,-1,-1)
 a = 42
 b = 32
 c = 0
-print for find with range (2,-1)
+print for find with range (2,-1,-1)
 a = 42
 b = 32
 c = -1
-print for find with range (-1,-1)
+print for find with range (-1,-1,1)
 a = 42
 b = 32
 c = -1
-print for find with range (0,2)
+print for find with range (0,2,1)
 a = 42
 b = 10
 c = 0
-print for find with range (0,2)
+print for find with range (0,2,1)
 a = 42
 b = 10
 c = 1
-print for find with range (0,2)
+print for find with range (0,2,1)
 a = 42
 b = 10
 c = 2

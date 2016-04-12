@@ -5,9 +5,11 @@ module S = Sast
 
 module StringMap = Map.Make(String)
 
+
 let translate sast =
   let (contexts, finds) = sast.S.ast in
   let varmap = sast.S.vars in
+  let liblist = sast.S.lib in 
 
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
@@ -61,7 +63,7 @@ let translate sast =
   let get_id_range finddecl =
     match finddecl.A.frange with
     | [] -> ""
-    | hd :: tl -> (match hd with A.Range(id, st, ed) -> id)
+    | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> id)
   in
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
@@ -92,22 +94,22 @@ let translate sast =
     in List.rev (gen_find_func_prototype 0 finddecl_list)
   in 
   let gen_wrapped_find_func_prototype_list finddecl_list = 
-    let get_st_range finddecl =
+    let get_for_loop_range finddecl =
       match finddecl.A.frange with
       | [] -> ""
-      | hd :: tl -> (match hd with A.Range(id, st, ed) -> 
-                     (match st, ed with A.Literal(lst), A.Literal(led) -> 
-                                        if lst < led then string_of_float lst else string_of_float led
+      | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> 
+                     (match st, ed, inc with A.Literal(lst), A.Literal(led), A.Literal(linc)  ->
+                                        if linc >= 0. 
+                                        then 
+                                        "for ( " ^ id ^ "=" ^ string_of_float lst ^ "; " ^
+                                        id ^ "<=" ^ string_of_float led ^ "; " ^
+                                        id ^ "=" ^ id ^ "+" ^ string_of_float linc ^ ")"
+                                        else  
+                                        "for ( " ^ id ^ "=" ^ string_of_float lst ^ "; " ^
+                                        id ^ ">=" ^ string_of_float led ^ "; " ^
+                                        id ^ "=" ^ id ^ "+" ^ string_of_float linc ^ ")"
                                         | _ -> ""))
     in 
-    let get_ed_range finddecl =
-      match finddecl.A.frange with
-      | [] -> ""
-      | hd :: tl -> (match hd with A.Range(id, st, ed) -> 
-                     (match st, ed with A.Literal(lst), A.Literal(led) -> 
-                                        if lst < led then string_of_float led else string_of_float lst
-                                        | _ -> ""))
-    in
     let rec gen_wrapped_find_func_prototype count find_list = 
       match find_list with
       | [] -> []
@@ -117,9 +119,7 @@ let translate sast =
                              " (" ^ get_id_range hd ^ ");\n}\n" )::(gen_wrapped_find_func_prototype (count+1) tl)
                    | _ -> ("void find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range(){\n" ^
                            "double " ^ get_id_range hd ^ ";\n" ^ 
-                           "for ( " ^ get_id_range hd ^ "=" ^ get_st_range hd ^ "; " ^
-                           get_id_range hd ^ "<=" ^ get_ed_range hd ^ "; " ^
-                           get_id_range hd ^ "++) {\n" ^
+                           get_for_loop_range hd ^ "{\n" ^
                            "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
                            " (" ^ get_id_range hd ^ ");\n" ^
                            "}\n}\n") ::(gen_wrapped_find_func_prototype (count+1) tl) 
@@ -142,7 +142,17 @@ let translate sast =
                   )::(gen_find_func_call (count+1) tl)
     in List.rev (gen_find_func_call 0 finddecl_list)
   in 
-  "#include <stdio.h>\n#include <math.h>\n" ^
+  let lib=
+    let header head elem=
+      match elem with
+      |"%" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"^" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"|" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"print" -> if (List.mem "#include <stdio.h>\n" head) then head else "#include <stdio.h>\n"::head
+      |_ -> head 
+    in (List.fold_left header [] liblist)
+  in 
+  String.concat "" lib ^ 
   String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
   String.concat "" (gen_wrapped_find_func_prototype_list finds) ^
   "int main() {\n" ^
