@@ -91,7 +91,7 @@ let translate sast =
                   )::(gen_find_func_prototype (count+1) tl)
     in List.rev (gen_find_func_prototype 0 finddecl_list)
   in 
-  let gen_find_funcname_list finddecl_list = 
+  let gen_wrapped_find_func_prototype_list finddecl_list = 
     let get_st_range finddecl =
       match finddecl.A.frange with
       | [] -> ""
@@ -108,21 +108,23 @@ let translate sast =
                                         if lst < led then string_of_float led else string_of_float lst
                                         | _ -> ""))
     in
-    let rec gen_find_funcname count find_list = 
+    let rec gen_wrapped_find_func_prototype count find_list = 
       match find_list with
       | [] -> []
       | hd::tl -> (match get_id_range hd with
-                   | "" ->  ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
-                   " (" ^ get_id_range hd ^ ");\n" )::(gen_find_funcname (count+1) tl)
-                   | _ -> ("double " ^ get_id_range hd ^ ";\n" ^ 
-                   "for ( " ^ get_id_range hd ^ "=" ^ get_st_range hd ^ "; " ^
-                   get_id_range hd ^ "<=" ^ get_ed_range hd ^ "; " ^
-                   get_id_range hd ^ "++) {\n" ^
-                   "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
-                   " (" ^ get_id_range hd ^ ");\n" ^
-                   "}\n") ::(gen_find_funcname (count+1) tl) 
+                   | "" ->  ("void find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range(){\n" ^ 
+                             "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^
+                             " (" ^ get_id_range hd ^ ");\n}\n" )::(gen_wrapped_find_func_prototype (count+1) tl)
+                   | _ -> ("void find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range(){\n" ^
+                           "double " ^ get_id_range hd ^ ";\n" ^ 
+                           "for ( " ^ get_id_range hd ^ "=" ^ get_st_range hd ^ "; " ^
+                           get_id_range hd ^ "<=" ^ get_ed_range hd ^ "; " ^
+                           get_id_range hd ^ "++) {\n" ^
+                           "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
+                           " (" ^ get_id_range hd ^ ");\n" ^
+                           "}\n}\n") ::(gen_wrapped_find_func_prototype (count+1) tl) 
                  )
-    in List.rev (gen_find_funcname 0 finddecl_list)
+    in List.rev (gen_wrapped_find_func_prototype 0 finddecl_list)
   in
   let gen_find_function find_funcname finddecl =
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
@@ -130,10 +132,19 @@ let translate sast =
     String.concat ""(List.map gen_decl_ctx contexts) ^ 
     String.concat ""(List.map gen_ctxdecl contexts) ^
     (gen_finddecl finddecl) ^ "}\n" ^
-    "\n"
+    "\n" 
   in
+  let gen_find_func_call_list finddecl_list = 
+    let rec gen_find_func_call count find_list = 
+      match find_list with
+      | [] -> []
+      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range ();\n" 
+                  )::(gen_find_func_call (count+1) tl)
+    in List.rev (gen_find_func_call 0 finddecl_list)
+  in 
   "#include <stdio.h>\n#include <math.h>\n" ^
   String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
+  String.concat "" (gen_wrapped_find_func_prototype_list finds) ^
   "int main() {\n" ^
-  String.concat "" (gen_find_funcname_list finds) ^
+  String.concat "" (gen_find_func_call_list finds) ^
   " return 0;\n}\n"
