@@ -97,10 +97,10 @@ let translate sast =
   let lib=
     let header head elem=
       match elem with
-      |"%" -> if (not(List.mem "#include <math.h>\n" head)) then "#include <math.h>\n"::head else head
-      |"^" -> if (not(List.mem "#include <math.h>\n" head)) then "#include <math.h>\n"::head else head
-      |"|" -> if (not(List.mem "#include <math.h>\n" head)) then "#include <math.h>\n"::head else head
-      |"print" -> if (not(List.mem "#include <stdio.h>\n" head)) then "#include <stdio.h>\n"::head else head
+      |"%" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"^" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"|" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"print" -> if (List.mem "#include <stdio.h>\n" head) then head else "#include <stdio.h>\n"::head
       |_ -> head 
     in (List.fold_left header [] liblist)
   in 
