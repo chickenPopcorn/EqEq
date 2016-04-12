@@ -26,7 +26,7 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  let eqrelations =
+  let eqrelations : S.eqResolutions =
     let rec findDepsInAssignStmt foundDeps stmt =
       let rec findIdsInExpr foundIds = function
             A.Literal(_) -> foundIds
@@ -48,7 +48,8 @@ let check (contexts, finds) =
             findIdsInExpr (findDepsInAssignStmt foundDeps s) e
     in
 
-    let ctxRelations =
+    (* `Sast.eqResolutions` to which we'll add `S.equation_relations` *)
+    let ctxRelations : S.eqResolutions =
       let relationCtxFolder relations ctx =
 
         let ctxScope =
@@ -77,10 +78,62 @@ let check (contexts, finds) =
       in List.fold_left relationCtxFolder StringMap.empty contexts
     in
 
-    let relationFindFolder relations findDecl  =
-      (* let eqName = Printf.printf "find_%s_%d" ctx.A.context in *)
-      relations (* noop: just pass for now... *)
-    in List.fold_left relationFindFolder ctxRelations finds
+    (* Folds `S.equation_relations` to respective Contexts' `Sast.ctx_scopes` *)
+    let relationFindFolder (relations, findIdx) findDecl  =
+      let findName = Printf.sprintf "find_%s_%d" findDecl.A.fcontext findIdx in
+
+      (* `Sast.ctx_scopes` for which we're creating an `findName` entry. *)
+      let ctxScopes : Sast.ctx_scopes =
+        try StringMap.find findDecl.A.fcontext relations
+        with Not_found ->
+            fail ("find targeting unknown context, " ^ quot findDecl.A.fcontext)
+      in
+
+      (* Map from expression index to a `Sast.equation_relations` *)
+      let findRelationMap : (S.equation_relations S.IntMap.t) =
+        let baseRelations : S.equation_relations = {
+          S.indeps = ctxScopes.S.ctx_indeps;
+          S.deps = ctxScopes.S.ctx_deps;
+        } in
+
+        (* Initial map from expression-index to `Sast.equation_relations` *)
+        let exprMap = S.IntMap.add 0 baseRelations S.IntMap.empty in
+
+        let findBodyFolder (exprMap, exprIndex) stmt =
+          let maybeMoreFindExprs =
+            exprMap (*TODO: actually S.IntMap.add exprIndex exprMap*)
+          in (maybeMoreFindExprs, exprIndex + 1)
+        in
+
+        (* Build a complete map of expresion-index to relations for this find
+         * body, then discard the latest index and return that map. *)
+        let (eqRels, _) =
+          List.fold_left findBodyFolder (exprMap, 0) findDecl.A.fbody
+        in eqRels
+      in
+
+      (* TODO: after building deps/indeps (findBodyMap), ensure
+       * `findDecl.ftarget` is a known key (of either deps or indeps is fine) *)
+
+      let extendedRels : S.eqResolutions =
+        let ctxFinds : S.find_scopes =
+          StringMap.add findName findRelationMap ctxScopes.S.ctx_finds
+        in
+        let scopes = {
+          S.ctx_deps = ctxScopes.S.ctx_deps;
+          S.ctx_indeps = ctxScopes.S.ctx_indeps;
+          S.ctx_finds = ctxFinds;
+        }
+        in StringMap.add findDecl.A.fcontext scopes relations
+      in (extendedRels, findIdx + 1)
+    in
+
+    (* Add a complete picture of contexts' find decl relations, maintaining an
+     * index along the way, then discard the last index and just return the
+     * completed map. *)
+    let (sastEqRels, _) =
+      List.fold_left relationFindFolder (ctxRelations, 0) finds
+    in sastEqRels
   in
 
   (* Map of variables to their decls. For more, see: S.varMap *)

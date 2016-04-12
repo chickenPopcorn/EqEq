@@ -39,19 +39,31 @@ type checked = {
 
 (* pretty print *)
 let string_of_checked chk = 
-  let string_of_deps eq_name depList str =
+  let string_of_deps eq_name (depList : string list) str =
     str ^
     eq_name ^ " : [" ^
     String.concat ", " depList ^
     "]\n  "
   in
-  let string_of_indeps eq_name stmtList str =
+  let string_of_indeps eq_name (stmtList : A.stmt list) str =
     str ^
     eq_name ^ " : ```\n    " ^
     String.concat "" (List.map A.string_of_stmt stmtList) ^
     "  ```"
   in
-  let string_of_finds fdname exprmap finds = ""
+  let string_of_finds fdname (finds : (equation_relations IntMap.t)) str =
+    let string_of_eqrelmap exprIndex (relmap : equation_relations) str =
+      str ^ String.concat "\n" [
+        "  " ^ (StringMap.fold string_of_deps relmap.deps "  ");
+        "  " ^ (StringMap.fold string_of_indeps relmap.indeps "  ");
+      ]
+    in
+
+    str ^
+    "\"" ^ fdname ^ "\": " ^
+    String.concat "\n" [
+      IntMap.fold string_of_eqrelmap finds "\n"
+    ]
   in
   let string_of_ctxscope ctxname scope str =
     String.concat "\n" [
