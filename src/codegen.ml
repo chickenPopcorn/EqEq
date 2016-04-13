@@ -128,15 +128,14 @@ let translate sast =
       match find_list with
       | [] -> []
       | hd::tl -> (match get_id_range hd with
-                   | "" ->  ("void find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range(){\n" ^ 
-                             "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^
-                             " (" ^ get_id_range hd ^ ");\n}\n" )::(gen_wrapped_find_func_prototype (count+1) tl)
-                   | _ -> ("void find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range(){\n" ^
-                           "double " ^ get_id_range hd ^ ";\n" ^ 
-                           get_for_loop_range hd ^ "{\n" ^
-                           "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ 
-                           " (" ^ get_id_range hd ^ ");\n" ^
-                           "}\n}\n") ::(gen_wrapped_find_func_prototype (count+1) tl) 
+                   | "" ->  ((Printf.sprintf "void find_%s_%d_range(){\n" hd.A.fcontext count)^ 
+                            (Printf.sprintf "find_%s_%d(%s);\n}\n" hd.A.fcontext count (get_id_range hd)))::(gen_wrapped_find_func_prototype (count+1) tl)
+                   | _ -> ((Printf.sprintf "void find_%s_%d_range(){\n" hd.A.fcontext count) ^
+                          (Printf.sprintf "double %s;\n" (get_id_range hd)) ^
+                          get_for_loop_range hd ^ "{\n" ^
+                          (Printf.sprintf "find_%s_%d(%s);\n}\n}\n" hd.A.fcontext count (get_id_range hd)))::(gen_wrapped_find_func_prototype (count+1) tl)
+
+
                  )
     in List.rev (gen_wrapped_find_func_prototype 0 finddecl_list)
   in
