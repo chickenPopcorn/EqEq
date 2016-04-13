@@ -4,6 +4,6 @@ SomeContext = {
 SomeContext: find a {
   while(a<3){
   print("%.0f\n",a);
-  a=a+1;
+  a = a + 1;
  }
 }

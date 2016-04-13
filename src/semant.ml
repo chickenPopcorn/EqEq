@@ -40,12 +40,82 @@ let check (contexts, finds) =
           )
           map
     in
-    List.fold_left create_varmap StringMap.empty contexts in
+    List.fold_left create_varmap StringMap.empty contexts
+   in
+   (* list of EqualsEquals symbols that require external library support *)
+   let liblist =
+    let rec add_lib_expre lis  = function
+          A.Binop(left,op,right)-> (
+               match op with
+               |A.Mod -> "%"::lis
+               |A.Pow -> "^"::lis
+               |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis )
+        | A.Unop(op, expr) -> (
+            match op with
+            |A.Abs -> "|"::lis
+            |_ -> add_lib_expre lis expr )
+        | A.Builtin(name, expr) -> (
+            match name with
+            | "cos" -> "cos"::lis
+            | "sin" -> "sin"::lis
+            | "tan" -> "tan"::lis
+            | "log" -> "log"::lis
+            | "sqrt" -> "sqrt"::lis
+            | "print" -> "print"::(List.fold_left add_lib_expre lis expr)
+            |_ -> List.fold_left add_lib_expre lis expr )
+        |_ -> lis
+    in
+    let rec add_lib_stmt_ctx lis = function
+             A.Expr e-> add_lib_expre lis e
+            |A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)
+            |A.If(l) -> lis
+            |A.While(p, s) -> add_lib_stmt_ctx lis s
+    in
+    let check_if_lib lis = function
+        | (None, sl) -> add_lib_stmt_ctx lis sl
+        | (Some(e), sl) -> List.append (add_lib_expre lis e) (add_lib_stmt_ctx lis sl)
+    in
+    let rec add_lib_stmt lis  = function
+             A.Expr e-> add_lib_expre lis e
+            |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
+            |A.If(l) -> let rec check_if_list_lib lis = function
+                                 | [] -> lis
+                                 | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
+                                in check_if_list_lib lis l
+            |A.While(p, s) -> add_lib_stmt lis s
+    in
+    let create_liblist_finds lis finds =
+      List.fold_left
+        add_lib_stmt
+        lis
+        finds.A.fbody
+    in
+    let create_liblist_ctx lis ctx =
+      List.fold_left
+        add_lib_stmt_ctx
+        lis
+        ctx.A.fdbody
+    in
+    (* append list from finds black with list from contexts block *)
+    List.append
+     (List.fold_left create_liblist_finds [] finds)
+     (List.fold_left (fun lis eq -> List.fold_left create_liblist_ctx lis eq.A.cbody) [] contexts)
+  in
 
   let check_have_var var symbolmap =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
+ let check_builtin name =
+    match name with
+        | "print" -> ()
+        | "cos" -> ()
+        | "sin" -> ()
+        | "sqrt" -> ()
+        | "tan" -> ()
+        | "log" -> ()
+        | _ -> fail ("unknown build-in function, " ^ quot name)
+    in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
       | A.Block sl ->
@@ -64,7 +134,7 @@ let check (contexts, finds) =
               | A.Binop(left, op, right) -> ()
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> ()
+              | A.Builtin(name, expr) -> (check_builtin name)
         )
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
@@ -118,7 +188,19 @@ let check (contexts, finds) =
               | A.Binop(left, op, right) -> ()
               | A.Unop(op, expr) -> ()
               | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> ()
+              | A.Builtin(name, expr) -> (check_builtin name)
+                    (* TO-DO check built-in input like log should not
+                    take negative input, but unfortunitely negative sign
+                    saved in unop
+                    List.iter
+                      (fun e -> (match e with
+                      | A.Literal(n) ->
+                        if n < 0.0 then fail ("illegal argument, " ^ quot (string_of_float n))
+                      | _ -> ()
+                        )
+                      ) expr
+                    | _ -> fail ("incorrect build-in function, " ^ quot name)
+                )*)
         )
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
@@ -137,4 +219,5 @@ let check (contexts, finds) =
   {
     Sast.ast = (contexts, finds);
     Sast.vars = varmap;
+    Sast.lib = liblist
   }
