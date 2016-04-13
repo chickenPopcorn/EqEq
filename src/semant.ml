@@ -29,28 +29,35 @@ let check (contexts, finds) =
   let eqrelations : S.eqResolutions =
     let rec findDepsInAssignStmt foundDeps stmt =
       let rec findIdsInExpr foundIds = function
-            A.Literal(_) -> foundIds
-          | A.Id(id) -> id::foundIds
-          | A.Strlit(_) -> foundIds
-          | A.Binop(e1,_,e2) -> findIdsInExpr (findIdsInExpr foundIds e2) e1
-          | A.Unop(_,e) -> findIdsInExpr foundIds e
-          | A.Assign(_,e) -> findIdsInExpr foundIds e
-          | A.Builtin(_,eList) -> List.fold_left (fun ls e -> findIdsInExpr ls e) foundIds eList
+        | A.Literal(_) -> foundIds
+        | A.Id(id) -> id::foundIds
+        | A.Strlit(_) -> foundIds
+        | A.Binop(e1,_,e2) -> findIdsInExpr (findIdsInExpr foundIds e2) e1
+        | A.Unop(_,e) -> findIdsInExpr foundIds e
+        | A.Assign(_,e) -> findIdsInExpr foundIds e
+        | A.Builtin(_,eList) ->
+            List.fold_left (fun ls e -> findIdsInExpr ls e) foundIds eList
       in
 
       match stmt with
-        | A.Block(sList) -> List.fold_left (fun ls s -> findDepsInAssignStmt ls s) foundDeps sList
+        | A.Block(sList) ->
+            List.fold_left
+              (fun ls s -> findDepsInAssignStmt ls s)
+              foundDeps
+              sList
         | A.Expr(e) -> findIdsInExpr foundDeps e
         | A.If(stmtOrTupleList ) -> (
             let rec collectIdsInIf accumul = function
               | [] -> accumul
-              | (None,stmt)::tail -> collectIdsInIf (findDepsInAssignStmt accumul stmt) tail
-              | (Some(e),stmt)::tail -> collectIdsInIf (findIdsInExpr (findDepsInAssignStmt accumul stmt) e) tail
+              | (None,stmt)::tail ->
+                  collectIdsInIf (findDepsInAssignStmt accumul stmt) tail
+              | (Some(e),stmt)::tail ->
+                  collectIdsInIf (
+                    findIdsInExpr (findDepsInAssignStmt accumul stmt) e
+                  ) tail
             in collectIdsInIf foundDeps stmtOrTupleList
           )
-
-        | A.While(e, s) ->
-            findIdsInExpr (findDepsInAssignStmt foundDeps s) e
+        | A.While(e, s) -> findIdsInExpr (findDepsInAssignStmt foundDeps s) e
     in
 
     (* `Sast.eqResolutions` to which we'll add `S.equation_relations` *)
@@ -67,8 +74,11 @@ let check (contexts, finds) =
                 else (deps, StringMap.add mEq.A.fname mEq.A.fdbody indeps)
               in
               List.fold_left multi_eq_folder (deps, indeps) mEq.A.fdbody
-            in
-            List.fold_left ctx_body_folder (StringMap.empty, StringMap.empty) ctx.A.cbody
+
+            in List.fold_left
+                 ctx_body_folder
+                 (StringMap.empty, StringMap.empty)
+                 ctx.A.cbody
           in
 
 
@@ -87,19 +97,20 @@ let check (contexts, finds) =
      * index along the way, then discard the last index and just return the
      * completed map. *)
     let (sastEqRels, _) =
-      (* Folds `S.equation_relations` to respective Contexts' `Sast.ctx_scopes` *)
-      let relationFindFolder (relations, findIdx) findDecl  =
-        let findName = Printf.sprintf "find_%s_%d" findDecl.A.fcontext findIdx in
+      (* Fold `S.equation_relations` to respective Contexts' `S.ctx_scopes` *)
+      let relationFindFolder (relations, findIdx) findDec  =
+        let findName = Printf.sprintf "find_%s_%d" findDec.A.fcontext findIdx in
 
         (* `Sast.ctx_scopes` for which we're creating an `findName` entry. *)
         let ctxScopes : Sast.ctx_scopes =
-          try StringMap.find findDecl.A.fcontext relations
-          with Not_found ->
-              fail ("find targeting unknown context, " ^ quot findDecl.A.fcontext)
+          try StringMap.find findDec.A.fcontext relations
+          with Not_found -> fail (
+            "find targeting unknown context, " ^ quot findDec.A.fcontext
+          )
         in
 
         (* TODO: after building deps/indeps (findBodyMap), ensure
-         * `findDecl.ftarget` is a known key (of either deps or indeps is fine) *)
+         * `findDec.ftarget` is known key (of either deps or indeps is fine) *)
 
         let extendedRels : S.eqResolutions =
           (* Map from expression index to a `Sast.equation_relations` *)
@@ -112,8 +123,8 @@ let check (contexts, finds) =
             (* Initial map from expression-index to `Sast.equation_relations` *)
             let exprMap = S.IntMap.add 0 baseRelations S.IntMap.empty in
 
-            (* Build a complete map of expresion-index to relations for this find
-             * body, then discard the latest index and return that map. *)
+            (* Build a complete map of expresion-index to relations for this
+             * find body, then discard the latest index and return that map. *)
             let (eqRels, _) =
               let findBodyFolder (exprMap, exprIndex) stmt =
                 let maybeMoreFindExprs =
@@ -121,7 +132,7 @@ let check (contexts, finds) =
                 in (maybeMoreFindExprs, exprIndex + 1)
               in
 
-              List.fold_left findBodyFolder (exprMap, 0) findDecl.A.fbody
+              List.fold_left findBodyFolder (exprMap, 0) findDec.A.fbody
             in eqRels
           in
 
@@ -133,7 +144,7 @@ let check (contexts, finds) =
             S.ctx_indeps = ctxScopes.S.ctx_indeps;
             S.ctx_finds = ctxFinds;
           }
-          in StringMap.add findDecl.A.fcontext scopes relations
+          in StringMap.add findDec.A.fcontext scopes relations
         in (extendedRels, findIdx + 1)
 
       in List.fold_left relationFindFolder (ctxRelations, 0) finds
