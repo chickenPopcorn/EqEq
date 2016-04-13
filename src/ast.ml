@@ -21,7 +21,7 @@ type stmt =
   | While of expr * stmt
 
 type range = 
-  | Range of string * expr * expr * expr
+  | Range of string * expr * expr option * expr option
 
 (* multieq: we call this a "multi-line equation" *)
 type multi_eq = {
@@ -102,10 +102,20 @@ let string_of_range range =
    match range with
    | [] -> ""
    | hd::tl -> (match hd with Range(id, st, ed, inc) -> 
-                (match st, ed, inc with Literal(lst), Literal(led), Literal(linc) ->
+                (match st, ed, inc with 
+                  | Literal(lst), Some(sed), Some(sinc) ->
+                    (match sed, sinc with Literal(led), Literal(linc) ->
                                    " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^  
-                                   string_of_float led ^ "," ^  string_of_float linc ^ ")"
-                                   | _ -> ""))
+                                   string_of_float led ^ ")"
+                                   | _ -> "")
+                  | Literal(lst), Some(sed), None -> 
+                    (match sed with Literal(led) ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^  
+                                   string_of_float led ^ ")"
+                                   | _ -> "")
+                  | Literal(lst), None, None -> 
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ ")"
+                  | _ -> ""))
 
 let string_of_multieq multieq =
   multieq.fname ^

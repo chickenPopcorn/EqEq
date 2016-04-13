@@ -98,17 +98,31 @@ let translate sast =
       match finddecl.A.frange with
       | [] -> ""
       | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> 
-                     (match st, ed, inc with A.Literal(lst), A.Literal(led), A.Literal(linc)  ->
-                                        if linc >= 0. 
-                                        then 
-                                        "for ( " ^ id ^ "=" ^ string_of_float lst ^ "; " ^
-                                        id ^ "<=" ^ string_of_float led ^ "; " ^
-                                        id ^ "=" ^ id ^ "+" ^ string_of_float linc ^ ")"
-                                        else  
-                                        "for ( " ^ id ^ "=" ^ string_of_float lst ^ "; " ^
-                                        id ^ ">=" ^ string_of_float led ^ "; " ^
-                                        id ^ "=" ^ id ^ "+" ^ string_of_float linc ^ ")"
-                                        | _ -> ""))
+                     (match st, ed, inc with 
+                      | A.Literal(lst), Some(sed), Some(sinc)  ->
+                        (match sed, sinc with 
+                        | A.Literal(led), A.Literal(linc) -> 
+                            if linc >= 0. 
+                            then 
+                            Printf.sprintf "for(%s=%f; %s<=%f; %s=%s+%f)" id lst id led id id linc 
+                            else  
+                            Printf.sprintf "for(%s=%f; %s>=%f; %s=%s+%f)" id lst id led id id linc 
+                        | _ -> "")
+                      | A.Literal(lst), Some(sed), None -> 
+                        (match sed with 
+                         | A.Literal(led) ->
+                           if lst < led then 
+                           Printf.sprintf "for(%s=%f; %s<=%f; %s++)" id lst id led id
+                           else
+                           Printf.sprintf "for(%s=%f; %s>=%f; %s--)" id lst id led id
+                         | _ -> "")
+                      | A.Literal(lst), None, None -> 
+                           if lst > 0. then 
+                           Printf.sprintf "for(%s=0; %s<=%f; %s++)" id id lst id
+                           else
+                           Printf.sprintf "for(%s=0; %s>=%f; %s--)" id id lst id
+                      | _ -> ""
+                      ))
     in 
     let rec gen_wrapped_find_func_prototype count find_list = 
       match find_list with
