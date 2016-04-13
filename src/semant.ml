@@ -54,6 +54,7 @@ let check (contexts, finds) =
             match op with
             |A.Abs -> "|"::lis
             |_ -> add_lib_expre lis expr )
+        | A.Assign(left, expr) -> add_lib_expre lis expr
         | A.Builtin(name, expr) -> (
             match name with
             | "cos" -> "cos"::lis
@@ -113,18 +114,28 @@ let check (contexts, finds) =
           | A.Id(id) -> ()
           | A.Binop(left, op, right) -> ()
           | A.Unop(op, expr) -> ()
-          | A.Assign(left, expr) -> ()
+          | A.Assign(left, expr) -> check_expr expr
           | A.Builtin(name, expr) -> (check_builtin name expr)
   and check_builtin name expr=
     match name, List.hd expr with
+        | "print", A.Builtin(name , value) -> ()
         | "print", _ -> ()
+        | "cos", A.Strlit(str) -> fail ("illegal argument for cos, " ^ quot str)
+        | "cos", A.Assign(left, expr) -> fail ("illegal argument for cos, " ^ quot left ^ " =")
         | "cos", _ -> ()
+        | "sin", A.Strlit(str) -> fail ("illegal argument for sin, " ^ quot str)
+        | "sin", A.Assign(left, expr) -> fail ("illegal argument for sin, " ^ quot left ^ " =")
         | "sin", _ -> ()
         | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
+        | "sqrt", A.Strlit(str) -> fail ("illegal argument for sqrt, " ^ quot str)
+        | "sqrt", A.Assign(left, expr) -> fail ("illegal argument for sqrt, " ^ quot left ^ " =")
+        | "sqrt", _ -> ()
         | "tan", _ -> ()
         | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
+        | "log", A.Strlit(str) -> fail ("illegal argument for log, " ^ quot str)
+        | "log", A.Assign(left, expr) -> fail ("illegal argument for log, " ^ quot left ^ " =")
+        | "log", _ -> ()
         | _ -> fail ("unknown build-in function, " ^ quot name)
-        (*if l < 0. then fail ("illegal build-in argument, " ^ quot (string_of_float l))*)
     in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
