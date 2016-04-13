@@ -40,15 +40,15 @@ let check (contexts, finds) =
           )
           map
     in
-    List.fold_left create_varmap StringMap.empty contexts 
+    List.fold_left create_varmap StringMap.empty contexts
    in
    (* list of EqualsEquals symbols that require external library support *)
-   let liblist = 
+   let liblist =
     let rec add_lib_expre lis  = function
           A.Binop(left,op,right)-> (
-               match op with 
+               match op with
                |A.Mod -> "%"::lis
-               |A.Pow -> "^"::lis 
+               |A.Pow -> "^"::lis
                |_ -> (add_lib_expre lis left)@(add_lib_expre lis right)@lis )
         | A.Unop(op, expr) -> (
             match op with
@@ -56,46 +56,51 @@ let check (contexts, finds) =
             |_ -> add_lib_expre lis expr )
         | A.Builtin(name, expr) -> (
             match name with
-            |"print" -> "print"::(List.fold_left add_lib_expre lis expr)
+            | "cos" -> "cos"::lis
+            | "sin" -> "sin"::lis
+            | "tan" -> "tan"::lis
+            | "log" -> "log"::lis
+            | "sqrt" -> "sqrt"::lis
+            | "print" -> "print"::(List.fold_left add_lib_expre lis expr)
             |_ -> List.fold_left add_lib_expre lis expr )
-        |_ -> lis 
+        |_ -> lis
     in
     let rec add_lib_stmt_ctx lis = function
-             A.Expr e-> add_lib_expre lis e 
+             A.Expr e-> add_lib_expre lis e
             |A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)
             |A.If(l) -> lis
             |A.While(p, s) -> add_lib_stmt_ctx lis s
     in
     let check_if_lib lis = function
         | (None, sl) -> add_lib_stmt_ctx lis sl
-        | (Some(e), sl) -> List.append (add_lib_expre lis e) (add_lib_stmt_ctx lis sl) 
+        | (Some(e), sl) -> List.append (add_lib_expre lis e) (add_lib_stmt_ctx lis sl)
     in
     let rec add_lib_stmt lis  = function
-             A.Expr e-> add_lib_expre lis e 
+             A.Expr e-> add_lib_expre lis e
             |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
             |A.If(l) -> let rec check_if_list_lib lis = function
                                  | [] -> lis
                                  | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
-                                in check_if_list_lib lis l 
+                                in check_if_list_lib lis l
             |A.While(p, s) -> add_lib_stmt lis s
-    in 
-    let create_liblist_finds lis finds = 
-      List.fold_left 
+    in
+    let create_liblist_finds lis finds =
+      List.fold_left
         add_lib_stmt
         lis
         finds.A.fbody
     in
-    let create_liblist_ctx lis ctx = 
-      List.fold_left 
+    let create_liblist_ctx lis ctx =
+      List.fold_left
         add_lib_stmt_ctx
         lis
         ctx.A.fdbody
-    in 
+    in
     (* append list from finds black with list from contexts block *)
-    List.append 
+    List.append
      (List.fold_left create_liblist_finds [] finds)
      (List.fold_left (fun lis eq -> List.fold_left create_liblist_ctx lis eq.A.cbody) [] contexts)
-  in 
+  in
 
   let check_have_var var symbolmap =
     try StringMap.find var symbolmap
@@ -216,4 +221,3 @@ let check (contexts, finds) =
     Sast.vars = varmap;
     Sast.lib = liblist
   }
-

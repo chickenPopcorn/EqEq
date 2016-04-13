@@ -9,7 +9,7 @@ module StringMap = Map.Make(String)
 let translate sast =
   let (contexts, finds) = sast.S.ast in
   let varmap = sast.S.vars in
-  let liblist = sast.S.lib in 
+  let liblist = sast.S.lib in
 
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
@@ -94,17 +94,29 @@ let translate sast =
   let gen_findfunc_call find_funcname finddecl =
     find_funcname ^ " ();\n"
   in
+
   let lib=
+    let add_math_lib head_lib =
+      if (List.mem "#include <math.h>\n" head_lib) then head_lib else "#include <math.h>\n"::head_lib
+    in
+    let add_stdio_lib head_lib =
+      if (List.mem "#include <stdio.h>\n" head_lib) then head_lib else "#include <stdio.h>\n"::head_lib
+    in
     let header head elem=
       match elem with
-      |"%" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
-      |"^" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
-      |"|" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
-      |"print" -> if (List.mem "#include <stdio.h>\n" head) then head else "#include <stdio.h>\n"::head
-      |_ -> head 
+      |"%" -> add_math_lib head
+      |"^" -> add_math_lib head
+      |"|" -> add_math_lib head
+      |"print" -> add_stdio_lib head
+      |"cos"  -> add_math_lib head
+      |"sin"  -> add_math_lib head
+      |"tan"  -> add_math_lib head
+      |"sqrt"  -> add_math_lib head
+      |"log"  -> add_math_lib head
+      |_ -> head
     in (List.fold_left header [] liblist)
-  in 
-  String.concat "" lib ^ 
+  in
+  String.concat "" lib ^
   String.concat "" (List.map2 gen_find_function (gen_find_funcname_list finds) finds) ^
   "int main() {\n" ^
   String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^
