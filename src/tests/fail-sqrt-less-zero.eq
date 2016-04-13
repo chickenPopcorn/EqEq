@@ -4,5 +4,5 @@ SomeContext = {
 }
 
 SomeContext:find a {
-  log(-42);
+  sqrt(-42);
 }

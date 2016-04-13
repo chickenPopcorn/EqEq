@@ -106,15 +106,25 @@ let check (contexts, finds) =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
- let check_builtin name =
-    match name with
-        | "print" -> ()
-        | "cos" -> ()
-        | "sin" -> ()
-        | "sqrt" -> ()
-        | "tan" -> ()
-        | "log" -> ()
+  let rec check_expr e =
+      match e with
+          | A.Literal(lit) -> ()
+          | A.Strlit(str) -> ()
+          | A.Id(id) -> ()
+          | A.Binop(left, op, right) -> ()
+          | A.Unop(op, expr) -> ()
+          | A.Assign(left, expr) -> ()
+          | A.Builtin(name, expr) -> (check_builtin name expr)
+  and check_builtin name expr=
+    match name, List.hd expr with
+        | "print", _ -> ()
+        | "cos", _ -> ()
+        | "sin", _ -> ()
+        | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
+        | "tan", _ -> ()
+        | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
         | _ -> fail ("unknown build-in function, " ^ quot name)
+        (*if l < 0. then fail ("illegal build-in argument, " ^ quot (string_of_float l))*)
     in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
@@ -125,17 +135,7 @@ let check (contexts, finds) =
             | s :: ss -> check_stmt s; check_block ss
             | [] -> ()
           in check_block sl
-      | A.Expr e -> (
-          (* Verify an expression or throw an exception *)
-          match e with
-              | A.Literal(lit) -> ()
-              | A.Strlit(str) -> ()
-              | A.Id(id) -> ()
-              | A.Binop(left, op, right) -> ()
-              | A.Unop(op, expr) -> ()
-              | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> (check_builtin name)
-        )
+      | A.Expr e -> check_expr e
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
   in
@@ -179,29 +179,7 @@ let check (contexts, finds) =
             | s :: ss -> check_stmt_for_find s; check_block ss
             | [] -> ()
           in check_block sl
-      | A.Expr e -> (
-          (* Verify an expression or throw an exception *)
-          match e with
-              | A.Literal(lit) -> ()
-              | A.Strlit(str) -> ()
-              | A.Id(id) -> ()
-              | A.Binop(left, op, right) -> ()
-              | A.Unop(op, expr) -> ()
-              | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> (check_builtin name)
-                    (* TO-DO check built-in input like log should not
-                    take negative input, but unfortunitely negative sign
-                    saved in unop
-                    List.iter
-                      (fun e -> (match e with
-                      | A.Literal(n) ->
-                        if n < 0.0 then fail ("illegal argument, " ^ quot (string_of_float n))
-                      | _ -> ()
-                        )
-                      ) expr
-                    | _ -> fail ("incorrect build-in function, " ^ quot name)
-                )*)
-        )
+      | A.Expr e -> check_expr e
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> check_if hd; check_if_list tl
