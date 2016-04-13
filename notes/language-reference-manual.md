@@ -361,19 +361,19 @@ mycontext: find x {
 #### With Statement
 With statements have the form
 ```
-with [variable in expression, ]+ compound_statement
+with [variable in expression; ]+ compound_statement
 ```
 , which means that with takes one or more expressions, and a compound
-sub-statement.
+sub-statement. (After each expression, a semicolon is needed after the expression.)
 
 If the expressions have type double, then with will evaluate the expression and
 execute the compound sub-statement:
 ```c
-with x in 5 {
+with x = 5; {
   print(x);
 }  // 5
 
-with x in 5, y in 6 {
+with x = 5; y = 6; {
   print(x + y);
 }  // 11
 ```
@@ -413,11 +413,11 @@ find velocity {
 } // print 6
 
 // this block is the same as the one above
-find velocity with length in 5 {
+find velocity with length = 5; {
   print(velocity);
 } // print 6
 
-pendulum:find vector with length in range(0, 5) {
+pendulum:find vector with length in range(0, 5); {
   print(velocity);
 } // print 1 to 6
 ```
@@ -451,8 +451,9 @@ range([start,] stop [,step]);
 
 For examples,
 ```python
-range(3);        // same as writing: {0, 1, 2}
-range(2, 5);     // same as writing: {2, 3, 4}
+range(3);        // same as writing: {0, 1, 2, 3}
+range(-3);       // same as writing: {0, -1, -2, -3}
+range(2, 5);     // same as writing: {2, 3, 4, 5}
 range(2, 8, 3);  // same as writing: {2, 5, 8}
 ```
 
@@ -564,7 +565,7 @@ pendulum: find v with l in range(0, 20) {
 
 // evaluate v in pendulum's equations given that g in range(4, 15) and l = 10
 // take the average of values of v
-pendulum: find v with g in range(4, 15), m = 100 {
+pendulum: find v with m = 100; g in range(4, 15); {
   l = 10;
 
   sum += v;
@@ -574,7 +575,7 @@ pendulum: find v with g in range(4, 15), m = 100 {
 
 average = sum / (15 - 4);
 
-pendulum: find v with v in range(20) {
+pendulum: find v with v in range(20); {
   // throw a compiler error because can't find v with v's value
 }
 
