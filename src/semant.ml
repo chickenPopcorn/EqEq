@@ -41,8 +41,13 @@ let check (contexts, finds) =
       match stmt with
         | A.Block(sList) -> List.fold_left (fun ls s -> findDepsInAssignStmt ls s) foundDeps sList
         | A.Expr(e) -> findIdsInExpr foundDeps e
-        | A.If(e, s, s_else) ->
-            findIdsInExpr (findDepsInAssignStmt (findDepsInAssignStmt foundDeps s_else) s) e
+        | A.If(stmtOrTupleList ) -> (
+            let rec collectIdsInIf accumul = function
+              | [] -> accumul
+              | (None,stmt)::tail -> collectIdsInIf (findDepsInAssignStmt accumul stmt) tail
+              | (Some(e),stmt)::tail -> collectIdsInIf (findIdsInExpr (findDepsInAssignStmt accumul stmt) e) tail
+            in collectIdsInIf foundDeps stmtOrTupleList
+          )
 
         | A.While(e, s) ->
             findIdsInExpr (findDepsInAssignStmt foundDeps s) e
