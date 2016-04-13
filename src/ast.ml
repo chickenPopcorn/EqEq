@@ -20,7 +20,7 @@ type stmt =
   | If of (expr option * stmt) list
   | While of expr * stmt
 
-type range = 
+type range =
   | Range of string * expr * expr option * expr option
 
 (* multieq: we call this a "multi-line equation" *)
@@ -101,19 +101,19 @@ let rec string_of_stmt = function
 let string_of_range range =
    match range with
    | [] -> ""
-   | hd::tl -> (match hd with Range(id, st, ed, inc) -> 
-                (match st, ed, inc with 
+   | hd::tl -> (match hd with Range(id, st, ed, inc) ->
+                (match st, ed, inc with
                   | Literal(lst), Some(sed), Some(sinc) ->
                     (match sed, sinc with Literal(led), Literal(linc) ->
-                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^  
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^
                                    string_of_float led ^ ")"
                                    | _ -> "")
-                  | Literal(lst), Some(sed), None -> 
+                  | Literal(lst), Some(sed), None ->
                     (match sed with Literal(led) ->
-                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^  
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^
                                    string_of_float led ^ ")"
                                    | _ -> "")
-                  | Literal(lst), None, None -> 
+                  | Literal(lst), None, None ->
                                    " " ^ id ^ " in range(" ^ string_of_float lst ^ ")"
                   | _ -> ""))
 
