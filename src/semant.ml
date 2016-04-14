@@ -122,15 +122,15 @@ let check (contexts, finds) =
       | _ -> ())
     | _ -> ()
 
-  and check_builtin_name name str =
+  and match_builtin_name name str =
     match name with
       | "cos" | "sin" | "tan" | "sqrt" | "log"  -> fail ("illegal argument for "^name ^", " ^ quot str)
       | _ -> fail ("unknown built-in function, " ^ quot name)
 
   and check_builtin_other s hd =
       match s, hd with
-          | s, A.Assign(left, expr) -> check_builtin_name s left
-          | s, A.Strlit(str) -> check_builtin_name s str
+          | s, A.Assign(left, expr) -> match_builtin_name s left
+          | s, A.Strlit(str) -> match_builtin_name s str
           | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
           | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
           | "log", _ | "cos", _ | "sin", _ | "sqrt", _ | "tan", _ -> ()
