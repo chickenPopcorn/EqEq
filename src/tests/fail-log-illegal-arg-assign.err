@@ -1,1 +1,1 @@
-Fatal error: exception Failure("illegal argument for log, "a"")
+Fatal error: exception Failure("illegal argument for log, "a=8."")

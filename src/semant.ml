@@ -129,7 +129,7 @@ let check (contexts, finds) =
 
   and fail_illegal_builtin_arg s hd =
       match s, hd with
-          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s left
+          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s (left ^"=" ^A.string_of_expr expr)
           | s, A.Strlit(str) -> fail_illegal_builtin_arg_str_asgn s str
           | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
           | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
