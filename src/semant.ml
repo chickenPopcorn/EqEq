@@ -112,7 +112,7 @@ let check (contexts, finds) =
               not_print left (A.string_of_op op); not_print right (A.string_of_op op)
           | A.Unop(op, expr) -> check_expr expr; (not_print expr (A.string_of_uop op))
           | A.Assign(left, expr) -> check_expr expr
-          | A.Builtin(name, expr) -> (match_builtin_name name expr); List.iter check_expr expr
+          | A.Builtin(name, expr) -> (fail_illegal_builtin name expr); List.iter check_expr expr
 
   and not_print expr op =
     match expr with
@@ -129,20 +129,20 @@ let check (contexts, finds) =
 
   and fail_illegal_builtin_arg s hd =
       match s, hd with
-          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s left
+          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s (left ^"=" ^A.string_of_expr expr)
           | s, A.Strlit(str) -> fail_illegal_builtin_arg_str_asgn s str
           | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
           | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
           | "log", _ | "cos", _ | "sin", _ | "sqrt", _ | "tan", _ -> ()
           | s,_ -> fail ("unknown built-in function, " ^ quot s)
 
-  and match_builtin_name name expr_list=
+  and fail_illegal_builtin name expr_list=
     match name, expr_list with
         | "print", expr -> List.iter check_expr expr
-        | s, hd::tl -> fail_illegal_builtin_arg s hd; check_num_of_arg tl
+        | s, hd::tl -> fail_illegal_builtin_arg s hd; fail_illegal_num_of_builtin_arg tl
         | _ ->()
 
-  and check_num_of_arg tl =
+  and fail_illegal_num_of_builtin_arg tl =
     match tl with
         | [] -> ()
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
