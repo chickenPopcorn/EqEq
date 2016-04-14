@@ -439,7 +439,7 @@ range(2, 5);     // same as writing: {2, 3, 4, 5}
 range(2, 8, 3);  // same as writing: {2, 5, 8}
 ```
 
-Range has to be the last argument in the find block. 
+Range has to be the last argument in the find block.
 For examples,
 ```
 SomeCtx: find a with b = 3; c in range(3); {} // correct syntax
@@ -463,6 +463,27 @@ Users can format strings in `print()` with `%f` and `%s` formatter (and but not
 print("words here %f.0 and %f here\n", 4, myvar);
 // words here 4 and 3.14159 here
 ```
+
+Unlike the built-in functions below print function does not support any unary or binary operators.
+```c
+-print("words here %f.0 and %f here\n", 4, myvar);
+// will throw the following error
+Fatal error: exception Failure("Illegal use of operator on print, "-"")
+```
+
+#### `sin()/cos()/tan()/sqrt()/log()`
+
+`sin()/cos()/tan()/sqrt()/log()` are built-in trigonometry and math functions that mirrors the same functions in C
+under `math.h` library. Their arguments include variable names and numbers only. Nested built-in functions are allowed.
+
+Numerical range for sqrt()\log() and is confined to greater or equals to zero and greater than zero respectively and are checked statically at compile time. Like most imperative language illegal argument for the above built-in functions cannot be caught at compile time for variables, will will be reported at C runtime.
+```
+a = cos(sin(tan(log(sqrt(42)))));
+```
+
+functions can be nested like the example above.
+
+
 
 <!-- TODO: insert built-in descriptions for cos, sin, sqrt, others.-->
 
