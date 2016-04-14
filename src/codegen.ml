@@ -157,17 +157,13 @@ let translate sast =
   in
 
   let lib=
-    let add_math_lib head_lib =
-      if (List.mem "#include <math.h>\n" head_lib) then head_lib else "#include <math.h>\n"::head_lib
+    let add_lib header head_lib =
+      if (List.mem header head_lib) then head_lib else header::head_lib
     in
-    let add_stdio_lib head_lib =
-      if (List.mem "#include <stdio.h>\n" head_lib) then head_lib else "#include <stdio.h>\n"::head_lib
-    in
-
     let add_lib_for_dep head elem =
       match elem with
-      | "%" | "^" | "|" | "cos" | "sin" | "tan" | "sqrt" | "log" -> add_math_lib head
-      | "print" -> add_stdio_lib head
+      | "%" | "^" | "|" | "cos" | "sin" | "tan" | "sqrt" | "log" -> add_lib "#include <math.h>\n" head
+      | "print" -> add_lib "#include <stdio.h>\n" head
       | _ -> head
     in List.fold_left add_lib_for_dep [] liblist
 
