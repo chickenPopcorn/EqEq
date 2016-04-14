@@ -112,11 +112,20 @@ let check (contexts, finds) =
           | A.Literal(lit) -> ()
           | A.Strlit(str) -> ()
           | A.Id(id) -> ()
-          | A.Binop(left, op, right) -> ()
-          | A.Unop(op, expr) -> ()
+          | A.Binop(left, op, right) -> check_expr left; check_expr right;
+          | A.Unop(op, expr) -> check_expr expr
           | A.Assign(left, expr) -> check_expr expr
-          | A.Builtin(name, expr) -> (check_builtin name expr)
-  and check_builtin_name name str=
+          | A.Builtin(name, expr) -> (check_builtin_print name expr); List.iter check_expr expr
+  and not_print expr =
+    match expr with
+    |A.Builtin(name, expr) -> (
+      match name with
+      | "print" -> fail("Illegal use of print")
+      | _ -> ()
+      )
+    | _ -> ()
+
+  and check_builtin_name name str =
     match name with
       | "sin" -> fail ("illegal argument for sin, " ^ quot str)
       | "cos" -> fail ("illegal argument for cos, " ^ quot str)
@@ -124,20 +133,30 @@ let check (contexts, finds) =
       | "log" -> fail ("illegal argument for log, " ^ quot str)
       | "sqrt" -> fail ("illegal argument for sqrt, " ^ quot str)
       | _ -> fail ("unknown built-in function, " ^ quot name)
-  and check_builtin name expr=
-    match name, List.hd expr with
-        | "print", A.Builtin(name , value) -> ()
+
+  and check_builtin_other s hd =
+      match s, hd with
+          | s, A.Assign(left, expr) -> check_builtin_name s left
+          | s, A.Strlit(str) -> check_builtin_name s str
+          | "cos", _ -> ()
+          | "sin", _ -> ()
+          | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
+          | "sqrt", _ -> ()
+          | "tan", _ -> ()
+          | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
+          | "log", _ -> ()
+          | s,_ -> fail ("unknown built-in function, " ^ quot s)
+
+  and check_builtin_print name expr_list=
+    match name, expr_list with
         | "print", _ -> ()
-        | s, A.Strlit(str) -> check_builtin_name s str
-        | s, A.Assign(left, expr) -> check_builtin_name s left
-        | "cos", _ -> ()
-        | "sin", _ -> ()
-        | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
-        | "sqrt", _ -> ()
-        | "tan", _ -> ()
-        | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
-        | "log", _ -> ()
-        | _ -> fail ("unknown built-in function, " ^ quot name)
+        | s, hd::tl -> check_builtin_other s hd; check_no_of_arg tl
+        | _ ->()
+
+  and check_no_of_arg tl =
+    match tl with
+        | [] -> ()
+        | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
     in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
