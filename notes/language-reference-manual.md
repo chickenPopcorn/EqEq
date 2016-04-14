@@ -464,8 +464,7 @@ print("words here %f.0 and %f here\n", 4, myvar);
 // words here 4 and 3.14159 here
 ```
 
-Also, unlike other functions below print function does not support any unary or binary
-operators.
+Unlike the built-in functions below print function does not support any unary or binary operators.
 ```c
 -print("words here %f.0 and %f here\n", 4, myvar);
 // will throw the following error
@@ -477,9 +476,7 @@ Fatal error: exception Failure("Illegal use of operator on print, "-"")
 `sin()/cos()/tan()/sqrt()/log()` are built-in trigonometry and math functions that mirrors the same functions in C
 under `math.h` library. Their arguments include variable names and numbers only. Nested built-in functions are allowed.
 
-Numerical range for sqrt()\log() and
-log is confined to greater or equals to zero and greater than zero respectively and are checked statically at compile time.
-Like most imperative language illegal argument for the above built-in functions cannot be caught at compile time for variables, will will be reported at C runtime.
+Numerical range for sqrt()\log() and is confined to greater or equals to zero and greater than zero respectively and are checked statically at compile time. Like most imperative language illegal argument for the above built-in functions cannot be caught at compile time for variables, will will be reported at C runtime.
 ```
 a = cos(sin(tan(log(sqrt(42)))));
 ```
