@@ -139,10 +139,10 @@ let check (contexts, finds) =
   and fail_illegal_builtin name expr_list=
     match name, expr_list with
         | "print", expr -> List.iter check_expr expr
-        | s, hd::tl -> fail_illegal_builtin_arg s hd; fail_num_of_arg tl
+        | s, hd::tl -> fail_illegal_builtin_arg s hd; fail_illegal_num_of_builtin_arg tl
         | _ ->()
 
-  and fail_num_of_arg tl =
+  and fail_illegal_num_of_builtin_arg tl =
     match tl with
         | [] -> ()
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
