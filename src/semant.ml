@@ -113,14 +113,15 @@ let check (contexts, finds) =
           | A.Strlit(str) -> ()
           | A.Id(id) -> ()
           | A.Binop(left, op, right) -> check_expr left; check_expr right;
-          | A.Unop(op, expr) -> check_expr expr
+              not_print left (A.string_of_op op); not_print right (A.string_of_op op)
+          | A.Unop(op, expr) -> check_expr expr; (not_print expr (A.string_of_uop op))
           | A.Assign(left, expr) -> check_expr expr
           | A.Builtin(name, expr) -> (check_builtin_print name expr); List.iter check_expr expr
-  and not_print expr =
+  and not_print expr op =
     match expr with
     |A.Builtin(name, expr) -> (
       match name with
-      | "print" -> fail("Illegal use of print")
+      | "print" -> fail("Illegal use of operator on print, " ^ quot op)
       | _ -> ()
       )
     | _ -> ()
