@@ -112,7 +112,7 @@ let check (contexts, finds) =
               not_print left (A.string_of_op op); not_print right (A.string_of_op op)
           | A.Unop(op, expr) -> check_expr expr; (not_print expr (A.string_of_uop op))
           | A.Assign(left, expr) -> check_expr expr
-          | A.Builtin(name, expr) -> (match_builtin_name name expr); List.iter check_expr expr
+          | A.Builtin(name, expr) -> (fail_illegal_builtin name expr); List.iter check_expr expr
 
   and not_print expr op =
     match expr with
@@ -136,13 +136,13 @@ let check (contexts, finds) =
           | "log", _ | "cos", _ | "sin", _ | "sqrt", _ | "tan", _ -> ()
           | s,_ -> fail ("unknown built-in function, " ^ quot s)
 
-  and match_builtin_name name expr_list=
+  and fail_illegal_builtin name expr_list=
     match name, expr_list with
         | "print", expr -> List.iter check_expr expr
-        | s, hd::tl -> fail_illegal_builtin_arg s hd; check_num_of_arg tl
+        | s, hd::tl -> fail_illegal_builtin_arg s hd; fail_num_of_arg tl
         | _ ->()
 
-  and check_num_of_arg tl =
+  and fail_num_of_arg tl =
     match tl with
         | [] -> ()
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
