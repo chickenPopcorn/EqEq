@@ -438,13 +438,14 @@ range(-3);       // same as writing: {0, -1, -2, -3}
 range(2, 5);     // same as writing: {2, 3, 4, 5}
 range(2, 8, 3);  // same as writing: {2, 5, 8}
 ```
-Range has to be the last statement in the find block. 
 
+Range has to be the last argument in the find block. 
 For examples,
 ```
 SomeCtx: find a with b = 3; c in range(3); {} // correct syntax
 SomeCtx: find a with c in range(3); b = 3; {} // illegal syntax
 ```
+
 ### Built-ins
 #### `print()`
 
