@@ -151,6 +151,21 @@ let check (contexts, finds) =
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
     in
+    let check_range = 
+        match findBlk.A.frange with
+        | [] -> ()
+        | hd::tl -> (match hd with
+          A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument")
+                                                     | _ -> ()); 
+                                      (match ed with Some(str) ->
+                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument")
+                                                        | _ -> ())
+                                                     | _ -> ());
+                                      (match inc with Some(str) -> 
+                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument")
+                                                        | _ -> ())
+                                                     | _ -> ()))
+  in
   (* Verify a particular `statement` in `find` or throw an exception *)
   let check_if = function
     | (None, sl) -> check_stmt sl
