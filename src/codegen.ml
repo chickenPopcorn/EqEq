@@ -9,7 +9,7 @@ module StringMap = Map.Make(String)
 let translate sast =
   let (contexts, finds) = sast.S.ast in
   let varmap = sast.S.vars in
-  let liblist = sast.S.lib in 
+  let liblist = sast.S.lib in
 
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
@@ -29,7 +29,9 @@ let translate sast =
                                 let check_type expr_str =
                                     match expr_str with
                                     | [] -> "printf()"
-                                    | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^ String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^ ")"
+                                    | hd::tl -> if tl != [] then "printf(" ^ hd ^ ", " ^
+                                                                 String.concat ", " (List.map (fun x -> "(double) (" ^ x ^ ")") tl) ^
+                                                                 ")"
                                                 else "printf(" ^ hd ^ ")"
                                 in check_type (generate_expr el)
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
@@ -58,6 +60,11 @@ let translate sast =
                                       "}\n"
     | _ -> ""
   in
+  let get_id_range finddecl =
+    match finddecl.A.frange with
+    | [] -> ""
+    | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> id)
+  in
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
   in
@@ -76,36 +83,91 @@ let translate sast =
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody)
   in
-  let gen_find_funcname_list finddecl_list =
-    let rec gen_find_funcname count find_list =
+  let gen_find_func_prototype_list finddecl_list =
+    let rec gen_find_func_prototype count find_list =
       match find_list with
       | [] -> []
-      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count))::(gen_find_funcname (count+1) tl)
-    in List.rev (gen_find_funcname 0 finddecl_list)
+      | hd::tl -> ("void " ^ "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^
+                   " (" ^ ((fun x -> match x with "" -> " "
+                                                 | _ -> "double " ^ x ) (get_id_range hd)) ^ ")"
+                  )::(gen_find_func_prototype (count+1) tl)
+    in List.rev (gen_find_func_prototype 0 finddecl_list)
+  in
+  let gen_wrapped_find_func_prototype_list finddecl_list =
+    let get_for_loop_range finddecl =
+      match finddecl.A.frange with
+      | [] -> ""
+      | hd :: tl -> (match hd with A.Range(id, st, ed, inc) ->
+                     (match st, ed, inc with
+                      | A.Literal(lst), Some(sed), Some(sinc)  ->
+                        (match sed, sinc with
+                        | A.Literal(led), A.Literal(linc) ->
+                            if linc >= 0.
+                            then
+                            Printf.sprintf "for(%s=%f; %s<=%f; %s=%s+%f)" id lst id led id id linc
+                            else
+                            Printf.sprintf "for(%s=%f; %s>=%f; %s=%s+%f)" id lst id led id id linc
+                        | _ -> "")
+                      | A.Literal(lst), Some(sed), None ->
+                        (match sed with
+                         | A.Literal(led) ->
+                           if lst < led then
+                           Printf.sprintf "for(%s=%f; %s<=%f; %s++)" id lst id led id
+                           else
+                           Printf.sprintf "for(%s=%f; %s>=%f; %s--)" id lst id led id
+                         | _ -> "")
+                      | A.Literal(lst), None, None ->
+                           if lst > 0. then
+                           Printf.sprintf "for(%s=0; %s<=%f; %s++)" id id lst id
+                           else
+                           Printf.sprintf "for(%s=0; %s>=%f; %s--)" id id lst id
+                      | _ -> ""
+                      ))
+    in
+    let rec gen_wrapped_find_func_prototype count find_list =
+      match find_list with
+      | [] -> []
+      | hd::tl -> (match get_id_range hd with
+                   | "" ->  ((Printf.sprintf "void find_%s_%d_range(){\n" hd.A.fcontext count)^
+                            (Printf.sprintf "find_%s_%d(%s);\n}\n" hd.A.fcontext count (get_id_range hd)))::(gen_wrapped_find_func_prototype (count+1) tl)
+                   | _ -> ((Printf.sprintf "void find_%s_%d_range(){\n" hd.A.fcontext count) ^
+                          (Printf.sprintf "double %s;\n" (get_id_range hd)) ^
+                          get_for_loop_range hd ^ "{\n" ^
+                          (Printf.sprintf "find_%s_%d(%s);\n}\n}\n" hd.A.fcontext count (get_id_range hd)))::(gen_wrapped_find_func_prototype (count+1) tl)
+
+
+                 )
+    in List.rev (gen_wrapped_find_func_prototype 0 finddecl_list)
   in
   let gen_find_function find_funcname finddecl =
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
-    "void " ^ find_funcname ^ " () {\n  " ^
+    find_funcname ^ " {\n  " ^
     String.concat ""(List.map gen_decl_ctx contexts) ^
     String.concat ""(List.map gen_ctxdecl contexts) ^
     (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
-  let gen_findfunc_call find_funcname finddecl =
-    find_funcname ^ " ();\n"
+  let gen_find_func_call_list finddecl_list =
+    let rec gen_find_func_call count find_list =
+      match find_list with
+      | [] -> []
+      | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^ "_range ();\n"
+                  )::(gen_find_func_call (count+1) tl)
+    in List.rev (gen_find_func_call 0 finddecl_list)
   in
   let lib=
     let header head elem=
       match elem with
-      |"%" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
-      |"^" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
-      |"|" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head 
+      |"%" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head
+      |"^" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head
+      |"|" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head
       |"print" -> if (List.mem "#include <stdio.h>\n" head) then head else "#include <stdio.h>\n"::head
-      |_ -> head 
+      |_ -> head
     in (List.fold_left header [] liblist)
-  in 
-  String.concat "" lib ^ 
-  String.concat "" (List.map2 gen_find_function (gen_find_funcname_list finds) finds) ^
+  in
+  String.concat "" lib ^
+  String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
+  String.concat "" (gen_wrapped_find_func_prototype_list finds) ^
   "int main() {\n" ^
-  String.concat "" (List.rev (List.map2 gen_findfunc_call (gen_find_funcname_list finds) finds)) ^
+  String.concat "" (gen_find_func_call_list finds) ^
   " return 0;\n}\n"
