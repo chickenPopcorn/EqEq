@@ -46,14 +46,14 @@ let check (contexts, finds) =
               foundDeps
               sList
         | A.Expr(e) -> findIdsInExpr foundDeps e
-        | A.If(stmtOrTupleList ) -> (
+        | A.If(stmtOrTupleList) -> (
             let rec collectIdsInIf accumul = function
               | [] -> accumul
-              | (None,stmt)::tail ->
-                  collectIdsInIf (findDepsInAssignStmt accumul stmt) tail
-              | (Some(e),stmt)::tail ->
+              | (None,s)::tail ->
+                  collectIdsInIf (findDepsInAssignStmt accumul s) tail
+              | (Some(e),s)::tail ->
                   collectIdsInIf (
-                    findIdsInExpr (findDepsInAssignStmt accumul stmt) e
+                    findIdsInExpr (findDepsInAssignStmt accumul s) e
                   ) tail
             in collectIdsInIf foundDeps stmtOrTupleList
           )
@@ -98,15 +98,14 @@ let check (contexts, finds) =
      * completed map. *)
     let (sastEqRels, _) =
       (* Fold `S.equation_relations` to respective Contexts' `S.ctx_scopes` *)
-      let relationFindFolder (relations, findIdx) findDec  =
+      let relationFindFolder (relations, findIdx) findDec =
         let findName = Printf.sprintf "find_%s_%d" findDec.A.fcontext findIdx in
 
         (* `Sast.ctx_scopes` for which we're creating an `findName` entry. *)
         let ctxScopes : Sast.ctx_scopes =
           try StringMap.find findDec.A.fcontext relations
-          with Not_found -> fail (
-            "find targeting unknown context, " ^ quot findDec.A.fcontext
-          )
+          with Not_found ->
+            fail ("find targeting unknown context, " ^ quot findDec.A.fcontext)
         in
 
         (* TODO: after building deps/indeps (findBodyMap), ensure
@@ -115,24 +114,82 @@ let check (contexts, finds) =
         let extendedRels : S.eqResolutions =
           (* Map from expression index to a `Sast.equation_relations` *)
           let findRelationMap : (S.equation_relations S.IntMap.t) =
-            let baseRelations : S.equation_relations = {
-              S.indeps = ctxScopes.S.ctx_indeps;
-              S.deps = ctxScopes.S.ctx_deps;
-            } in
-
-            (* Initial map from expression-index to `Sast.equation_relations` *)
-            let exprMap = S.IntMap.add 0 baseRelations S.IntMap.empty in
-
             (* Build a complete map of expresion-index to relations for this
              * find body, then discard the latest index and return that map. *)
             let (eqRels, _) =
-              let findBodyFolder (exprMap, exprIndex) stmt =
-                let maybeMoreFindExprs =
-                  exprMap (*TODO: actually S.IntMap.add exprIndex exprMap*)
-                in (maybeMoreFindExprs, exprIndex + 1)
+              let rec findExprRelator (eMap, idx) (expr : A.expr) =
+                let check_resolvable (index : int) (id : string) m =
+                  let assert_nodeps id rels = try StringMap.find id rels with
+                    | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
+
+                    (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
+                  in
+                  let lastMap =
+                    let rec asof i =
+                      (* TODO rm backwards walk by maintaining "latest" index *)
+                      try S.IntMap.find i m with Not_found ->
+                        if i > 0 then asof (i - 1) else fail (
+                          Printf.sprintf
+                            "Compiler BUG found: empty rel-map at Id('%s') at expression #%d [only found: '%s']"
+                            id index (String.concat "', '" (
+                              S.IntMap.fold
+                                (fun k v a -> (string_of_int k)::a)
+                                m []
+                            ))
+                        )
+                    in asof index
+                  in assert_nodeps id lastMap.S.indeps
+                in
+
+                let i = idx + 1 in match expr with
+                  | A.Id(identifier) ->
+                      (* TODO: here's the golden logic we care about! *)
+                      ignore (check_resolvable i identifier eMap); (eMap, i)
+                  | A.Literal(_) | A.Strlit(_) -> (eMap, i)
+                  | A.Binop(eLeft, _, eRight) ->
+                      findExprRelator (findExprRelator (eMap, i) eLeft) eRight
+                  | A.Unop(_, e) -> findExprRelator (eMap, i) e
+                  | A.Assign(id, e) ->
+                      (* TODO: figure out how to ensure failures for
+                       * `undefinedvar` in `e` for an expression:
+                       *     `find{ a = b = undefinedvar + 1}`
+                       *)
+
+                      (* TODO: NEXT STEP: perform if/else and add `id` to
+                       * deps/indeps accordingly *)
+
+                      findExprRelator (eMap, i) e
+                  | A.Builtin(_, exprLis) ->
+                      List.fold_left findExprRelator (eMap, i) exprLis
               in
 
-              List.fold_left findBodyFolder (exprMap, 0) findDec.A.fbody
+              let rec findStmtRelator (m, i) (st : A.stmt) = match st with
+                | A.Block(s) -> List.fold_left findStmtRelator (m, i) s
+                | A.Expr(e) -> findExprRelator (m, i) e
+                | A.If(stmtTupleWithOptionalExpr) ->
+                    let rec relationsInIf accum = function
+                      | [] -> accum
+                      | (None, s)::tail ->
+                          relationsInIf (findStmtRelator accum s) tail
+                      | (Some(e), s)::tail ->
+                          relationsInIf (
+                            findStmtRelator (
+                              findExprRelator accum e
+                            ) s
+                          ) tail
+                    in relationsInIf (m, i) stmtTupleWithOptionalExpr
+                | A.While(e, s) -> findStmtRelator (findExprRelator (m, i) e) s
+
+              in
+
+              (* Initial map from starting with contexts' own relationships *)
+              let exprMap : S.equation_relations S.IntMap.t =
+                let baseRelations : S.equation_relations = {
+                  S.indeps = ctxScopes.S.ctx_indeps;
+                  S.deps = ctxScopes.S.ctx_deps;
+                } in S.IntMap.add 0 baseRelations S.IntMap.empty
+
+              in List.fold_left findStmtRelator (exprMap, 0) findDec.A.fbody
             in eqRels
           in
 
