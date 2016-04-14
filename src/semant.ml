@@ -54,9 +54,11 @@ let check (contexts, finds) =
             match op with
             |A.Abs -> "|"::lis
             |_ -> add_lib_expre lis expr )
+        | A.Assign(left, expr) -> add_lib_expre lis expr
         | A.Builtin(name, expr) -> (
             match name with
-            |"print" -> "print"::(List.fold_left add_lib_expre lis expr)
+            | "cos" | "sin" | "tan" | "sqrt" | "log"  -> name::lis
+            | "print" -> "print"::(List.fold_left add_lib_expre lis expr)
             |_ -> List.fold_left add_lib_expre lis expr )
         |_ -> lis
     in
@@ -101,6 +103,50 @@ let check (contexts, finds) =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
+  let rec check_expr e =
+      match e with
+          | A.Literal(lit) -> ()
+          | A.Strlit(str) -> ()
+          | A.Id(id) -> ()
+          | A.Binop(left, op, right) -> check_expr left; check_expr right;
+              not_print left (A.string_of_op op); not_print right (A.string_of_op op)
+          | A.Unop(op, expr) -> check_expr expr; (not_print expr (A.string_of_uop op))
+          | A.Assign(left, expr) -> check_expr expr
+          | A.Builtin(name, expr) -> (match_builtin_name name expr); List.iter check_expr expr
+
+  and not_print expr op =
+    match expr with
+    |A.Builtin(name, expr) -> (
+      match name with
+      | "print" -> fail("Illegal use of operator on print, " ^ quot op)
+      | _ -> ())
+    | _ -> ()
+
+  and fail_illegal_builtin_arg_str_asgn name str =
+    match name with
+      | "cos" | "sin" | "tan" | "sqrt" | "log"  -> fail ("illegal argument for "^name ^", " ^ quot str)
+      | _ -> fail ("unknown built-in function, " ^ quot name)
+
+  and fail_illegal_builtin_arg s hd =
+      match s, hd with
+          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s left
+          | s, A.Strlit(str) -> fail_illegal_builtin_arg_str_asgn s str
+          | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
+          | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
+          | "log", _ | "cos", _ | "sin", _ | "sqrt", _ | "tan", _ -> ()
+          | s,_ -> fail ("unknown built-in function, " ^ quot s)
+
+  and match_builtin_name name expr_list=
+    match name, expr_list with
+        | "print", expr -> List.iter check_expr expr
+        | s, hd::tl -> fail_illegal_builtin_arg s hd; check_num_of_arg tl
+        | _ ->()
+
+  and check_num_of_arg tl =
+    match tl with
+        | [] -> ()
+        | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
+    in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
       | A.Block sl ->
@@ -110,17 +156,7 @@ let check (contexts, finds) =
             | s :: ss -> check_stmt s; check_block ss
             | [] -> ()
           in check_block sl
-      | A.Expr e -> (
-          (* Verify an expression or throw an exception *)
-          match e with
-              | A.Literal(lit) -> ()
-              | A.Strlit(str) -> ()
-              | A.Id(id) -> ()
-              | A.Binop(left, op, right) -> ()
-              | A.Unop(op, expr) -> ()
-              | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> ()
-        )
+      | A.Expr e -> check_expr e
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
   in
@@ -151,17 +187,17 @@ let check (contexts, finds) =
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
     in
-    let check_range = 
+    let check_range =
         match findBlk.A.frange with
         | [] -> ()
         | hd::tl -> (match hd with
           A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                     | _ -> ()); 
+                                                     | _ -> ());
                                       (match ed with Some(str) ->
                                         (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
                                                         | _ -> ())
                                                      | _ -> ());
-                                      (match inc with Some(str) -> 
+                                      (match inc with Some(str) ->
                                         (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
                                                         | _ -> ())
                                                      | _ -> ()))
@@ -179,17 +215,7 @@ let check (contexts, finds) =
             | s :: ss -> check_stmt_for_find s; check_block ss
             | [] -> ()
           in check_block sl
-      | A.Expr e -> (
-          (* Verify an expression or throw an exception *)
-          match e with
-              | A.Literal(lit) -> ()
-              | A.Strlit(str) -> ()
-              | A.Id(id) -> ()
-              | A.Binop(left, op, right) -> ()
-              | A.Unop(op, expr) -> ()
-              | A.Assign(left, expr) -> ()
-              | A.Builtin(name, expr) -> ()
-        )
+      | A.Expr e -> check_expr e
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> check_if hd; check_if_list tl
@@ -209,4 +235,3 @@ let check (contexts, finds) =
     Sast.vars = varmap;
     Sast.lib = liblist
   }
-

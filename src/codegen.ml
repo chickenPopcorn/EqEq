@@ -155,15 +155,18 @@ let translate sast =
                   )::(gen_find_func_call (count+1) tl)
     in List.rev (gen_find_func_call 0 finddecl_list)
   in
+
   let lib=
-    let header head elem=
+    let add_lib header head_lib =
+      if (List.mem header head_lib) then head_lib else header::head_lib
+    in
+    let add_lib_for_dep head elem =
       match elem with
-      |"%" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head
-      |"^" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head
-      |"|" -> if (List.mem "#include <math.h>\n" head) then head else "#include <math.h>\n"::head
-      |"print" -> if (List.mem "#include <stdio.h>\n" head) then head else "#include <stdio.h>\n"::head
-      |_ -> head
-    in (List.fold_left header [] liblist)
+      | "%" | "^" | "|" | "cos" | "sin" | "tan" | "sqrt" | "log" -> add_lib "#include <math.h>\n" head
+      | "print" -> add_lib "#include <stdio.h>\n" head
+      | _ -> head
+    in List.fold_left add_lib_for_dep [] liblist
+
   in
   String.concat "" lib ^
   String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
