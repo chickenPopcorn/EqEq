@@ -155,14 +155,14 @@ let check (contexts, finds) =
         match findBlk.A.frange with
         | [] -> ()
         | hd::tl -> (match hd with
-          A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument")
+          A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
                                                      | _ -> ()); 
                                       (match ed with Some(str) ->
-                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument")
+                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
                                                         | _ -> ())
                                                      | _ -> ());
                                       (match inc with Some(str) -> 
-                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument")
+                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
                                                         | _ -> ())
                                                      | _ -> ()))
   in
