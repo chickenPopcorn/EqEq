@@ -4,9 +4,6 @@ SomeCtx = {
 
 }
 
-SomeCtx:find a with c in range(); {
-  print("print for find with range (0,3,1)\n");
-  print("a = %0.0f\n", a);
-  print("b = %0.0f\n", b);
-  print("c = %0.0f\n", c);
+SomeCtx:find a with c in range(); { /* range has to take at least one argument */
+  print("%.0f\n", a);
 }
