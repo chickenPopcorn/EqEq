@@ -57,11 +57,7 @@ let check (contexts, finds) =
         | A.Assign(left, expr) -> add_lib_expre lis expr
         | A.Builtin(name, expr) -> (
             match name with
-            | "cos" -> "cos"::lis
-            | "sin" -> "sin"::lis
-            | "tan" -> "tan"::lis
-            | "log" -> "log"::lis
-            | "sqrt" -> "sqrt"::lis
+            | "cos" | "sin" | "tan" | "sqrt" | "log"  -> name::lis
             | "print" -> "print"::(List.fold_left add_lib_expre lis expr)
             |_ -> List.fold_left add_lib_expre lis expr )
         |_ -> lis
@@ -116,39 +112,31 @@ let check (contexts, finds) =
               not_print left (A.string_of_op op); not_print right (A.string_of_op op)
           | A.Unop(op, expr) -> check_expr expr; (not_print expr (A.string_of_uop op))
           | A.Assign(left, expr) -> check_expr expr
-          | A.Builtin(name, expr) -> (check_builtin_print name expr); List.iter check_expr expr
+          | A.Builtin(name, expr) -> (match_builtin_print name expr); List.iter check_expr expr
+
   and not_print expr op =
     match expr with
     |A.Builtin(name, expr) -> (
       match name with
       | "print" -> fail("Illegal use of operator on print, " ^ quot op)
-      | _ -> ()
-      )
+      | _ -> ())
     | _ -> ()
 
   and check_builtin_name name str =
     match name with
-      | "sin" -> fail ("illegal argument for sin, " ^ quot str)
-      | "cos" -> fail ("illegal argument for cos, " ^ quot str)
-      | "tan" -> fail ("illegal argument for tan, " ^ quot str)
-      | "log" -> fail ("illegal argument for log, " ^ quot str)
-      | "sqrt" -> fail ("illegal argument for sqrt, " ^ quot str)
+      | "cos" | "sin" | "tan" | "sqrt" | "log"  -> fail ("illegal argument for "^name ^", " ^ quot str)
       | _ -> fail ("unknown built-in function, " ^ quot name)
 
   and check_builtin_other s hd =
       match s, hd with
           | s, A.Assign(left, expr) -> check_builtin_name s left
           | s, A.Strlit(str) -> check_builtin_name s str
-          | "cos", _ -> ()
-          | "sin", _ -> ()
           | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
-          | "sqrt", _ -> ()
-          | "tan", _ -> ()
           | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
-          | "log", _ -> ()
+          | "log", _ | "cos", _ | "sin", _ | "sqrt", _ | "tan", _ -> ()
           | s,_ -> fail ("unknown built-in function, " ^ quot s)
 
-  and check_builtin_print name expr_list=
+  and match_builtin_print name expr_list=
     match name, expr_list with
         | "print", _ -> ()
         | s, hd::tl -> check_builtin_other s hd; check_no_of_arg tl
@@ -199,6 +187,21 @@ let check (contexts, finds) =
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
     in
+    let check_range =
+        match findBlk.A.frange with
+        | [] -> ()
+        | hd::tl -> (match hd with
+          A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
+                                                     | _ -> ());
+                                      (match ed with Some(str) ->
+                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
+                                                        | _ -> ())
+                                                     | _ -> ());
+                                      (match inc with Some(str) ->
+                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
+                                                        | _ -> ())
+                                                     | _ -> ()))
+  in
   (* Verify a particular `statement` in `find` or throw an exception *)
   let check_if = function
     | (None, sl) -> check_stmt sl

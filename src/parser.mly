@@ -7,7 +7,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
 %token PLUS MINUS TIMES DIVIDE MOD POW ABS ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token IF ELSE WHILE FIND ELIF WITH
+%token IF ELSE WHILE FIND ELIF WITH IN RANGE
 %token <float> LITERAL
 %token <string> ID
 %token <string> STRLIT
@@ -59,19 +59,34 @@ finddecl:
    FIND ID LBRACE stmt_list RBRACE
      { { fcontext = ""; (* global context *)
          ftarget = $2;
+         frange = [];
          fbody = List.rev $4 } }
  | CTX COLON FIND ID LBRACE stmt_list RBRACE
      { { fcontext = $1;
          ftarget = $4;
+         frange = [];
          fbody = List.rev $6 } }
  | FIND ID WITH stmt_list LBRACE stmt_list RBRACE
      { { fcontext = ""; (* global context *)
          ftarget = $2;
+         frange = [];
          fbody = (List.rev $4) @ (List.rev $6) } }
  | CTX COLON FIND ID WITH stmt_list LBRACE stmt_list RBRACE
      { { fcontext = $1;
          ftarget = $4;
+         frange = [];
          fbody = (List.rev $6) @ (List.rev $8) } }
+ | FIND ID WITH stmt_list range LBRACE stmt_list RBRACE
+     { { fcontext = ""; (* global context *)
+         ftarget = $2;
+         frange = [$5];
+         fbody = (List.rev $4) @ (List.rev $7) } }
+ | CTX COLON FIND ID WITH stmt_list range LBRACE stmt_list RBRACE
+     { { fcontext = $1;
+         ftarget = $4;
+         frange = [$7];
+         fbody = (List.rev $6) @ (List.rev $9) } }
+
 
 funcdecl_list:
     /* nothing */  { [] }
@@ -80,6 +95,22 @@ funcdecl_list:
 stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { $2 :: $1 }
+
+/*
+findpost_list:
+                               { [], [] }
+ | findpost_list stmt_list     { ($2 :: fst $1), snd $1 }
+ | findpost_list range_list    { fst $1, ($2 :: snd $1) }
+
+range_list:
+      { [] }
+  | range_list range { $2 :: $1 }
+*/
+
+range:
+  | ID IN RANGE LPAREN literal RPAREN SEMI {Range($1, $5, None, None)}
+  | ID IN RANGE LPAREN literal COMMA literal RPAREN SEMI {Range($1, $5, Some($7), None)}
+  | ID IN RANGE LPAREN literal COMMA literal COMMA literal RPAREN SEMI {Range($1, $5, Some($7), Some($9))}
 
 stmt:
     expr SEMI { Expr $1 }
@@ -133,3 +164,4 @@ actuals_opt:
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
+

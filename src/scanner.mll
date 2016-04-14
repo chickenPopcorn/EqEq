@@ -54,6 +54,8 @@ rule token = parse
 | "while"                    { WHILE }
 | "find"                     { FIND }
 | "with"                     { WITH }
+| "in"                       { IN }
+| "range"                    { RANGE }
 | '"' (([^'"']*) as lxm) '"' { STRLIT(lxm) }
 | num as lxm                 { LITERAL(float_of_string lxm) }
 | identifier as lxm          { ID(lxm) }

@@ -33,6 +33,8 @@ let stringify = function
   | STRLIT(lxm) -> "STRLIT"
   | FIND -> "FIND"
   | WITH -> "WITH"
+  | IN -> "IN"
+  | RANGE -> "RANGE"
   | LITERAL(lxm) -> "LITERAL"
   | ID(lxm) -> "ID"
   | CTX(lxm) -> "CTX"
