@@ -249,7 +249,7 @@ let check (contexts, finds) =
                     | [] -> ()
                     | hd::tl -> check_stmt_break_continue blk  "if statement of " (snd hd); check_if_list tl
                     in check_if_list l
-      | A.While(p, s) -> () (* stop now. any `break` below here is valid *)
+      | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
       | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
       | A.Break -> fail("Inadquate usage of Break in "^err_stmt^blk^", 'Break' should only exist in while loop" )
   in
