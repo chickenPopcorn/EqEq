@@ -3,6 +3,5 @@ SomeContext = {
 }
 SomeContext:find break {
   if ( break==1){
-  break = 3;
  }
 }
