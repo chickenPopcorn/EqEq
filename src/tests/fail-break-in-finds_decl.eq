@@ -1,5 +1,6 @@
 SomeContext = {
-  a={continue;}
+  a={1;}
 }
 SomeContext: find a {
+  break;
 }

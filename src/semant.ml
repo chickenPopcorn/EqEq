@@ -236,30 +236,30 @@ let check (contexts, finds) =
   in 
   (*add function to cheack the usage of Break and Continue 
     Break & Continue are allowed only in While loop *)
-    let rec check_stmt_break_continue = function
+    let rec check_stmt_break_continue blk err_stmt = function
       | A.Block sl ->
           (* effectively unravel statements out of their block *)
           let rec check_block = function
             | A.Block sl :: ss -> check_block (sl @ ss)
-            | s :: ss -> check_stmt_break_continue s; check_block ss
+            | s :: ss -> check_stmt_break_continue blk err_stmt s; check_block ss
             | [] -> ()
           in check_block sl
       | A.Expr e -> ()
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
-                    | hd::tl -> check_stmt_break_continue (snd hd); check_if_list tl
+                    | hd::tl -> check_stmt_break_continue blk  "if statement of " (snd hd); check_if_list tl
                     in check_if_list l
-      | A.While(p, s) -> ()
-      | A.Continue -> fail("Inadquate usage of Continue")
-      | A.Break -> fail("Inadquate usage of Break")
+      | A.While(p, s) -> () (* stop now. any `break` below here is valid *)
+      | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
+      | A.Break -> fail("Inadquate usage of Break in "^err_stmt^blk^", 'Break' should only exist in while loop" )
   in
   (* check Break and Continue for the contexts *)
   let check_ctx_break_continue ctxBlk =
-    let check_eq_break_continue eq = List.iter check_stmt_break_continue eq.A.fdbody in
+    let check_eq_break_continue eq = List.iter (check_stmt_break_continue "Contexts_Declaration" "") eq.A.fdbody in
     List.iter check_eq_break_continue ctxBlk.A.cbody
   in
   (* check Break and Continue for the finds *)
-  let check_find_break_continue findBlk = List.iter check_stmt_break_continue findBlk.A.fbody
+  let check_find_break_continue findBlk = List.iter (check_stmt_break_continue "Finds_Declaration" "") findBlk.A.fbody
   in
 
   List.iter check_ctx_break_continue contexts;
