@@ -253,11 +253,13 @@ let check (contexts, finds) =
       | A.Continue -> fail("Inadquate usage of Continue")
       | A.Break -> fail("Inadquate usage of Break")
   in
+  (* check Break and Continue for the contexts *)
   let check_ctx_break_continue ctxBlk =
     let check_eq_break_continue eq = List.iter check_stmt_break_continue eq.A.fdbody in
     List.iter check_eq_break_continue ctxBlk.A.cbody
   in
-    let check_find_break_continue findBlk = List.iter check_stmt_break_continue findBlk.A.fbody
+  (* check Break and Continue for the finds *)
+  let check_find_break_continue findBlk = List.iter check_stmt_break_continue findBlk.A.fbody
   in
 
   List.iter check_ctx_break_continue contexts;
