@@ -30,6 +30,8 @@ let stringify = function
   | ELSE -> "ELSE"
   | ELIF -> "ELIF"
   | WHILE -> "WHILE"
+  | BREAK -> "BREAK"
+  | CONTINUE -> "CONTINUE"
   | STRLIT(lxm) -> "STRLIT"
   | FIND -> "FIND"
   | WITH -> "WITH"

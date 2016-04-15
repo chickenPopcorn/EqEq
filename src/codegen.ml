@@ -35,6 +35,7 @@ let translate sast =
                                                 else "printf(" ^ hd ^ ")"
                                 in check_type (generate_expr el)
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
+
   in
 
   let rec gen_stmt = function
@@ -42,6 +43,8 @@ let translate sast =
         "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n"
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
+    | A.Continue -> "continue;\n"
+    | A.Break -> "break;\n" 
     | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
     (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
 
@@ -59,6 +62,7 @@ let translate sast =
                                            (String.concat "\n" (List.map gen_stmt stmts)) ^
                                       "}\n"
     | _ -> ""
+
   in
   let get_id_range finddecl =
     match finddecl.A.frange with

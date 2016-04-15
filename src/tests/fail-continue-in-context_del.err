@@ -1,0 +1,1 @@
+Fatal error: exception Failure("Inadquate usage of Continue in Contexts_Declaration, 'Continue' should only exist in while loop")

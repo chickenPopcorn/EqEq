@@ -53,6 +53,8 @@ rule token = parse
 | "elif"                     { ELIF }
 | "while"                    { WHILE }
 | "find"                     { FIND }
+| "break"                    { BREAK }
+| "continue"                 { CONTINUE }
 | "with"                     { WITH }
 | "in"                       { IN }
 | "range"                    { RANGE }

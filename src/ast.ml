@@ -14,11 +14,14 @@ type expr =
   | Assign of string * expr
   | Builtin of string * expr list
 
+
 type stmt =
     Block of stmt list
   | Expr of expr
   | If of (expr option * stmt) list
   | While of expr * stmt
+  | Break 
+  | Continue 
 
 type range =
   | Range of string * expr * expr option * expr option
@@ -78,6 +81,7 @@ let string_of_uop = function
     | Builtin(f, el) ->
         f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
 
+
 let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
@@ -85,6 +89,8 @@ let rec string_of_stmt = function
   | If(conds) -> "\n" ^ string_of_first_cond_stmts (List.hd conds) ^ "\n" ^
   (String.concat "\n" (List.map string_of_cond_stmts (List.tl conds)))
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | Break -> "break"
+  | Continue -> "continue"
 
   and string_of_first_cond_stmts = function
     | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
