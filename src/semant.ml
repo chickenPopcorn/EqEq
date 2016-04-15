@@ -65,6 +65,7 @@ let check (contexts, finds) =
             |A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)
             |A.If(l) -> lis
             |A.While(p, s) -> add_lib_stmt_ctx lis s
+            |_ -> lis
     in
     let check_if_lib lis = function
         | (None, sl) -> add_lib_stmt_ctx lis sl
@@ -78,6 +79,7 @@ let check (contexts, finds) =
                                  | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
                                 in check_if_list_lib lis l 
             |A.While(p, s) -> add_lib_stmt lis s
+            |_ -> lis 
     in 
     let create_liblist_finds lis finds = 
       List.fold_left 
@@ -124,8 +126,8 @@ let check (contexts, finds) =
         )
       | A.If(l) ->  ()
       | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
-      | A.Continue() -> ()
-      | A.Break() -> ()
+      | A.Continue -> ()
+      | A.Break -> ()
   in
 
   (**** Checking Context blocks  ****)
@@ -184,14 +186,41 @@ let check (contexts, finds) =
                     | hd::tl -> check_if hd; check_if_list tl
                     in check_if_list l
       | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
-      | A.Continue() -> ()
-      | A.Break() -> ()
-  in
+      | A.Continue -> ()
+      | A.Break -> ()
+  
+  in 
 
     check_have_var findBlk.A.ftarget symbolmap;
     List.iter check_stmt_for_find findBlk.A.fbody
+
+  in 
+    let rec check_stmt_break_continue = function
+      | A.Block sl ->
+          (* effectively unravel statements out of their block *)
+          let rec check_block = function
+            | A.Block sl :: ss -> check_block (sl @ ss)
+            | s :: ss -> check_stmt_break_continue s; check_block ss
+            | [] -> ()
+          in check_block sl
+      | A.Expr e -> ()
+      | A.If(l) -> let rec check_if_list = function
+                    | [] -> ()
+                    | hd::tl -> check_stmt_break_continue (snd hd); check_if_list tl
+                    in check_if_list l
+      | A.While(p, s) -> ()
+      | A.Continue -> fail("Inadquate usage of Continue()\n")
+      | A.Break -> fail("Inadquate usage of Break()\n")
+  in
+  let check_ctx_break_continue ctxBlk =
+    let check_eq_break_continue eq = List.iter check_stmt_break_continue eq.A.fdbody in
+    List.iter check_eq_break_continue ctxBlk.A.cbody
+  in
+    let check_find_break_continue findBlk = List.iter check_stmt_break_continue findBlk.A.fbody
   in
 
+  List.iter check_ctx_break_continue contexts;
+  List.iter check_find_break_continue finds;
   List.iter check_ctx contexts;
   List.iter check_find finds;
 

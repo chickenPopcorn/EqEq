@@ -86,11 +86,8 @@ stmt:
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [(Some($3), Block(List.rev $6)) ])) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
-<<<<<<< HEAD
-  | FIND stmt_list RBRACE { Block(List.rev $2) }
-  | BREAK SEMI {Break()}
-  | CONTINUE SEMI {Continue()}
-
+  | BREAK SEMI { Break }
+  | CONTINUE SEMI { Continue }
 
 elif_stmt_list:
     /* nothing */ { [] }
@@ -102,7 +99,6 @@ elif_stmt:
 else_stmt:
     /* nothing */ { [] }
     | ELSE LBRACE stmt_list RBRACE { [(None, Block(List.rev $3))] }
-
 
 expr:
     literal          { $1 }

@@ -20,8 +20,8 @@ type stmt =
   | Expr of expr
   | If of (expr option * stmt) list
   | While of expr * stmt
-  | Break of unit
-  | Continue of unit
+  | Break 
+  | Continue 
 
 (* multieq: we call this a "multi-line equation" *)
 type multi_eq = {
@@ -85,8 +85,8 @@ let rec string_of_stmt = function
   | If(conds) -> "\n" ^ string_of_first_cond_stmts (List.hd conds) ^ "\n" ^
   (String.concat "\n" (List.map string_of_cond_stmts (List.tl conds)))
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-  | Break() -> "break"
-  | Continue() -> "continue"
+  | Break -> "break"
+  | Continue -> "continue"
 
   and string_of_first_cond_stmts = function
     | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))

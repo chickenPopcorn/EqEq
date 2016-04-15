@@ -41,8 +41,8 @@ let translate sast =
         "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n"
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
     | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
-    | A.Continue() -> "continue;\n"
-    | A.Break() -> "break;\n" 
+    | A.Continue -> "continue;\n"
+    | A.Break -> "break;\n" 
     | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
     (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
 
