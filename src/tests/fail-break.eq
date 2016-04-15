@@ -1,9 +1,7 @@
 SomeContext = {
- a={1;}
+  a = { 42.333; }
 }
-SomeContext: find a{
-    if(a<3){
-    print("%.0f\n",a);
-    break;
-    }
+
+SomeContext:find a {
+  break; 
 }

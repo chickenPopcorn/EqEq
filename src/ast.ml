@@ -23,6 +23,9 @@ type stmt =
   | Break 
   | Continue 
 
+type range =
+  | Range of string * expr * expr option * expr option
+
 (* multieq: we call this a "multi-line equation" *)
 type multi_eq = {
     fname : string;
@@ -37,6 +40,7 @@ type ctx_decl = {
 type find_decl = {
     fcontext : string;
     ftarget : string;
+    frange: range list;
     fbody : stmt list;
   }
 
@@ -100,6 +104,25 @@ let rec string_of_stmt = function
                                     (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
     | _ -> ""
 
+let string_of_range range =
+   match range with
+   | [] -> ""
+   | hd::tl -> (match hd with Range(id, st, ed, inc) ->
+                (match st, ed, inc with
+                  | Literal(lst), Some(sed), Some(sinc) ->
+                    (match sed, sinc with Literal(led), Literal(linc) ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^
+                                   string_of_float led ^ ")"
+                                   | _ -> "")
+                  | Literal(lst), Some(sed), None ->
+                    (match sed with Literal(led) ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^
+                                   string_of_float led ^ ")"
+                                   | _ -> "")
+                  | Literal(lst), None, None ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ ")"
+                  | _ -> ""))
+
 let string_of_multieq multieq =
   multieq.fname ^
   " = {\n" ^
@@ -116,6 +139,7 @@ let string_of_finddecl finddecl =
   finddecl.fcontext ^
   ": find " ^
   finddecl.ftarget ^
+  string_of_range finddecl.frange ^
   " {\n" ^
   String.concat "" (List.map string_of_stmt finddecl.fbody) ^
   "\n}\n"
