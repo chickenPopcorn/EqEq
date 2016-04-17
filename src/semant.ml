@@ -64,23 +64,23 @@ let check (contexts, finds) =
     in
     let rec add_lib_stmt_ctx lis = function
              A.Expr e-> add_lib_expre lis e
-            |A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)
+            (*|A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)*)
             |A.If(l) -> lis
-            |A.While(p, s) -> add_lib_stmt_ctx lis s
+            |A.While(p, stmts) -> List.fold_left add_lib_stmt_ctx lis stmts
             |_ -> lis
     in
     let check_if_lib lis = function
-        | (None, sl) -> add_lib_stmt_ctx lis sl
-        | (Some(e), sl) -> List.append (add_lib_expre lis e) (add_lib_stmt_ctx lis sl)
+        | (None, sl) -> List.fold_left add_lib_stmt_ctx lis sl
+        | (Some(e), sl) -> List.append (add_lib_expre lis e) (List.fold_left add_lib_stmt_ctx lis sl)
     in
     let rec add_lib_stmt lis  = function
              A.Expr e-> add_lib_expre lis e
-            |A.Block sl -> (List.fold_left add_lib_stmt lis sl)
+            (*|A.Block sl -> (List.fold_left add_lib_stmt lis sl)*)
             |A.If(l) -> let rec check_if_list_lib lis = function
                                  | [] -> lis
                                  | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
-                                in check_if_list_lib lis l
-            |A.While(p, s) -> add_lib_stmt lis s
+                        in check_if_list_lib lis l
+            |A.While(p, stmts) -> List.fold_left add_lib_stmt lis stmts
             |_ -> lis
     in
     let create_liblist_finds lis finds =
@@ -151,16 +151,16 @@ let check (contexts, finds) =
     in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
-      | A.Block sl ->
+      (*| A.Block sl ->
           (* effectively unravel statements out of their block *)
           let rec check_block = function
             | A.Block sl :: ss -> check_block (sl @ ss)
             | s :: ss -> check_stmt s; check_block ss
             | [] -> ()
-          in check_block sl
+          in check_block sl*)
       | A.Expr e -> check_expr e
       | A.If(l) ->  ()
-      | A.While(p, s) -> check_stmt (A.Expr p); check_stmt s
+      | A.While(p, s) -> check_stmt (A.Expr p); List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
   in
@@ -208,23 +208,23 @@ let check (contexts, finds) =
   in
   (* Verify a particular `statement` in `find` or throw an exception *)
   let check_if = function
-    | (None, sl) -> check_stmt sl
-    | (Some(e), sl) -> check_stmt (A.Expr e); check_stmt sl
+    | (None, sl) -> List.iter check_stmt sl
+    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
   in
   let rec check_stmt_for_find = function
-      | A.Block sl ->
+      (*| A.Block sl ->
           (* effectively unravel statements out of their block *)
           let rec check_block = function
             | A.Block sl :: ss -> check_block (sl @ ss)
             | s :: ss -> check_stmt_for_find s; check_block ss
             | [] -> ()
-          in check_block sl
+          in check_block sl *)
       | A.Expr e -> check_expr e
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> check_if hd; check_if_list tl
                     in check_if_list l
-      | A.While(p, s) -> check_stmt_for_find (A.Expr p); check_stmt_for_find s
+      | A.While(p, stmts) -> check_stmt_for_find (A.Expr p); List.iter check_stmt_for_find stmts
       | A.Continue -> ()
       | A.Break -> ()
   
@@ -237,17 +237,19 @@ let check (contexts, finds) =
   (*add function to cheack the usage of Break and Continue 
     Break & Continue are allowed only in While loop *)
     let rec check_stmt_break_continue blk err_stmt = function
-      | A.Block sl ->
+      (*| A.Block sl ->
           (* effectively unravel statements out of their block *)
           let rec check_block = function
             | A.Block sl :: ss -> check_block (sl @ ss)
             | s :: ss -> check_stmt_break_continue blk err_stmt s; check_block ss
             | [] -> ()
-          in check_block sl
+          in check_block sl*)
       | A.Expr e -> ()
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
-                    | hd::tl -> check_stmt_break_continue blk  "if statement of " (snd hd); check_if_list tl
+                    | hd::tl -> let check_stmt_break_continue_in_if stmt =
+                                    check_stmt_break_continue blk  "if statement of " stmt 
+                                in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
                     in check_if_list l
       | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
       | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
