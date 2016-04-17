@@ -1,9 +1,9 @@
-# Brainstorm Whiteboarding & Notes
+# Brainstorm White-boarding & Notes
 
 Below we describe the API between semantic analysis and codegen of equations
 _(with dependencies full features allowed in our LRM, ie: dependencies)_.
 
-Note "SAST" below refers to Edwards' "semanticly-annotated"-AST _(ie: whatever
+Note "SAST" below refers to Edwards' "semantically-annotated"-AST _(ie: whatever
 our semantic analysis outputs for codegen's use)_.
 
   - [EqualsEquals Demonstration](#equalsequals-demonstration)
@@ -25,10 +25,10 @@ FooCtx = {
 }
 
 FooCtx:find {
-  m = 3; x = 4;  // expresions 1 and 2
-  print(y);      // expresion  3
-  y = 8;         // expresion  4
-  print(y);      // expresion  5
+  m = 3; x = 4;  // expressions 1 and 2
+  print(y);      // expression  3
+  y = 8;         // expression  4
+  print(y);      // expression  5
 }
 
 FooCtx:find { print(99); }
@@ -93,7 +93,7 @@ the string `FooCtx`), where values are tuples with three items:
   2. `indeps` built for `FooCtx` _(described above)_
   3. "FindMap": a map specific to `FootCtx`, described below.
 
-"FindMap" is a map of our analsys of each `Ast.find_decl` for a given context.
+"FindMap" is a map of our analysis of each `Ast.find_decl` for a given context.
 The keys of a "FindMap" map are the relative expression index in said
 `find_decl` where value is `(deps, indeps)` as inherited and modified up to that
 particular expression in the find block. This is the key design choice that
@@ -103,8 +103,6 @@ _(eg: "expression 4" in our main example doesn't interfere with "expression
 
 ### Algorithm in Pseudocode
 
-Most helpful is the table shown in [TODO add link to whiteboard of nam's]()
-
 ```c
 for CTX'
   for EQ' = { ID', ASSGN, EXPR' } // note: only ASSIGN exprs exist
@@ -113,40 +111,40 @@ for CTX'
     else
       sast.get(CTX').indeps.add(ID', EXPR')
 
-  FIND_INDEX = 0
-  for FIND' = { CTX', FIND_DECL' }
-    NAME = "find_%s_%d" CTX' FIND_INDEX
+FIND_INDEX = 0
+for FIND' = { CTX', FIND_DECL' }
+  NAME = "find_%s_%d" CTX' FIND_INDEX
 
-    EXPR_INDEX = 0
+  EXPR_INDEX = 0
 
-    FIND_MAP = (sast.get(CTX').deps, sast.get(CTX').indeps)
-    EXPR_MAP = <EXPR_INDEX, FIND_MAP>
-    sast.get(CTX').FindMap.add(NAME, EXPR_MAP)
+  FIND_MAP = (sast.get(CTX').deps, sast.get(CTX').indeps)
+  EXPR_MAP = <EXPR_INDEX, FIND_MAP>
+  sast.get(CTX').FindMap.add(NAME, EXPR_MAP)
 
-    for EXPR'
-      EXPR_MAP = sast.get(CTX').FindMap.get(NAME).get(EXPR_INDEX) || EXPR_MAP
+  for EXPR'
+    EXPR_MAP = sast.get(CTX').FindMap.get(NAME).get(EXPR_INDEX) || EXPR_MAP
 
-      Match EXPR' with:
-        | ASSIGN' = { ID', ASSGN, EXPR" } ->
-            for ID" in EXPR"
-                if ID" is not in FIND_MAP.indeps
-                    throw "unresolvable expression"
+    Match EXPR' with:
+      | ASSIGN' = { ID', ASSGN, EXPR" } ->
+          for ID" in EXPR"
+              if ID" is not in FIND_MAP.indeps
+                  throw "unresolvable expression"
 
-            if ID' exists in FIND_MAP
-              EXPR_MAP = sast.get(CTX').FindMap.get(NAME).add(
-                  EXPR_INDEX,
-                  copy(EXPR_MAP))
+          if ID' exists in FIND_MAP
+            EXPR_MAP = sast.get(CTX').FindMap.get(NAME).add(
+                EXPR_INDEX,
+                copy(EXPR_MAP))
 
-              FIND_MAP.indeps.add(ID', EXPR")
-            else
-              FIND_MAP.indeps.add(ID', EXPR")
-        | _ ->
-            for ID' in EXPR'
-                throw if ID' unresolvable per FIND_MAP
+            FIND_MAP.indeps.add(ID', EXPR")
+          else
+            FIND_MAP.indeps.add(ID', EXPR")
+      | _ ->
+          for ID' in EXPR'
+              throw if ID' unresolvable per FIND_MAP
 
-      ++EXPR_INDEX
+    ++EXPR_INDEX
 
-    ++FIND_INDEX
+  ++FIND_INDEX
 
 ```
 
@@ -189,4 +187,5 @@ for FIND' = {CTX', FIND_TARG} in AST
 ### Questions
 
 1. What does the ocaml look like for our SAST struct?
-2. What have we not considered for `if`/`else`/`while` statemnets
+ - will 430dbdf7f02965f work?
+2. What have we not considered for `if`/`else`/`while` statements

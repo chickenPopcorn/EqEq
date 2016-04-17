@@ -361,19 +361,19 @@ mycontext: find x {
 #### With Statement
 With statements have the form
 ```
-with [variable in expression, ]+ compound_statement
+with [variable in expression; ]+ compound_statement
 ```
 , which means that with takes one or more expressions, and a compound
-sub-statement.
+sub-statement. (After each expression, a semicolon is needed after the expression.)
 
 If the expressions have type double, then with will evaluate the expression and
 execute the compound sub-statement:
 ```c
-with x in 5 {
+with x = 5; {
   print(x);
 }  // 5
 
-with x in 5, y in 6 {
+with x = 5; y = 6; {
   print(x + y);
 }  // 11
 ```
@@ -413,13 +413,37 @@ find velocity {
 } // print 6
 
 // this block is the same as the one above
-find velocity with length in 5 {
+find velocity with length = 5; {
   print(velocity);
 } // print 6
 
-pendulum:find vector with length in range(0, 5) {
+pendulum:find vector with length in range(0, 5); {
   print(velocity);
 } // print 1 to 6
+```
+
+#### `range()`
+`range()` mimics Python's `range()` function. It takes an optional expression
+`start`, an expression `stop`, and an optional expression `step`. It returns a
+vector from `stat` to `stop - 1`, with distance `step` between each member of
+the vector:
+```c
+range([start,] stop [,step]);
+```
+
+For examples,
+```python
+range(3);        // same as writing: {0, 1, 2, 3}
+range(-3);       // same as writing: {0, -1, -2, -3}
+range(2, 5);     // same as writing: {2, 3, 4, 5}
+range(2, 8, 3);  // same as writing: {2, 5, 8}
+```
+
+Range has to be the last argument in the find block.
+For examples,
+```
+SomeCtx: find a with b = 3; c in range(3); {} // correct syntax
+SomeCtx: find a with c in range(3); b = 3; {} // illegal syntax
 ```
 
 ### Built-ins
@@ -440,21 +464,26 @@ print("words here %f.0 and %f here\n", 4, myvar);
 // words here 4 and 3.14159 here
 ```
 
-#### `range()`
-`range()` mimics Python's `range()` function. It takes an optional expression
-`start`, an expression `stop`, and an optional expression `step`. It returns a
-vector from `stat` to `stop - 1`, with distance `step` between each member of
-the vector:
+Unlike the built-in functions below print function does not support any unary or binary operators.
 ```c
-range([start,] stop [,step]);
+-print("words here %f.0 and %f here\n", 4, myvar);
+// will throw the following error
+Fatal error: exception Failure("Illegal use of operator on print, "-"")
 ```
 
-For examples,
-```python
-range(3);        // same as writing: {0, 1, 2}
-range(2, 5);     // same as writing: {2, 3, 4}
-range(2, 8, 3);  // same as writing: {2, 5, 8}
+#### `sin()/cos()/tan()/sqrt()/log()`
+
+`sin()/cos()/tan()/sqrt()/log()` are built-in trigonometry and math functions that mirrors the same functions in C
+under `math.h` library. Their arguments include variable names and numbers only. Nested built-in functions are allowed.
+
+Numerical range for sqrt()\log() and is confined to greater or equals to zero and greater than zero respectively and are checked statically at compile time. Like most imperative language illegal argument for the above built-in functions cannot be caught at compile time for variables, will will be reported at C runtime.
 ```
+a = cos(sin(tan(log(sqrt(42)))));
+```
+
+functions can be nested like the example above.
+
+
 
 <!-- TODO: insert built-in descriptions for cos, sin, sqrt, others.-->
 
@@ -564,7 +593,7 @@ pendulum: find v with l in range(0, 20) {
 
 // evaluate v in pendulum's equations given that g in range(4, 15) and l = 10
 // take the average of values of v
-pendulum: find v with g in range(4, 15), m = 100 {
+pendulum: find v with m = 100; g in range(4, 15); {
   l = 10;
 
   sum += v;
@@ -574,7 +603,7 @@ pendulum: find v with g in range(4, 15), m = 100 {
 
 average = sum / (15 - 4);
 
-pendulum: find v with v in range(20) {
+pendulum: find v with v in range(20); {
   // throw a compiler error because can't find v with v's value
 }
 

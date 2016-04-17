@@ -217,7 +217,9 @@ CheckTest() {
 
     local left="$expected" right="$actual"
     if [ "$expectExit" -eq 0 ];then
-      if ! "$eqToObj" "$eqTarget" -o "$eqTargetObj" 2>&1 | log;then
+      local buildLog; buildLog="$("$eqToObj" "$eqTarget" -o "$eqTargetObj" 2>&1)"
+      local buildStatus=$?; echo -n "$buildLog" | log
+      if [ $buildStatus -ne 0 ];then
         printf \
           "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
           log
