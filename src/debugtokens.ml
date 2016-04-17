@@ -28,7 +28,6 @@ let stringify = function
   | NOT -> "NOT"
   | IF -> "IF"
   | ELSE -> "ELSE"
-  | ELIF -> "ELIF"
   | WHILE -> "WHILE"
   | BREAK -> "BREAK"
   | CONTINUE -> "CONTINUE"
