@@ -35,30 +35,32 @@ let translate sast =
                                                 else "printf(" ^ hd ^ ")"
                                 in check_type (generate_expr el)
     | A.Builtin(f, el) -> f ^ "(" ^ String.concat ", " (List.map gen_expr el) ^ ")"
+
   in
 
   let rec gen_stmt = function
-    | A.Block(stmts) ->
-        "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n"
+    (* | A.Block(stmts) ->
+        "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n" *)
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
-    | A.While(e, s) -> "while (" ^ gen_expr e ^ ") " ^ gen_stmt s
+    | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt stmts)) ^ "}\n"
+    | A.Continue -> "continue;\n"
+    | A.Break -> "break;\n" 
     | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
     (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
 
   and string_of_first_cond_exec = function
-    | (Some(expr), A.Block(stmts)) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^
+    | (Some(expr), stmts) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^
                                           (String.concat "\n" (List.map gen_stmt stmts)) ^
                                       "}\n"
     | _ -> ""
 
   and string_of_cond_exec = function
-    | (None, A.Block(stmts)) -> "else {\n" ^
+    | (None, stmts) -> "else {\n" ^
                                     (String.concat "\n" (List.map gen_stmt stmts)) ^
                                 "}\n"
-    | (Some(expr), A.Block(stmts)) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^
+    | (Some(expr), stmts) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^
                                            (String.concat "\n" (List.map gen_stmt stmts)) ^
                                       "}\n"
-    | _ -> ""
   in
   let get_id_range finddecl =
     match finddecl.A.frange with

@@ -1,0 +1,1 @@
+Fatal error: exception Failure("Inadquate usage of Continue in if statement of Finds_Declaration, 'Continue' should only exist in while loop")

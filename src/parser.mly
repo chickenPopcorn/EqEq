@@ -7,14 +7,13 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
 %token PLUS MINUS TIMES DIVIDE MOD POW ABS ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token IF ELSE WHILE FIND ELIF WITH IN RANGE
+%token IF ELSE WHILE FIND WITH IN RANGE BREAK CONTINUE
 %token <float> LITERAL
 %token <string> ID
 %token <string> STRLIT
 %token <string> CTX
 %token EOF
 
-%nonassoc ELSE
 %right ASSIGN
 %left OR
 %left AND
@@ -22,7 +21,6 @@ open Ast
 %left LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE MOD POW
-%right ABS
 %right NOT NEG
 
 %start program
@@ -114,20 +112,21 @@ range:
 
 stmt:
     expr SEMI { Expr $1 }
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [(Some($3), Block(List.rev $6)) ])) }
-  | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [(Some($3), List.rev $6) ])) }
+  | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
+  | BREAK SEMI { Break }
+  | CONTINUE SEMI { Continue }
 
 elif_stmt_list:
     /* nothing */ { [] }
     | elif_stmt_list elif_stmt { $1 @ $2 }
 
 elif_stmt:
-    | ELSE IF LPAREN expr RPAREN LBRACE stmt_list RBRACE { [(Some($4), Block(List.rev $7))] }
+    | ELSE IF LPAREN expr RPAREN LBRACE stmt_list RBRACE { [(Some($4), List.rev $7)] }
 
 else_stmt:
     /* nothing */ { [] }
-    | ELSE LBRACE stmt_list RBRACE { [(None, Block(List.rev $3))] }
+    | ELSE LBRACE stmt_list RBRACE { [(None, List.rev $3)] }
 
 expr:
     literal          { $1 }
@@ -164,4 +163,3 @@ actuals_opt:
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
-

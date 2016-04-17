@@ -50,9 +50,10 @@ rule token = parse
 | "!"                        { NOT }
 | "if"                       { IF }
 | "else"                     { ELSE }
-| "elif"                     { ELIF }
 | "while"                    { WHILE }
 | "find"                     { FIND }
+| "break"                    { BREAK }
+| "continue"                 { CONTINUE }
 | "with"                     { WITH }
 | "in"                       { IN }
 | "range"                    { RANGE }
