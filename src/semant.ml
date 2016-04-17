@@ -63,7 +63,6 @@ let check (contexts, finds) =
     (* `Sast.eqResolutions` to which we'll add `S.equation_relations` *)
     let ctxRelations : S.eqResolutions =
       let relationCtxFolder relations ctx =
-
         let ctxScope =
           let (deps, indeps) =
             let ctx_body_folder (deps, indeps) mEq =
@@ -75,13 +74,9 @@ let check (contexts, finds) =
               in
               List.fold_left multi_eq_folder (deps, indeps) mEq.A.fdbody
 
-            in List.fold_left
-                 ctx_body_folder
-                 (StringMap.empty, StringMap.empty)
-                 ctx.A.cbody
+            in
+            List.fold_left ctx_body_folder (StringMap.empty, StringMap.empty) ctx.A.cbody
           in
-
-
           {
             S.ctx_deps = deps;
             S.ctx_indeps = indeps;
@@ -89,8 +84,10 @@ let check (contexts, finds) =
             (* taken care of in `relationFindFolder` later on ... *)
             S.ctx_finds = StringMap.empty;
           }
-        in StringMap.add ctx.A.context ctxScope relations
-      in List.fold_left relationCtxFolder StringMap.empty contexts
+        in
+        StringMap.add ctx.A.context ctxScope relations
+      in
+      List.fold_left relationCtxFolder StringMap.empty contexts
     in
 
     (* Add a complete picture of contexts' find decl relations, maintaining an
@@ -137,8 +134,10 @@ let check (contexts, finds) =
                                 m []
                             ))
                         )
-                    in asof index
-                  in assert_nodeps id lastMap.S.indeps
+                    in
+                    asof index
+                  in
+                  assert_nodeps id lastMap.S.indeps
                 in
 
                 let i = idx + 1 in match expr with
@@ -179,7 +178,6 @@ let check (contexts, finds) =
                           ) tail
                     in relationsInIf (m, i) stmtTupleWithOptionalExpr
                 | A.While(e, s) -> findStmtRelator (findExprRelator (m, i) e) s
-
               in
 
               (* Initial map from starting with contexts' own relationships *)
@@ -187,25 +185,32 @@ let check (contexts, finds) =
                 let baseRelations : S.equation_relations = {
                   S.indeps = ctxScopes.S.ctx_indeps;
                   S.deps = ctxScopes.S.ctx_deps;
-                } in S.IntMap.add 0 baseRelations S.IntMap.empty
-
-              in List.fold_left findStmtRelator (exprMap, 0) findDec.A.fbody
-            in eqRels
+                }
+                in
+                S.IntMap.add 0 baseRelations S.IntMap.empty
+              in
+              List.fold_left findStmtRelator (exprMap, 0) findDec.A.fbody
+            in
+            eqRels
           in
 
           let ctxFinds : S.find_scopes =
             StringMap.add findName findRelationMap ctxScopes.S.ctx_finds
           in
+
           let scopes = {
             S.ctx_deps = ctxScopes.S.ctx_deps;
             S.ctx_indeps = ctxScopes.S.ctx_indeps;
             S.ctx_finds = ctxFinds;
           }
-          in StringMap.add findDec.A.fcontext scopes relations
-        in (extendedRels, findIdx + 1)
-
-      in List.fold_left relationFindFolder (ctxRelations, 0) finds
-    in sastEqRels
+          in
+          StringMap.add findDec.A.fcontext scopes relations
+        in
+        (extendedRels, findIdx + 1)
+      in
+      List.fold_left relationFindFolder (ctxRelations, 0) finds
+    in
+    sastEqRels
   in
 
   (* Map of variables to their decls. For more, see: S.varMap *)
