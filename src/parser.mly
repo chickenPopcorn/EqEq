@@ -52,6 +52,8 @@ ctxtdecl:
 funcdecl:
    ID ASSIGN LBRACE stmt_list RBRACE
      { { fname = $1; fdbody = List.rev $4 } }
+   | ID ASSIGN stmt
+       { { fname = $1; fdbody = [$3] } }
 
 finddecl:
    FIND ID LBRACE stmt_list RBRACE
