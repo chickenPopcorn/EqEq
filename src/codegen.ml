@@ -63,7 +63,8 @@ let translate sast =
                                       "}\n"
   in
   let rec gen_stmt_for_multieq = function
-    | A.Expr(expr) -> "return " ^ gen_expr expr ^ ";\n";
+    | A.Expr(expr) -> (match expr with | A.Builtin("print", el) -> gen_expr expr ^ ";\n"
+                                      | _ -> "return (double) (" ^ gen_expr expr ^ ");\n" )
     | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt_for_multieq stmts)) ^ "}\n"
     | A.Continue -> "continue;\n"
     | A.Break -> "break;\n"
