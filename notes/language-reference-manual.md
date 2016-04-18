@@ -44,14 +44,13 @@ sequential statements, contexts and `find` blocks differ in their use:
   missing said pieces, or simply apply completed solutions to new inputs.
 
 The `context` block consists of a list of single line and/or multi-line equations.
-The single line equations is expressed in assignment format similar to most programming
-languages.
+The single line equations is expressed in assignment format.
 ```c
 SomeCtx = { a = 42; }
 ```
 Multi-line equations, like single line equations, must be expressed in assignment
 format, but right hand side is express in `{*... multi-line statements ...*}`. In
-this case right hand side variable is treated as both a variable and a function. However
+this case right hand side variable is treated as a variable. However
 nested `{{}}` is considered illegal in eqeq.
 ```c
 multi:{
