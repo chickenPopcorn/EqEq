@@ -1,4 +1,4 @@
-SomeContext = {
+SomeContext={
   a = 40 + 2;
 }
 
