@@ -16,7 +16,6 @@ type expr =
 
 
 type stmt =
-   (* Block of stmt list *)
   | Expr of expr
   | If of (expr option * stmt list) list
   | While of expr * stmt list
@@ -83,8 +82,6 @@ let string_of_uop = function
 
 
 let rec string_of_stmt = function
-   (* Block(stmts) ->
-      "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n" *)
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | If(conds) -> "\n" ^ string_of_first_cond_stmts (List.hd conds) ^ "\n" ^
   (String.concat "\n" (List.map string_of_cond_stmts (List.tl conds)))

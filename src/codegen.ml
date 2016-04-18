@@ -39,8 +39,6 @@ let translate sast =
   in
 
   let rec gen_stmt = function
-    (* | A.Block(stmts) ->
-        "{\n" ^ String.concat "" (List.map gen_stmt stmts) ^ "}\n" *)
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
     | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt stmts)) ^ "}\n"
     | A.Continue -> "continue;\n"
@@ -85,17 +83,20 @@ let translate sast =
                                            (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
                                       "}\n"
   in
+  
   let get_id_range finddecl =
     match finddecl.A.frange with
     | [] -> ""
     | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> id)
   in
+
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
   in
   let gen_decl_ctx ctx =
     StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
   in
+
   let gen_function_for_one_ctx ctx = 
     let rec gen_function_for_multieq count multieq_list = 
       match multieq_list with
@@ -108,6 +109,7 @@ let translate sast =
     in String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x) 
                 (gen_function_for_multieq 0 ctx.A.cbody))
   in
+
   let gen_function_call_in_find ctx = 
     let rec gen_function_call_for_multieq count multieq_list = 
       match multieq_list with
@@ -116,15 +118,7 @@ let translate sast =
                   ) :: (gen_function_call_for_multieq (count+1) tl)
     in String.concat "\n" (gen_function_call_for_multieq 0 ctx.A.cbody)
   in
-  (*let gen_singleeq eq =
-    eq.A.fname ^
-    " = " ^
-    String.concat "" (List.map gen_stmt eq.A.fdbody) ^
-    "\n"
-  in*)
-  (*let gen_ctxdecl ctx =
-    String.concat "" (List.map gen_multieq ctx)
-  in *)
+
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody)
   in

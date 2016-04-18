@@ -64,7 +64,6 @@ let check (contexts, finds) =
     in
     let rec add_lib_stmt_ctx lis = function
              A.Expr e-> add_lib_expre lis e
-            (*|A.Block sl -> (List.fold_left add_lib_stmt_ctx lis sl)*)
             |A.If(l) -> lis
             |A.While(p, stmts) -> List.fold_left add_lib_stmt_ctx lis stmts
             |_ -> lis
@@ -75,7 +74,6 @@ let check (contexts, finds) =
     in
     let rec add_lib_stmt lis  = function
              A.Expr e-> add_lib_expre lis e
-            (*|A.Block sl -> (List.fold_left add_lib_stmt lis sl)*)
             |A.If(l) -> let rec check_if_list_lib lis = function
                                  | [] -> lis
                                  | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
@@ -212,13 +210,6 @@ let check (contexts, finds) =
     | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
   in
   let rec check_stmt_for_find = function
-      (*| A.Block sl ->
-          (* effectively unravel statements out of their block *)
-          let rec check_block = function
-            | A.Block sl :: ss -> check_block (sl @ ss)
-            | s :: ss -> check_stmt_for_find s; check_block ss
-            | [] -> ()
-          in check_block sl *)
       | A.Expr e -> check_expr e
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
@@ -237,13 +228,6 @@ let check (contexts, finds) =
   (*add function to cheack the usage of Break and Continue 
     Break & Continue are allowed only in While loop *)
     let rec check_stmt_break_continue blk err_stmt = function
-      (*| A.Block sl ->
-          (* effectively unravel statements out of their block *)
-          let rec check_block = function
-            | A.Block sl :: ss -> check_block (sl @ ss)
-            | s :: ss -> check_stmt_break_continue blk err_stmt s; check_block ss
-            | [] -> ()
-          in check_block sl*)
       | A.Expr e -> ()
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
