@@ -4,12 +4,14 @@ SomeContext = {
 }
 
 SomeContext:find a {
-if (3>4){
-  print("inside: if!\n");
+  if (3>4){
+    print("inside: if!\n");
+    }
+  else{
+    print("inside: else!\n");
   }
-else{
-  print("inside: else!\n");
-}
-else if (  ) {
-  print("inside: else if!\n");
+  else if (  ) {
+  /* it should raise error for else if not the empty predicate
+    print("inside: else if!\n");
+  }
 }
