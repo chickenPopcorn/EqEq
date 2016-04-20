@@ -52,6 +52,8 @@ ctxtdecl:
 funcdecl:
    ID ASSIGN LBRACE stmt_list RBRACE
      { { fname = $1; fdbody = List.rev $4 } }
+   | ID ASSIGN stmt
+       { { fname = $1; fdbody = [$3] } }
 
 finddecl:
    FIND ID LBRACE stmt_list RBRACE
@@ -112,9 +114,8 @@ range:
 
 stmt:
     expr SEMI { Expr $1 }
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [(Some($3), Block(List.rev $6)) ])) }
-  | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+  | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE elif_stmt_list else_stmt{ If(List.rev ($9 @ List.rev $8 @ [(Some($3), List.rev $6) ])) }
+  | WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE { While($3, $6) }
   | BREAK SEMI { Break }
   | CONTINUE SEMI { Continue }
 
@@ -123,11 +124,11 @@ elif_stmt_list:
     | elif_stmt_list elif_stmt { $1 @ $2 }
 
 elif_stmt:
-    | ELSE IF LPAREN expr RPAREN LBRACE stmt_list RBRACE { [(Some($4), Block(List.rev $7))] }
+    | ELSE IF LPAREN expr RPAREN LBRACE stmt_list RBRACE { [(Some($4), List.rev $7)] }
 
 else_stmt:
     /* nothing */ { [] }
-    | ELSE LBRACE stmt_list RBRACE { [(None, Block(List.rev $3))] }
+    | ELSE LBRACE stmt_list RBRACE { [(None, List.rev $3)] }
 
 expr:
     literal          { $1 }
