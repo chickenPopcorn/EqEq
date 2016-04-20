@@ -135,9 +135,7 @@ for FIND' = { CTX', FIND_DECL' }
                 EXPR_INDEX,
                 copy(EXPR_MAP))
 
-            FIND_MAP.indeps.add(ID', EXPR")
-          else
-            FIND_MAP.indeps.add(ID', EXPR")
+          FIND_MAP.indeps.add(ID', EXPR")
       | _ ->
           for ID' in EXPR'
               throw if ID' unresolvable per FIND_MAP
