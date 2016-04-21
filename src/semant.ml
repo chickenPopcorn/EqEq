@@ -103,6 +103,7 @@ let check (contexts, finds) =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
+
   let rec check_expr e =
       match e with
           | A.Literal(lit) -> ()
@@ -205,9 +206,20 @@ let check (contexts, finds) =
                                                      | _ -> ()))
   in
   (* Verify a particular `statement` in `find` or throw an exception *)
+  let rec fail_illegal_if_predicate = function
+      | A.Assign(left, expr) ->  fail ("Illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
+      | A.Builtin(name, expr) -> (
+          match name with
+          | "print" -> fail ("Illegal if argument, \"print\"")
+          | _ -> ()
+          )
+      | A.Strlit(s) ->  fail ("Illegal if argument, " ^ quot s)
+      | _ -> ()
+  in
+
   let check_if = function
     | (None, sl) -> List.iter check_stmt sl
-    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
+    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl; fail_illegal_if_predicate e
   in
   let rec check_stmt_for_find = function
       | A.Expr e -> check_expr e
@@ -218,21 +230,22 @@ let check (contexts, finds) =
       | A.While(p, stmts) -> check_stmt_for_find (A.Expr p); List.iter check_stmt_for_find stmts
       | A.Continue -> ()
       | A.Break -> ()
-  
-  in 
+
+  in
 
     check_have_var findBlk.A.ftarget symbolmap;
     List.iter check_stmt_for_find findBlk.A.fbody
 
-  in 
-  (*add function to cheack the usage of Break and Continue 
+  in
+
+  (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
     let rec check_stmt_break_continue blk err_stmt = function
       | A.Expr e -> ()
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> let check_stmt_break_continue_in_if stmt =
-                                    check_stmt_break_continue blk  "if statement of " stmt 
+                                    check_stmt_break_continue blk  "if statement of " stmt
                                 in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
                     in check_if_list l
       | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
