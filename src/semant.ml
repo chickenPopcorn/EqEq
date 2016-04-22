@@ -158,7 +158,7 @@ let check (contexts, finds) =
           in check_block sl*)
       | A.Expr e -> check_expr e
       | A.If(l) ->  ()
-      | A.While(p, s) -> check_stmt (A.Expr p); List.iter check_stmt s
+      | A.While(p, s) -> check_expr p; List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
   in
@@ -210,29 +210,35 @@ let check (contexts, finds) =
     | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
   in
   let rec check_stmt_for_find = function
-      | A.Expr e -> check_expr e
+      | A.Expr e -> check_expr e;(
+        match e with
+        | A.Builtin(name, expr) -> ()
+        | A.Assign(left, expr) -> ()
+        | a -> fail ("invalid return in find " ^ quot (A.string_of_expr a))
+      )
+      (*check_expr e*)
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> check_if hd; check_if_list tl
                     in check_if_list l
-      | A.While(p, stmts) -> check_stmt_for_find (A.Expr p); List.iter check_stmt_for_find stmts
+      | A.While(p, stmts) -> check_expr p; List.iter check_stmt_for_find stmts
       | A.Continue -> ()
       | A.Break -> ()
-  
-  in 
+
+  in
 
     check_have_var findBlk.A.ftarget symbolmap;
     List.iter check_stmt_for_find findBlk.A.fbody
 
-  in 
-  (*add function to cheack the usage of Break and Continue 
+  in
+  (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
     let rec check_stmt_break_continue blk err_stmt = function
       | A.Expr e -> ()
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> let check_stmt_break_continue_in_if stmt =
-                                    check_stmt_break_continue blk  "if statement of " stmt 
+                                    check_stmt_break_continue blk  "if statement of " stmt
                                 in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
                     in check_if_list l
       | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
