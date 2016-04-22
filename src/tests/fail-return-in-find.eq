@@ -3,6 +3,6 @@ SomeContext = {
 }
 
 SomeContext:find a {
-  return;
+  a;
   print("%.0f\n", -3);
 }
