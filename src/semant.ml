@@ -148,6 +148,16 @@ let check (contexts, finds) =
         | [] -> ()
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
     in
+  let rec fail_illegal_if_predicate = function
+      | A.Assign(left, expr) ->  fail ("Illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
+      | A.Builtin(name, expr) -> (
+          match name with
+          | "print" -> fail ("Illegal if argument, \"print\"")
+          | _ -> ()
+          )
+      | A.Strlit(s) ->  fail ("Illegal if argument, " ^ quot s)
+      | _ -> ()
+  in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
       (*| A.Block sl ->
@@ -158,10 +168,16 @@ let check (contexts, finds) =
             | [] -> ()
           in check_block sl*)
       | A.Expr e -> check_expr e
-      | A.If(l) ->  ()
+      | A.If(l) ->  let rec check_if_list = function
+                    | [] -> ()
+                    | hd::tl -> check_if hd; check_if_list tl
+                    in check_if_list l
       | A.While(p, s) -> check_stmt (A.Expr p); List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
+  and check_if = function
+      | (None, sl) -> List.iter check_stmt sl
+      | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl; fail_illegal_if_predicate e
   in
 
   (**** Checking Context blocks  ****)
@@ -206,21 +222,6 @@ let check (contexts, finds) =
                                                      | _ -> ()))
   in
   (* Verify a particular `statement` in `find` or throw an exception *)
-  let rec fail_illegal_if_predicate = function
-      | A.Assign(left, expr) ->  fail ("Illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
-      | A.Builtin(name, expr) -> (
-          match name with
-          | "print" -> fail ("Illegal if argument, \"print\"")
-          | _ -> ()
-          )
-      | A.Strlit(s) ->  fail ("Illegal if argument, " ^ quot s)
-      | _ -> ()
-  in
-
-  let check_if = function
-    | (None, sl) -> List.iter check_stmt sl
-    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl; fail_illegal_if_predicate e
-  in
   let rec check_stmt_for_find = function
       | A.Expr e -> check_expr e
       | A.If(l) -> let rec check_if_list = function
