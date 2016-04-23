@@ -150,12 +150,39 @@ let check (contexts, finds) =
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
     in
   (* Verify a statement or throw an exception *)
+  let rec check_stmt_break_continue blk err_stmt = function
+    | A.Expr e -> ()
+    | A.If(l) -> let rec check_if_list = function
+                  | [] -> ()
+                  | hd::tl -> let check_stmt_break_continue_in_if stmt =
+                                  check_stmt_break_continue blk  "if statement of " stmt
+                              in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
+                  in check_if_list l
+    | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
+    | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
+    | A.Break -> fail("Inadquate usage of Break in "^err_stmt^blk^", 'Break' should only exist in while loop" )
+  in
   let rec check_stmt = function
-      | A.Expr e -> check_expr e
-      | A.If(l) ->  ()
+      | A.Expr e -> check_expr e;(
+        match e with
+        | A.Builtin(name, expr) -> ()
+        | A.Assign(left, expr) -> ()
+        | A.Strlit(str) -> fail ("cannot return string " ^ quot str)
+        | A.Literal(lit) -> ()
+        | _ -> ()
+      )
+      | A.If(l) -> (let rec check_if_list = function
+                    | [] -> ()
+                    | hd::tl -> check_if hd; check_if_list tl
+                    in check_if_list l
+        )
       | A.While(p, s) -> check_expr p; List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
+
+  and check_if = function
+    | (None, sl) -> List.iter check_stmt sl
+    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
   (**** Checking Context blocks  ****)
   in
   let check_ctx ctxBlk =
@@ -239,10 +266,6 @@ let check (contexts, finds) =
                                                      | _ -> ()))
   in
   (* Verify a particular `statement` in `find` or throw an exception *)
-  let check_if = function
-    | (None, sl) -> List.iter check_stmt sl
-    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
-  in
   let rec check_stmt_for_find = function
       | A.Expr e -> check_expr e;(
         match e with
@@ -267,18 +290,6 @@ let check (contexts, finds) =
   in
   (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
-    let rec check_stmt_break_continue blk err_stmt = function
-      | A.Expr e -> ()
-      | A.If(l) -> let rec check_if_list = function
-                    | [] -> ()
-                    | hd::tl -> let check_stmt_break_continue_in_if stmt =
-                                    check_stmt_break_continue blk  "if statement of " stmt
-                                in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
-                    in check_if_list l
-      | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
-      | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
-      | A.Break -> fail("Inadquate usage of Break in "^err_stmt^blk^", 'Break' should only exist in while loop" )
-  in
   (* check Break and Continue for the contexts *)
   let check_ctx_break_continue ctxBlk =
     let check_eq_break_continue eq = List.iter (check_stmt_break_continue "Contexts_Declaration" "") eq.A.fdbody in
