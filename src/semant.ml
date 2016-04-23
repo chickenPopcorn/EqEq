@@ -149,24 +149,53 @@ let check (contexts, finds) =
     in
   (* Verify a statement or throw an exception *)
   let rec check_stmt = function
-      (*| A.Block sl ->
-          (* effectively unravel statements out of their block *)
-          let rec check_block = function
-            | A.Block sl :: ss -> check_block (sl @ ss)
-            | s :: ss -> check_stmt s; check_block ss
-            | [] -> ()
-          in check_block sl*)
       | A.Expr e -> check_expr e
       | A.If(l) ->  ()
       | A.While(p, s) -> check_expr p; List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
-  in
-
   (**** Checking Context blocks  ****)
+  in
   let check_ctx ctxBlk =
-    let check_eq eq = List.iter check_stmt eq.A.fdbody in
-
+    let check_eq eq = List.iter check_stmt eq.A.fdbody
+    in
+    let sum_list l =
+      match l with
+      | hd::tl -> List.fold_left (fun x y -> x + y) hd tl
+      | [] -> 0
+    in
+    let min_list l =
+      match l with
+      | hd::tl -> List.fold_left min hd tl
+      | [] -> -1
+    in
+    let rec check_return_in_stmt stmt =
+      match stmt with
+      | A.Expr e -> (
+        match e with
+        | A.Builtin(name, expr) -> (
+          match name with
+          | "print" -> 0
+          | _ -> 1
+          )
+        | A.Assign(left, expr) -> 0
+        | _ ->  1
+      )
+      | A.Continue | A.Break -> 0
+      | A.If(l) -> min_list (List.map check_if_for_return l)
+      | A.While(p, s) -> check_return_stmt_list s
+    and check_if_for_return = function
+      | (None, sl) -> check_return_stmt_list sl
+      | (Some(e), sl) -> check_return_stmt_list sl
+    and check_return_stmt_list sl = sum_list (List.map check_return_in_stmt sl)
+    in
+    let check_return_count num_return eqName ctxName=
+      match num_return with
+      | 0 -> fail ("not enough return for equation " ^ quot eqName ^" in context "^quot ctxName)
+      | _ -> ()
+    in
+     let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context
+    in
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
     let knowns = [] in
@@ -179,9 +208,8 @@ let check (contexts, finds) =
       with Not_found -> raise (Failure ("unrecognized variable " ^ quot s))
     in
     *)
-    List.iter check_eq ctxBlk.A.cbody
+    List.iter check_eq ctxBlk.A.cbody; List.iter check_return_eq ctxBlk.A.cbody
   in
-
   (**** Checking Find blocks ****)
   let check_find findBlk =
     let symbolmap =
