@@ -1,1 +1,1 @@
-Fatal error: exception Failure("not enough return for equation "b" in context "SomeContext"")
+Fatal error: exception Failure("missing return in equation "b" under context "SomeContext"")

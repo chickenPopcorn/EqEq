@@ -184,16 +184,20 @@ let check (contexts, finds) =
         | _ ->  1
       )
       | A.Continue | A.Break -> 0
-      | A.If(l) -> min_list (List.map check_if_for_return l)
+      | A.If(l) -> min_list ((List.map check_if_for_return l) @ last_one_in_if_else l)
       | A.While(p, s) -> check_return_stmt_list s
     and check_if_for_return = function
       | (None, sl) -> check_return_stmt_list sl
       | (Some(e), sl) -> check_return_stmt_list sl
     and check_return_stmt_list sl = sum_list (List.map check_return_in_stmt sl)
+    and last_one_in_if_else l =
+      match List.hd (List.rev l) with
+      | (Some(e), sl) -> [0]
+      | _ -> []
     in
     let check_return_count num_return eqName ctxName=
       match num_return with
-      | 0 -> fail ("not enough return for equation " ^ quot eqName ^" in context "^quot ctxName)
+      | 0 -> fail ("missing return in equation " ^ quot eqName ^" under context "^quot ctxName)
       | _ -> ()
     in
      let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context

@@ -1,1 +1,1 @@
-84
+Fatal error: exception Failure("missing return in equation "b" under context "SomeContext"")
