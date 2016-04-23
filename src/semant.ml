@@ -64,11 +64,13 @@ let check (contexts, finds) =
     in
     let rec add_lib_stmt_ctx lis = function
              A.Expr e-> add_lib_expre lis e
-            |A.If(l) -> lis
+            |A.If(l) -> let rec check_if_list_lib lis = function
+                                 | [] -> lis
+                                 | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
+                        in check_if_list_lib lis l
             |A.While(p, stmts) -> List.fold_left add_lib_stmt_ctx lis stmts
             |_ -> lis
-    in
-    let check_if_lib lis = function
+    and check_if_lib lis = function
         | (None, sl) -> List.fold_left add_lib_stmt_ctx lis sl
         | (Some(e), sl) -> List.append (add_lib_expre lis e) (List.fold_left add_lib_stmt_ctx lis sl)
     in
