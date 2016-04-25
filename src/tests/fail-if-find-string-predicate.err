@@ -1,1 +1,1 @@
-Fatal error: exception Failure("Illegal if argument, "hello world"")
+Fatal error: exception Failure("illegal if argument, "hello world"")

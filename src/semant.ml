@@ -64,11 +64,13 @@ let check (contexts, finds) =
     in
     let rec add_lib_stmt_ctx lis = function
              A.Expr e-> add_lib_expre lis e
-            |A.If(l) -> lis
+            |A.If(l) -> let rec check_if_list_lib lis = function
+                                 | [] -> lis
+                                 | hd::tl -> check_if_list_lib (List.append lis (check_if_lib lis hd)) tl
+                        in check_if_list_lib lis l
             |A.While(p, stmts) -> List.fold_left add_lib_stmt_ctx lis stmts
             |_ -> lis
-    in
-    let check_if_lib lis = function
+    and check_if_lib lis = function
         | (None, sl) -> List.fold_left add_lib_stmt_ctx lis sl
         | (Some(e), sl) -> List.append (add_lib_expre lis e) (List.fold_left add_lib_stmt_ctx lis sl)
     in
@@ -149,41 +151,94 @@ let check (contexts, finds) =
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
     in
   let rec fail_illegal_if_predicate = function
-      | A.Assign(left, expr) ->  fail ("Illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
+      | A.Assign(left, expr) ->  fail ("illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
       | A.Builtin(name, expr) -> (
           match name with
-          | "print" -> fail ("Illegal if argument, \"print\"")
+          | "print" -> fail ("illegal if argument, \"print\"")
           | _ -> ()
           )
-      | A.Strlit(s) ->  fail ("Illegal if argument, " ^ quot s)
+      | A.Strlit(s) ->  fail ("illegal if argument, " ^ quot s)
       | _ -> ()
   in
   (* Verify a statement or throw an exception *)
+  let rec check_stmt_break_continue blk err_stmt = function
+    | A.Expr e -> ()
+    | A.If(l) -> let rec check_if_list = function
+                  | [] -> ()
+                  | hd::tl -> let check_stmt_break_continue_in_if stmt =
+                                  check_stmt_break_continue blk  "if statement of " stmt
+                              in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
+                  in check_if_list l
+    | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
+    | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
+    | A.Break -> fail("Inadquate usage of Break in "^err_stmt^blk^", 'Break' should only exist in while loop" )
+  in
   let rec check_stmt = function
-      (*| A.Block sl ->
-          (* effectively unravel statements out of their block *)
-          let rec check_block = function
-            | A.Block sl :: ss -> check_block (sl @ ss)
-            | s :: ss -> check_stmt s; check_block ss
-            | [] -> ()
-          in check_block sl*)
-      | A.Expr e -> check_expr e
-      | A.If(l) ->  let rec check_if_list = function
+      | A.Expr e -> check_expr e;(
+        match e with
+        | A.Builtin(name, expr) -> ()
+        | A.Assign(left, expr) -> ()
+        | A.Strlit(str) -> fail ("cannot return string " ^ quot str)
+        | A.Literal(lit) -> ()
+        | _ -> ()
+      )
+      | A.If(l) -> (let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> check_if hd; check_if_list tl
                     in check_if_list l
-      | A.While(p, s) -> check_stmt (A.Expr p); List.iter check_stmt s
+        )
+      | A.While(p, s) -> check_expr p; List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
   and check_if = function
-      | (None, sl) -> List.iter check_stmt sl
-      | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl; fail_illegal_if_predicate e
-  in
-
+    | (None, sl) -> List.iter check_stmt sl
+    | (Some(e), sl) -> fail_illegal_if_predicate e; check_stmt (A.Expr e); List.iter check_stmt sl
   (**** Checking Context blocks  ****)
+  in
   let check_ctx ctxBlk =
-    let check_eq eq = List.iter check_stmt eq.A.fdbody in
-
+    let check_eq eq = List.iter check_stmt eq.A.fdbody
+    in
+    let sum_list l =
+      match l with
+      | hd::tl -> List.fold_left (fun x y -> x + y) hd tl
+      | [] -> 0
+    in
+    let min_list l =
+      match l with
+      | hd::tl -> List.fold_left min hd tl
+      | [] -> -1
+    in
+    let rec check_return_in_stmt stmt =
+      match stmt with
+      | A.Expr e -> (
+        match e with
+        | A.Builtin(name, expr) -> (
+          match name with
+          | "print" -> 0
+          | _ -> 1
+          )
+        | A.Assign(left, expr) -> 0
+        | _ ->  1
+      )
+      | A.Continue | A.Break -> 0
+      | A.If(l) -> min_list ((List.map check_if_for_return l) @ last_one_in_if_else l)
+      | A.While(p, s) -> check_return_stmt_list s
+    and check_if_for_return = function
+      | (None, sl) -> check_return_stmt_list sl
+      | (Some(e), sl) -> check_return_stmt_list sl
+    and check_return_stmt_list sl = sum_list (List.map check_return_in_stmt sl)
+    and last_one_in_if_else l =
+      match List.hd (List.rev l) with
+      | (Some(e), sl) -> [0]
+      | _ -> []
+    in
+    let check_return_count num_return eqName ctxName=
+      match num_return with
+      | 0 -> fail ("missing return in equation " ^ quot eqName ^" under context "^quot ctxName)
+      | _ -> ()
+    in
+     let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context
+    in
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
     let knowns = [] in
@@ -196,9 +251,8 @@ let check (contexts, finds) =
       with Not_found -> raise (Failure ("unrecognized variable " ^ quot s))
     in
     *)
-    List.iter check_eq ctxBlk.A.cbody
+    List.iter check_eq ctxBlk.A.cbody; List.iter check_return_eq ctxBlk.A.cbody
   in
-
   (**** Checking Find blocks ****)
   let check_find findBlk =
     let symbolmap =
@@ -223,12 +277,18 @@ let check (contexts, finds) =
   in
   (* Verify a particular `statement` in `find` or throw an exception *)
   let rec check_stmt_for_find = function
-      | A.Expr e -> check_expr e
+      | A.Expr e -> check_expr e;(
+        match e with
+        | A.Builtin(name, expr) -> ()
+        | A.Assign(left, expr) -> ()
+        | a -> fail ("invalid return in find " ^ quot (A.string_of_expr a))
+      )
+      (*check_expr e*)
       | A.If(l) -> let rec check_if_list = function
                     | [] -> ()
                     | hd::tl -> check_if hd; check_if_list tl
                     in check_if_list l
-      | A.While(p, stmts) -> check_stmt_for_find (A.Expr p); List.iter check_stmt_for_find stmts
+      | A.While(p, stmts) -> check_expr p; List.iter check_stmt_for_find stmts
       | A.Continue -> ()
       | A.Break -> ()
 
@@ -236,23 +296,9 @@ let check (contexts, finds) =
 
     check_have_var findBlk.A.ftarget symbolmap;
     List.iter check_stmt_for_find findBlk.A.fbody
-
   in
-
   (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
-    let rec check_stmt_break_continue blk err_stmt = function
-      | A.Expr e -> ()
-      | A.If(l) -> let rec check_if_list = function
-                    | [] -> ()
-                    | hd::tl -> let check_stmt_break_continue_in_if stmt =
-                                    check_stmt_break_continue blk  "if statement of " stmt
-                                in List.iter check_stmt_break_continue_in_if (snd hd); check_if_list tl
-                    in check_if_list l
-      | A.While(p, s) -> () (* stop now. any 'break' below here is valid *)
-      | A.Continue -> fail("Inadquate usage of Continue in "^err_stmt^blk^", 'Continue' should only exist in while loop" )
-      | A.Break -> fail("Inadquate usage of Break in "^err_stmt^blk^", 'Break' should only exist in while loop" )
-  in
   (* check Break and Continue for the contexts *)
   let check_ctx_break_continue ctxBlk =
     let check_eq_break_continue eq = List.iter (check_stmt_break_continue "Contexts_Declaration" "") eq.A.fdbody in
