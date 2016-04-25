@@ -115,36 +115,33 @@ let check (contexts, finds) =
              * find body, then discard the latest index and return that map. *)
             let (eqRels, _) =
               let rec findExprRelator (eMap, idx) (expr : A.expr) =
+                (* Oldest value in `map` no greater than key `i` *)
+                let oldest (asof : int) (m : S.equation_relations S.IntMap.t) =
+                  let rec walkBack i =
+                    try S.IntMap.find i m with Not_found ->
+                      if i > 0 then walkBack (i - 1) else fail (
+                        Printf.sprintf
+                          "Compiler BUG found: empty rel-map at expression #%d [only found: '%s']"
+                          asof (String.concat "', '" (
+                            S.IntMap.fold
+                              (fun k v a -> (string_of_int k)::a)
+                              m []
+                          ))
+                      )
+                  in walkBack asof
+                in
+
                 let check_resolvable (index : int) (id : string) m =
                   let assert_nodeps id rels = try StringMap.find id rels with
                     | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
 
                     (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
-                  in
-                  let lastMap =
-                    let rec asof i =
-                      (* TODO rm backwards walk by maintaining "latest" index *)
-                      try S.IntMap.find i m with Not_found ->
-                        if i > 0 then asof (i - 1) else fail (
-                          Printf.sprintf
-                            "Compiler BUG found: empty rel-map at Id('%s') at expression #%d [only found: '%s']"
-                            id index (String.concat "', '" (
-                              S.IntMap.fold
-                                (fun k v a -> (string_of_int k)::a)
-                                m []
-                            ))
-                        )
-                    in
-                    asof index
-                  in
-                  assert_nodeps id lastMap.S.indeps
+
+                  in assert_nodeps id (oldest index m).S.indeps
                 in
 
                 let i = idx + 1 in match expr with
-                  | A.Id(identifier) ->
-                      (* TODO: here's the golden logic we care about! *)
-                      ignore (check_resolvable i identifier eMap); (eMap, i)
-                  | A.Literal(_) | A.Strlit(_) -> (eMap, i)
+                  | A.Id(_) | A.Literal(_) | A.Strlit(_) -> (eMap, i)
                   | A.Binop(eLeft, _, eRight) ->
                       findExprRelator (findExprRelator (eMap, i) eLeft) eRight
                   | A.Unop(_, e) -> findExprRelator (eMap, i) e
@@ -153,11 +150,34 @@ let check (contexts, finds) =
                        * `undefinedvar` in `e` for an expression:
                        *     `find{ a = b = undefinedvar + 1}`
                        *)
+                      let rec chk_right_indep = function
+                        | A.Id(id) -> ignore (check_resolvable i id eMap);
+                        | A.Literal(_) | A.Strlit(_) -> ignore ();
+                        | A.Binop(left, _, right) ->
+                            ignore (List.iter chk_right_indep [left; right]);
+                        | A.Unop(_, e) -> ignore (chk_right_indep e);
+                        | A.Assign(_, e) -> ignore (chk_right_indep e);
+                        | A.Builtin(_, eLi) -> ignore (List.iter chk_right_indep eLi);
+                      in ignore (chk_right_indep);
 
-                      (* TODO: NEXT STEP: perform if/else and add `id` to
-                       * deps/indeps accordingly *)
+                      let latest = oldest i eMap in
 
-                      findExprRelator (eMap, i) e
+                      (* If `id` already exists, then it's being redefined, in
+                       * which case we'll start a new S.equation_relations the
+                       * current expression index. Else we'll keep using the
+                       * current S.equation_relations, `eMap` as-is.
+                       *)
+                      let maybeExtendedExprMap =
+                        let isKnownEquation =
+                          StringMap.mem id latest.S.indeps ||
+                          StringMap.mem id latest.S.deps
+                        in
+
+                        if isKnownEquation
+                        then S.IntMap.add i latest eMap
+                        else eMap
+
+                      in findExprRelator (maybeExtendedExprMap, i) e
                   | A.Builtin(_, exprLis) ->
                       List.fold_left findExprRelator (eMap, i) exprLis
               in
