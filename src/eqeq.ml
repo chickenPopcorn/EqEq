@@ -31,7 +31,7 @@ let _ =
         let line = string_of_int curr.Lexing.pos_lnum in
         let cnum = string_of_int (curr.Lexing.pos_cnum - curr.Lexing.pos_bol) in
         let tok = Lexing.lexeme lexbuf in
-        let tail = Scanner.ruleTail "" lexbuf in
+      (*let tail = Scanner.ruleTail "" lexbuf in*)
 
         let messageForError e =
           "line " ^ line ^

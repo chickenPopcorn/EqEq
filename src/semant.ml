@@ -13,9 +13,9 @@ let check (contexts, finds) =
 
   (* string prettifiers *)
   let quot content = "\"" ^ content ^  "\"" in
-  let ex_qt expr = quot (A.string_of_expr expr) in
-  let bop_qt bop = quot (A.string_of_op bop) in
-  let uop_qt uop = quot (A.string_of_uop uop) in
+  let ex_qt expr = A.string_of_expr expr in
+  let bop_qt bop = A.string_of_op bop in
+  let uop_qt uop = A.string_of_uop uop in
 
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
@@ -102,8 +102,8 @@ let check (contexts, finds) =
   in
 
   let check_have_var var symbolmap =
-    try StringMap.find var symbolmap
-    with Not_found -> fail ("variable not defined, " ^ quot var)
+    try StringMap.find var symbolmap with
+    Not_found -> fail ("variable not defined, " ^ quot var)
   in
 
   let rec check_expr e =
@@ -112,8 +112,8 @@ let check (contexts, finds) =
           | A.Strlit(str) -> ()
           | A.Id(id) -> ()
           | A.Binop(left, op, right) -> check_expr left; check_expr right;
-              not_print left (A.string_of_op op); not_print right (A.string_of_op op)
-          | A.Unop(op, expr) -> check_expr expr; (not_print expr (A.string_of_uop op))
+              not_print left (bop_qt op); not_print right (bop_qt op)
+          | A.Unop(op, expr) -> check_expr expr; (not_print expr (uop_qt op))
           | A.Assign(left, expr) -> check_expr expr
           | A.Builtin(name, expr) -> (fail_illegal_builtin name expr); List.iter check_expr expr
 
@@ -132,7 +132,7 @@ let check (contexts, finds) =
 
   and fail_illegal_builtin_arg s hd =
       match s, hd with
-          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s (left ^"=" ^A.string_of_expr expr)
+          | s, A.Assign(left, expr) -> fail_illegal_builtin_arg_str_asgn s (left ^"=" ^ex_qt  expr)
           | s, A.Strlit(str) -> fail_illegal_builtin_arg_str_asgn s str
           | "sqrt", A.Literal(l) -> if l < 0. then fail ("illegal argument for sqrt, " ^ quot (string_of_float l))
           | "log", A.Literal(l) -> if l <= 0. then fail ("illegal argument for log, " ^ quot (string_of_float l))
@@ -148,10 +148,11 @@ let check (contexts, finds) =
   and fail_illegal_num_of_builtin_arg tl =
     match tl with
         | [] -> ()
-        | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
-    in
+        | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map ex_qt  tl)))
+  in
+
   let rec fail_illegal_if_predicate = function
-      | A.Assign(left, expr) ->  fail ("illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
+      | A.Assign(left, expr) ->  fail ("illegal if argument, " ^ "\"" ^ left ^ " = " ^ ex_qt  expr ^"\"")
       | A.Builtin(name, expr) -> (
           match name with
           | "print" -> fail ("illegal if argument, \"print\"")
@@ -253,27 +254,28 @@ let check (contexts, finds) =
     *)
     List.iter check_eq ctxBlk.A.cbody; List.iter check_return_eq ctxBlk.A.cbody
   in
+
+  let check_range findBlk =
+      match findBlk.A.frange with
+      | [] -> ()
+      | hd::tl -> (match hd with
+        A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
+                                                   | _ -> ());
+                                    (match ed with Some(str) ->
+                                      (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
+                                                      | _ -> ())
+                                                   | _ -> ());
+                                    (match inc with Some(str) ->
+                                      (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
+                                                      | _ -> ())
+                                                   | _ -> ()))
+  in
   (**** Checking Find blocks ****)
   let check_find findBlk =
     let symbolmap =
       let ctx_name = findBlk.A.fcontext in
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
-    in
-    let check_range =
-        match findBlk.A.frange with
-        | [] -> ()
-        | hd::tl -> (match hd with
-          A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                     | _ -> ());
-                                      (match ed with Some(str) ->
-                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                        | _ -> ())
-                                                     | _ -> ());
-                                      (match inc with Some(str) ->
-                                        (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                        | _ -> ())
-                                                     | _ -> ()))
   in
   (* Verify a particular `statement` in `find` or throw an exception *)
   let rec check_stmt_for_find = function
@@ -281,7 +283,7 @@ let check (contexts, finds) =
         match e with
         | A.Builtin(name, expr) -> ()
         | A.Assign(left, expr) -> ()
-        | a -> fail ("invalid return in find " ^ quot (A.string_of_expr a))
+        | a -> fail ("invalid return in find " ^ quot (ex_qt  a))
       )
       (*check_expr e*)
       | A.If(l) -> let rec check_if_list = function
@@ -291,12 +293,10 @@ let check (contexts, finds) =
       | A.While(p, stmts) -> check_expr p; List.iter check_stmt_for_find stmts
       | A.Continue -> ()
       | A.Break -> ()
-
   in
-
-    check_have_var findBlk.A.ftarget symbolmap;
+    ignore (check_have_var findBlk.A.ftarget symbolmap);
     List.iter check_stmt_for_find findBlk.A.fbody
-  in
+in
   (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
   (* check Break and Continue for the contexts *)
@@ -310,6 +310,7 @@ let check (contexts, finds) =
 
   List.iter check_ctx_break_continue contexts;
   List.iter check_find_break_continue finds;
+  List.iter check_range finds;
   List.iter check_ctx contexts;
   List.iter check_find finds;
 
