@@ -121,26 +121,29 @@ for FIND' = { CTX', FIND_DECL' }
   EXPR_MAP = <EXPR_INDEX, FIND_MAP>
   sast.get(CTX').FindMap.add(NAME, EXPR_MAP)
 
-  for EXPR'
-    EXPR_MAP = sast.get(CTX').FindMap.get(NAME).get(EXPR_INDEX) || EXPR_MAP
+  for STMT' in FIND_DECL'
+    for EXPR' in STMT'
+      EXPR_MAP = sast.get(CTX').FindMap.get(NAME).get(EXPR_INDEX) || EXPR_MAP
 
-    Match EXPR' with:
-      | ASSIGN' = { ID', ASSGN, EXPR" } ->
-          for ID" in EXPR"
-              if ID" is not in FIND_MAP.indeps
-                  throw "unresolvable expression"
+      Match EXPR' with:
+        | ASSIGN' = { ID', ASSGN, EXPR" } ->
+            // NOTE: edge-caes below, not described in this pseudo-code
 
-          if ID' exists in FIND_MAP
-            EXPR_MAP = sast.get(CTX').FindMap.get(NAME).add(
-                EXPR_INDEX,
-                copy(EXPR_MAP))
+            for ID" in EXPR"
+                if ID" is not in FIND_MAP.indeps
+                    throw "unresolvable expression"
 
-          FIND_MAP.indeps.add(ID', EXPR")
-      | _ ->
-          for ID' in EXPR'
-              throw if ID' unresolvable per FIND_MAP
+            if ID' exists in FIND_MAP
+              EXPR_MAP = sast.get(CTX').FindMap.get(NAME).add(
+                  EXPR_INDEX,
+                  copy(EXPR_MAP))
 
-    ++EXPR_INDEX
+            FIND_MAP.indeps.add(ID', EXPR")
+        | _ ->
+            for ID' in EXPR'
+                throw if ID' unresolvable per FIND_MAP
+
+      ++EXPR_INDEX
 
   ++FIND_INDEX
 
