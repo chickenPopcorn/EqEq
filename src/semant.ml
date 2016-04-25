@@ -105,6 +105,7 @@ let check (contexts, finds) =
     try StringMap.find var symbolmap
     with Not_found -> fail ("variable not defined, " ^ quot var)
   in
+
   let rec check_expr e =
       match e with
           | A.Literal(lit) -> ()
@@ -149,6 +150,16 @@ let check (contexts, finds) =
         | [] -> ()
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
     in
+  let rec fail_illegal_if_predicate = function
+      | A.Assign(left, expr) ->  fail ("Illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
+      | A.Builtin(name, expr) -> (
+          match name with
+          | "print" -> fail ("Illegal if argument, \"print\"")
+          | _ -> ()
+          )
+      | A.Strlit(s) ->  fail ("Illegal if argument, " ^ quot s)
+      | _ -> ()
+  in
   (* Verify a statement or throw an exception *)
   let rec check_stmt_break_continue blk err_stmt = function
     | A.Expr e -> ()
@@ -179,7 +190,6 @@ let check (contexts, finds) =
       | A.While(p, s) -> check_expr p; List.iter check_stmt s
       | A.Continue -> ()
       | A.Break -> ()
-
   and check_if = function
     | (None, sl) -> List.iter check_stmt sl
     | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
@@ -286,7 +296,6 @@ let check (contexts, finds) =
 
     check_have_var findBlk.A.ftarget symbolmap;
     List.iter check_stmt_for_find findBlk.A.fbody
-
   in
   (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
