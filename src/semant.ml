@@ -151,13 +151,13 @@ let check (contexts, finds) =
         | _ ->fail("illegal argument, " ^ quot (String.concat " " (List.map A.string_of_expr tl)))
     in
   let rec fail_illegal_if_predicate = function
-      | A.Assign(left, expr) ->  fail ("Illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
+      | A.Assign(left, expr) ->  fail ("illegal if argument, " ^ "\"" ^ left ^ " = " ^ A.string_of_expr expr ^"\"")
       | A.Builtin(name, expr) -> (
           match name with
-          | "print" -> fail ("Illegal if argument, \"print\"")
+          | "print" -> fail ("illegal if argument, \"print\"")
           | _ -> ()
           )
-      | A.Strlit(s) ->  fail ("Illegal if argument, " ^ quot s)
+      | A.Strlit(s) ->  fail ("illegal if argument, " ^ quot s)
       | _ -> ()
   in
   (* Verify a statement or throw an exception *)
@@ -192,7 +192,7 @@ let check (contexts, finds) =
       | A.Break -> ()
   and check_if = function
     | (None, sl) -> List.iter check_stmt sl
-    | (Some(e), sl) -> check_stmt (A.Expr e); List.iter check_stmt sl
+    | (Some(e), sl) -> fail_illegal_if_predicate e; check_stmt (A.Expr e); List.iter check_stmt sl
   (**** Checking Context blocks  ****)
   in
   let check_ctx ctxBlk =
