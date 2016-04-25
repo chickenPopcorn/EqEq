@@ -20,7 +20,7 @@ our semantic analysis outputs for codegen's use)_.
 Examples below may make note of this EqualsEquals example:
 ```c
 FooCtx = {
-  y = mx + 3;
+  y = m * x + 3;
   w = 2;
 }
 
