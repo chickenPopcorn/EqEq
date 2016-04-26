@@ -82,9 +82,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
     let check_resolvable (index : int) (id : string) m =
       let assert_nodeps id rels = try StringMap.find id rels with
         | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
-
       (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
-
       in assert_nodeps id (oldest index m).S.indeps
     in
 
@@ -97,7 +95,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
       (* TODO: figure out how to ensure failures for
        * `undefinedvar` in `e` for an expression:
        *     `find{ a = b = undefinedvar + 1}`
-      *)
+       *)
       let rec chk_right_indep = function
         | A.Id(id) -> ignore (check_resolvable i id eMap);
         | A.Literal(_) | A.Strlit(_) -> ignore ();
@@ -108,14 +106,14 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         | A.Builtin(_, eLi) -> ignore (List.iter chk_right_indep eLi);
       in ignore (chk_right_indep);
 
-      let latest = oldest i eMap in
-
       (* If `id` already exists, then it's being redefined, in
        * which case we'll start a new S.equation_relations the
        * current expression index. Else we'll keep using the
        * current S.equation_relations, `eMap` as-is.
-      *)
+       *)
       let maybeExtendedExprMap =
+        let latest = oldest i eMap in
+
         let isKnownEquation =
           StringMap.mem id latest.S.indeps ||
           StringMap.mem id latest.S.deps
