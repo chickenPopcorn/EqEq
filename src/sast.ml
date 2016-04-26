@@ -76,11 +76,13 @@ let str_of_checked chk =
 
       str ^
 
-      indent depth ^ eq_name ^ " : ```\n" ^
+      String.concat "\n" [
+        indent depth ^ eq_name ^ " : ```";
 
-      String.concat "" indented_stmts ^
+        String.concat "" indented_stmts;
 
-      indent depth ^ "```"
+        indent depth ^ "```";
+      ] ^ "\n"
     in (rendered, depth)
   in
   let str_of_finds fdname (finds : (equation_relations IntMap.t)) (str, depth) =
@@ -91,12 +93,15 @@ let str_of_checked chk =
           (indent depth) ^ "[" ^ string_of_int exprIndex ^ "]: {";
 
           String.concat "\n" [
-            strMapFold str_of_deps relmap.deps "" (depth + 1);
-            strMapFold str_of_indeps relmap.indeps "" (depth + 1);
+            indent (depth + 1) ^ "deps:" ;
+            strMapFold str_of_deps relmap.deps "" (depth + 2);
+
+            indent (depth + 1) ^ "indeps:" ;
+            strMapFold str_of_indeps relmap.indeps "" (depth + 2);
           ];
 
           (indent depth) ^ "}";
-        ]
+        ] ^ "\n"
       in (rendered, depth)
     in
 
@@ -107,8 +112,8 @@ let str_of_checked chk =
         String.concat "\n" [
           intMapFold str_of_eqrelmap finds "" (depth + 1)
         ];
-        indent depth ^ "}";
-      ]
+        indent depth ^ "}\n";
+      ] ^ "\n"
     in (rendered, depth)
   in
 
@@ -131,7 +136,7 @@ let str_of_checked chk =
           strMapFold str_of_finds scope.ctx_finds "" (depth + 2);
         ];
         "}";
-      ]
+      ] ^ "\n"
     in (rendered, depth)
 
-  in (strMapFold str_of_ctxscope chk.eqs "" 0) ^ "\n"
+  in (strMapFold str_of_ctxscope chk.eqs "" 0)
