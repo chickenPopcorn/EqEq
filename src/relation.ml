@@ -88,9 +88,8 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         in assert_nodeps id (latest index m).S.indeps
       in
 
-      (* TODO: figure out how to ensure failures for
-       * `undefinedvar` in `e` for an expression:
-       *     `find{ a = b = undefinedvar + 1}`
+      (* TODO: figure out how to ensure failures for `undefinedvar` in `e` for
+       * an expression: `find{ a = b = undefinedvar + 1}`
        *)
       let rec chk_right_indep = function
         | A.Id(id) -> ignore (check_resolvable i id eMap);
@@ -101,10 +100,9 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         | A.Builtin(_, eLi) -> ignore (List.iter chk_right_indep eLi);
       in ignore (chk_right_indep);
 
-      (* If `id` already exists, then it's being redefined, in
-       * which case we'll start a new S.equation_relations the
-       * current expression index. Else we'll keep using the
-       * current S.equation_relations, `eMap` as-is.
+      (* If `id` already exists, then it's being redefined, in which case we'll
+       * start a new `S.equation_relations` at the current expression index.
+       * Else we'll keep using the current S.equation_relations, `eMap` as-is.
        *)
       let maybeExtendedExprMap =
         let latest = latest i eMap in
