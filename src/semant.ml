@@ -56,11 +56,8 @@ let check (contexts, finds) =
                 let baseRelations : S.equation_relations = {
                   S.indeps = ctxScopes.S.ctx_indeps;
                   S.deps = ctxScopes.S.ctx_deps;
-                }
-                in
-                S.IntMap.add 0 baseRelations S.IntMap.empty
-              in
-              List.fold_left R.findStmtRelator (exprMap, 0) fnDec.A.fbody
+                } in S.IntMap.add 0 baseRelations S.IntMap.empty
+              in List.fold_left R.findStmtRelator (exprMap, 0) fnDec.A.fbody
             in eqRels
           in
 

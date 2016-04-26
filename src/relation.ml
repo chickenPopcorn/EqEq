@@ -58,6 +58,7 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
     }
   in StringMap.add ctx.A.context ctxScope relations
 
+(* List.fold_left handler for find decl's fbody. *)
 let rec findStmtRelator (m, i) (st : A.stmt) =
   let fail msg = raise (Failure msg) in
   let quot content = "\"" ^ content ^  "\"" in
