@@ -98,7 +98,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         | A.Unop(_, e) -> ignore (chk_right_indep e);
         | A.Assign(_, e) -> ignore (chk_right_indep e);
         | A.Builtin(_, eLi) -> ignore (List.iter chk_right_indep eLi);
-      in ignore (chk_right_indep);
+      in ignore (chk_right_indep e);
 
       (* If `id` already exists, then it's being redefined, in which case we'll
        * start a new `S.equation_relations` at the current expression index.
