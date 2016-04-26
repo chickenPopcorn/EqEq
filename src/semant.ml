@@ -69,8 +69,7 @@ let check (contexts, finds) =
             S.ctx_deps = ctxScopes.S.ctx_deps;
             S.ctx_indeps = ctxScopes.S.ctx_indeps;
             S.ctx_finds = ctxFinds;
-          }
-          in StringMap.add fnDec.A.fcontext scopes relations
+          } in StringMap.add fnDec.A.fcontext scopes relations
 
         in (extendedRels, findIdx + 1)
 

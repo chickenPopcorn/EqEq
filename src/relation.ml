@@ -35,8 +35,7 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
     in
 
     match stmt with
-    | A.Block(sList) ->
-      List.fold_left (fun ls s -> getAssignDeps ls s) foundDeps sList
+    | A.Block(sL) -> List.fold_left (fun l s -> getAssignDeps l s) foundDeps sL
     | A.Expr(e) -> getExprIDs foundDeps e
     | A.If(stmtOrTupleList) -> (
         let rec idsInIf accumul = function
