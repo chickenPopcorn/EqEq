@@ -66,9 +66,7 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
     in {
       S.ctx_deps = deps;
       S.ctx_indeps = indeps;
-
-      (* taken care of in `relationFindFolder` later on ... *)
-      S.ctx_finds = StringMap.empty;
+      S.ctx_finds = StringMap.empty; (* is handled using `findStmtRelator` *)
     }
   in StringMap.add ctx.A.context ctxScope relations
 
