@@ -2,8 +2,23 @@ module A = Ast
 module S = Sast
 module StringMap = Map.Make(String)
 
-(* Mapper for List.fold_left to accumulate an initial map of contexts'
- * equations, before, and start an empty map for their find blocks. *)
+(* Oldest value in `map` no greater than key `i` *)
+let oldest (asof : int) (m : S.equation_relations S.IntMap.t) =
+  let rec walkBack i =
+    try S.IntMap.find i m with Not_found ->
+      if i > 0 then walkBack (i - 1) else fail (
+          Printf.sprintf
+            "Compiler BUG found: empty rel-map at expression #%d [only found: '%s']"
+            asof (String.concat "', '" (
+                S.IntMap.fold
+                  (fun k v a -> (string_of_int k)::a)
+                  m []
+              ))
+        )
+  in walkBack asof
+
+(* List.fold_left handler an initial map of contexts' equations, before, and
+ * start an empty map for their find blocks. *)
 let relationCtxFolder (relations : S.eqResolutions) ctx =
   (* internal helper *)
   let rec findDepsInAssignStmt foundDeps stmt =
@@ -64,22 +79,6 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
   let quot content = "\"" ^ content ^  "\"" in
 
   let rec findExprRelator (eMap, idx) (expr : A.expr) =
-    (* Oldest value in `map` no greater than key `i` *)
-    let oldest (asof : int) (m : S.equation_relations S.IntMap.t) =
-      let rec walkBack i =
-        try S.IntMap.find i m with Not_found ->
-          if i > 0 then walkBack (i - 1) else fail (
-              Printf.sprintf
-                "Compiler BUG found: empty rel-map at expression #%d [only found: '%s']"
-                asof (String.concat "', '" (
-                    S.IntMap.fold
-                      (fun k v a -> (string_of_int k)::a)
-                      m []
-                  ))
-            )
-      in walkBack asof
-    in
-
     let check_resolvable (index : int) (id : string) m =
       let assert_nodeps id rels = try StringMap.find id rels with
         | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
