@@ -4,8 +4,8 @@ module StringMap = Map.Make(String)
 
 let fail msg = raise (Failure msg)
 
-(* Oldest value in `map` no greater than key `i` *)
-let oldest (asof : int) (m : S.equation_relations S.IntMap.t) =
+(* Newest value in `map`; ie: where largest key <= `i` *)
+let latest (asof : int) (m : S.equation_relations S.IntMap.t) =
   let rec walkBack i =
     try S.IntMap.find i m with Not_found ->
       if i > 0 then walkBack (i - 1) else fail (
@@ -87,7 +87,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         let assert_nodeps id rels = try StringMap.find id rels with
           | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
         (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
-        in assert_nodeps id (oldest index m).S.indeps
+        in assert_nodeps id (latest index m).S.indeps
       in
 
       (* TODO: figure out how to ensure failures for
@@ -109,7 +109,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
        * current S.equation_relations, `eMap` as-is.
        *)
       let maybeExtendedExprMap =
-        let latest = oldest i eMap in
+        let latest = latest i eMap in
 
         let isKnownEquation =
           StringMap.mem id latest.S.indeps ||
