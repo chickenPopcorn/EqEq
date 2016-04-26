@@ -2,6 +2,8 @@ module A = Ast
 module S = Sast
 module StringMap = Map.Make(String)
 
+let fail msg = raise (Failure msg)
+
 (* Oldest value in `map` no greater than key `i` *)
 let oldest (asof : int) (m : S.equation_relations S.IntMap.t) =
   let rec walkBack i =
@@ -21,38 +23,36 @@ let oldest (asof : int) (m : S.equation_relations S.IntMap.t) =
  * start an empty map for their find blocks. *)
 let relationCtxFolder (relations : S.eqResolutions) ctx =
   (* internal helper *)
-  let rec findDepsInAssignStmt foundDeps stmt =
-    let rec findIdsInExpr foundIds = function
-      | A.Literal(_) -> foundIds
-      | A.Id(id) -> id::foundIds
-      | A.Strlit(_) -> foundIds
-      | A.Binop(e1,_,e2) -> findIdsInExpr (findIdsInExpr foundIds e2) e1
-      | A.Unop(_,e) -> findIdsInExpr foundIds e
-      | A.Assign(_,e) -> findIdsInExpr foundIds e
-      | A.Builtin(_,eList) ->
-        List.fold_left (fun ls e -> findIdsInExpr ls e) foundIds eList
+  let rec getAssignDeps foundDeps stmt =
+    let rec getExprIDs found = function
+      | A.Literal(_) -> found
+      | A.Id(id) -> id::found
+      | A.Strlit(_) -> found
+      | A.Binop(e1,_,e2) -> getExprIDs (getExprIDs found e2) e1
+      | A.Unop(_,e) -> getExprIDs found e
+      | A.Assign(_,e) -> getExprIDs found e
+      | A.Builtin(_,el) -> List.fold_left (fun l e -> getExprIDs l e) found el
     in
 
     match stmt with
     | A.Block(sList) ->
-      List.fold_left (fun ls s -> findDepsInAssignStmt ls s) foundDeps sList
-    | A.Expr(e) -> findIdsInExpr foundDeps e
+      List.fold_left (fun ls s -> getAssignDeps ls s) foundDeps sList
+    | A.Expr(e) -> getExprIDs foundDeps e
     | A.If(stmtOrTupleList) -> (
         let rec idsInIf accumul = function
           | [] -> accumul
-          | (None,s)::tail -> idsInIf (findDepsInAssignStmt accumul s) tail
-          | (Some(e),s)::tail ->
-            idsInIf (findIdsInExpr (findDepsInAssignStmt accumul s) e) tail
+          | (None,s)::t -> idsInIf (getAssignDeps accumul s) t
+          | (Some(e),s)::t -> idsInIf (getExprIDs (getAssignDeps accumul s) e) t
         in idsInIf foundDeps stmtOrTupleList
       )
-    | A.While(e, s) -> findIdsInExpr (findDepsInAssignStmt foundDeps s) e
+    | A.While(e, s) -> getExprIDs (getAssignDeps foundDeps s) e
   in
 
   let ctxScope =
     let (deps, indeps) =
       let ctx_body_folder (deps, indeps) mEq =
         let multi_eq_folder (deps, indeps) mEqBody =
-          let foundDeps = findDepsInAssignStmt [] mEqBody in
+          let foundDeps = getAssignDeps [] mEqBody in
           if List.length foundDeps > 0
           then (StringMap.add mEq.A.fname foundDeps deps, indeps)
           else (deps, StringMap.add mEq.A.fname mEq.A.fdbody indeps)
@@ -75,23 +75,22 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
 
 (* List.fold_left handler for find decl's fbody. *)
 let rec findStmtRelator (m, i) (st : A.stmt) =
-  let fail msg = raise (Failure msg) in
   let quot content = "\"" ^ content ^  "\"" in
 
   let rec findExprRelator (eMap, idx) (expr : A.expr) =
-    let check_resolvable (index : int) (id : string) m =
-      let assert_nodeps id rels = try StringMap.find id rels with
-        | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
-      (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
-      in assert_nodeps id (oldest index m).S.indeps
-    in
-
     let i = idx + 1 in match expr with
     | A.Id(_) | A.Literal(_) | A.Strlit(_) -> (eMap, i)
     | A.Binop(eLeft, _, eRight) ->
       findExprRelator (findExprRelator (eMap, i) eLeft) eRight
     | A.Unop(_, e) -> findExprRelator (eMap, i) e
     | A.Assign(id, e) ->
+      let check_resolvable (index : int) (id : string) m =
+        let assert_nodeps id rels = try StringMap.find id rels with
+          | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
+        (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
+        in assert_nodeps id (oldest index m).S.indeps
+      in
+
       (* TODO: figure out how to ensure failures for
        * `undefinedvar` in `e` for an expression:
        *     `find{ a = b = undefinedvar + 1}`
@@ -99,8 +98,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
       let rec chk_right_indep = function
         | A.Id(id) -> ignore (check_resolvable i id eMap);
         | A.Literal(_) | A.Strlit(_) -> ignore ();
-        | A.Binop(left, _, right) ->
-          ignore (List.iter chk_right_indep [left; right]);
+        | A.Binop(el, _, er) -> ignore (List.iter chk_right_indep [el; er]);
         | A.Unop(_, e) -> ignore (chk_right_indep e);
         | A.Assign(_, e) -> ignore (chk_right_indep e);
         | A.Builtin(_, eLi) -> ignore (List.iter chk_right_indep eLi);
@@ -124,8 +122,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         else eMap
 
       in findExprRelator (maybeExtendedExprMap, i) e
-    | A.Builtin(_, exprLis) ->
-      List.fold_left findExprRelator (eMap, i) exprLis
+    | A.Builtin(_, exprLis) -> List.fold_left findExprRelator (eMap, i) exprLis
 
   in match st with
   | A.Block(s) -> List.fold_left findStmtRelator (m, i) s
