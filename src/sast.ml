@@ -38,42 +38,100 @@ type checked = {
 }
 
 (* pretty print *)
-let string_of_checked chk = 
-  let string_of_deps eq_name (depList : string list) str =
-    str ^
-    eq_name ^ " : [" ^
-    String.concat ", " depList ^
-    "]\n  "
+let str_of_checked chk =
+  let indent depth =
+    let rec indentStr = function
+      | 0 -> []
+      | i -> "    "::(indentStr (i - 1))
+    in List.fold_left (fun s ind -> s ^ ind) "" (indentStr depth)
   in
-  let string_of_indeps eq_name (stmtList : A.stmt list) str =
-    str ^
-    eq_name ^ " : ```\n    " ^
-    String.concat "" (List.map A.string_of_stmt stmtList) ^
-    "  ```"
+
+  (* Thin wrapper for `StringMap.fold` that passes extra `depth` field in
+   * accumulator, and discards it in the final result. *)
+  let strMapFold func str_map accumulator startDepth =
+    let (result, _) =
+      StringMap.fold func str_map (accumulator, startDepth)
+    in result
   in
-  let string_of_finds fdname (finds : (equation_relations IntMap.t)) str =
-    let string_of_eqrelmap exprIndex (relmap : equation_relations) str =
-      str ^ String.concat "\n" [
-        "  " ^ (StringMap.fold string_of_deps relmap.deps "  ");
-        "  " ^ (StringMap.fold string_of_indeps relmap.indeps "  ");
-      ]
+
+  (* Thin wrapper for `IntMap.fold`, identical to strMapFold. *)
+  let intMapFold func int_map accumulator startDepth =
+    let (result, _) =
+      IntMap.fold func int_map (accumulator, startDepth)
+    in result
+  in
+
+  let str_of_deps eq_name (depList : string list) (str, (depth : int)) =
+    let rendered =
+      str ^
+      indent depth ^ eq_name ^
+      ": [" ^ (String.concat ", " depList) ^ "]\n"
+    in (rendered, depth)
+  in
+  let str_of_indeps eq_name (stmtList : A.stmt list) (str, depth) =
+    let rendered =
+      let indented_stmts = List.map (
+        fun stmt -> indent (depth + 1) ^ A.string_of_stmt stmt
+      ) stmtList in
+
+      str ^
+
+      indent depth ^ eq_name ^ " : ```\n" ^
+
+      String.concat "" indented_stmts ^
+
+      indent depth ^ "```"
+    in (rendered, depth)
+  in
+  let str_of_finds fdname (finds : (equation_relations IntMap.t)) (str, depth) =
+    let str_of_eqrelmap exprIndex (relmap : equation_relations) (str, depth) =
+      let rendered =
+        str ^
+        String.concat "\n" [
+          (indent depth) ^ "[" ^ string_of_int exprIndex ^ "]: {";
+
+          String.concat "\n" [
+            strMapFold str_of_deps relmap.deps "" (depth + 1);
+            strMapFold str_of_indeps relmap.indeps "" (depth + 1);
+          ];
+
+          (indent depth) ^ "}";
+        ]
+      in (rendered, depth)
     in
 
-    str ^
-    "\"" ^ fdname ^ "\": " ^
-    String.concat "\n" [
-      IntMap.fold string_of_eqrelmap finds "\n"
-    ]
+    let rendered =
+      str ^
+      String.concat "\n" [
+        indent depth ^ "\"" ^ fdname ^ "\": {";
+        String.concat "\n" [
+          intMapFold str_of_eqrelmap finds "" (depth + 1)
+        ];
+        indent depth ^ "}";
+      ]
+    in (rendered, depth)
   in
-  let string_of_ctxscope ctxname scope str =
-    String.concat "\n" [
-      str;
-      ctxname ^ " : {";
-      StringMap.fold string_of_deps scope.ctx_deps "  ";
-      StringMap.fold string_of_indeps scope.ctx_indeps "  ";
-      StringMap.fold string_of_finds scope.ctx_finds "  ";
-      "}";
-    ]
-  in
-  StringMap.fold string_of_ctxscope chk.eqs "\n" ^
-  "\n\n"
+
+  let str_of_ctxscope ctxname scope (str, depth) =
+    let rendered =
+      indent depth ^
+
+      String.concat "\n" [
+        str;
+        ctxname ^ " : {";
+
+        String.concat "\n" [
+          indent (depth + 1) ^ "deps:";
+          strMapFold str_of_deps scope.ctx_deps "" (depth + 2);
+
+          indent (depth + 1) ^ "indeps:";
+          strMapFold str_of_indeps scope.ctx_indeps "" (depth + 2);
+
+          indent (depth + 1) ^ "finds:";
+          strMapFold str_of_finds scope.ctx_finds "" (depth + 2);
+        ];
+        "}";
+      ]
+    in (rendered, depth)
+
+  in (strMapFold str_of_ctxscope chk.eqs "" 0) ^ "\n"

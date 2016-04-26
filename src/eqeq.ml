@@ -50,4 +50,4 @@ let _ =
   match cli_arg with
     Ast -> print_string (Ast.string_of_program ast)
   | Compile -> print_string (Codegen.translate sast)
-  | Sast -> print_string (Sast.string_of_checked sast)
+  | Sast -> print_string (Sast.str_of_checked sast)
