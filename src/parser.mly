@@ -46,14 +46,25 @@ decls:
 
 /* TODO: improve funcdeclt_list to make it better */
 ctxtdecl:
-   CTX ASSIGN LBRACE funcdecl_list RBRACE
-     { { context = $1; cbody = List.rev $4 } }
+  | CTX ASSIGN LBRACE funcdecl_list RBRACE
+    { { context = $1; cbody = List.rev $4 } }
+  | global_assign_list SEMI
+    { { context = "Global"; cbody = List.rev $1 } }
+
+
+global_assign:
+  | ID ASSIGN LITERAL SEMI
+    { { fname = $1; fdbody = [Expr(Literal($3))] } }
+
+global_assign_list:
+    { [] }
+  | global_assign_list global_assign { $2 :: $1 }
 
 funcdecl:
-   ID ASSIGN LBRACE stmt_list RBRACE
-     { { fname = $1; fdbody = List.rev $4 } }
-   | ID ASSIGN stmt
-       { { fname = $1; fdbody = [$3] } }
+    ID ASSIGN LBRACE stmt_list RBRACE
+      { { fname = $1; fdbody = List.rev $4 } }  
+  | ID ASSIGN stmt
+      { { fname = $1; fdbody = [$3] } }
 
 finddecl:
    FIND ID LBRACE stmt_list RBRACE
@@ -150,7 +161,7 @@ expr:
   | expr OR     expr { Binop($1, Or,    $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | ID ASSIGN expr   { Assign($1, $3) } 
   | ID LPAREN actuals_opt RPAREN { Builtin($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
