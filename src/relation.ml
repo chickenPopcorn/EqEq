@@ -106,25 +106,25 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
        * Else we'll keep using the current S.equation_relations, `eMap` as-is.
        *)
       let maybeExtendedExprMap =
-        let latest = latest i eMap in
+        let current = latest i eMap in
 
         let isKnownEquation =
-          StringMap.mem id latest.S.indeps ||
-          StringMap.mem id latest.S.deps
+          StringMap.mem id current.S.indeps ||
+          StringMap.mem id current.S.deps
         in
 
-        if not isKnownEquation then eMap else
+        if not isKnownEquation then eMap (* use as-is *) else
           let forked : S.equation_relations =
             let deps : string list = getStmtDeps (A.Expr(e)) in
             if List.length deps > 0 then
               {
-                S.deps = StringMap.add id deps latest.S.deps;
-                S.indeps = StringMap.remove id latest.S.indeps;
+                S.deps = StringMap.add id deps current.S.deps;
+                S.indeps = StringMap.remove id current.S.indeps;
               }
             else
               {
-                S.deps = StringMap.remove id latest.S.deps;
-                S.indeps = StringMap.add id [A.Expr(e)] latest.S.indeps;
+                S.deps = StringMap.remove id current.S.deps;
+                S.indeps = StringMap.add id [A.Expr(e)] current.S.indeps;
               }
           in S.IntMap.add i forked eMap
       in findExprRelator (maybeExtendedExprMap, i) e
