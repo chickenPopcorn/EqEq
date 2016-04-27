@@ -42,6 +42,7 @@ let rec getStmtDeps (stmt : A.stmt) : string list =
     in
 
     match st with
+    | A.Break | A.Continue -> foundDeps
     | A.Expr(e) -> getExprIDs foundDeps e
     | A.If(stmtOrTupleList) -> (
         let rec idsInIf accumul = function
@@ -143,6 +144,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
     List.fold_left (fun a s -> findStmtRelator a s) acc sLi
 
   in match st with
+  | A.Break | A.Continue -> (m, i)
   | A.Expr(e) -> findExprRelator (m, i) e
   | A.If(stmtTupleWithOptionalExpr) ->
     let rec relationsInIf accum = function
