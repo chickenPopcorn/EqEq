@@ -137,24 +137,18 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
           }
       in ((S.IntMap.add i forked m), i)
     | A.Builtin(_, exprLis) -> List.fold_left findExprRelator (eMap, i) exprLis
+  in
+
+  let findStmtLi acc (sLi : A.stmt list) =
+    List.fold_left (fun a s -> findStmtRelator a s) acc sLi
 
   in match st with
   | A.Expr(e) -> findExprRelator (m, i) e
   | A.If(stmtTupleWithOptionalExpr) ->
     let rec relationsInIf accum = function
       | [] -> accum
-      | (None, sLi)::tail ->
-        relationsInIf (
-          List.fold_left (fun a s -> findStmtRelator a s) accum sLi
-        ) tail
+      | (None, sLi)::tail -> relationsInIf (findStmtLi accum sLi) tail
       | (Some(e), sLi)::tail ->
-        relationsInIf (
-          let exprRel = findExprRelator accum e
-          in List.fold_left (fun a s -> findStmtRelator a s) exprRel sLi
-        ) tail
+        relationsInIf (findStmtLi (findExprRelator accum e) sLi) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
-  | A.While(e, sLi) ->
-      List.fold_left
-        (fun a s -> findStmtRelator a s)
-        (findExprRelator (m, i) e)
-        sLi
+  | A.While(e, sLi) -> findStmtLi (findExprRelator (m, i) e) sLi
