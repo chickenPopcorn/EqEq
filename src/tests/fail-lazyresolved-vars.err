@@ -1,2 +1,1 @@
-Semantic analysis failure here - we should write some error about `b` not being
-defiend
+Fatal error: exception Failure("Unresolvable identifier, "b" found while following "a"'s dependency chain.")

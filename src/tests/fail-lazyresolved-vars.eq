@@ -1,7 +1,8 @@
 SomeCtx = {
   a = { b + 40; }
+  c = { 3; }
 }
 
-SomeCtx:find a {
-  print("a = %.0f (when b = %.0f)\n", a, b);
+SomeCtx:find c {
+  print("a = %.0f\n", a);
 }
