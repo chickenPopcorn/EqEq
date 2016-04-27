@@ -1,1 +1,1 @@
-Fatal error: exception Failure("Cyclical dependency under, "b"; stopped at ID="c"")
+Fatal error: exception Failure("Unresolvable identifier, "b" found while following "a"'s dependency chain.")

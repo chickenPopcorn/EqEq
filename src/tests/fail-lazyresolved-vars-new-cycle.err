@@ -1,1 +1,1 @@
-created new cycle!
+Fatal error: exception Failure("Cyclical dependency under, "a"; stopped at ID="a"")
