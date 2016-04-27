@@ -238,7 +238,7 @@ let check (contexts, finds) =
       | 0 -> fail ("missing return in equation " ^ quot eqName ^" under context "^quot ctxName)
       | _ -> ()
     in
-     let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context
+    let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context
     in
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
@@ -307,8 +307,20 @@ in
   (* check Break and Continue for the finds *)
   let check_find_break_continue findBlk = List.iter (check_stmt_break_continue "Finds_Declaration" "") findBlk.A.fbody
   in
-
-  List.iter check_ctx_break_continue contexts;
+  let rec get_global_contexts global_context new_contexts contexts = 
+    match contexts with 
+    | [] -> (global_context, new_contexts)
+    | hd::tl -> if (hd.A.context = "Global")
+                then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
+                else  (get_global_contexts global_context (hd::new_contexts) tl)
+  in
+  let add_global_context_to_newcontext tuple = 
+    { A.context = "Global"; A.cbody = fst tuple } :: (snd tuple)
+  in
+  let new_contexts contexts = 
+    add_global_context_to_newcontext (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
+  in
+  List.iter check_ctx_break_continue (new_contexts contexts);
   List.iter check_find_break_continue finds;
   List.iter check_range finds;
   List.iter check_ctx contexts;
