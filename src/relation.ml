@@ -73,30 +73,71 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
   in StringMap.add ctx.A.context ctxScope relations
 
 let assert_resolvable (expr : A.expr) (m : S.equation_relations) : unit =
+  let assert_notseen parent id (visited : bool StringMap.t) : unit =
+    if StringMap.mem id visited then fail (
+      "Cyclical dependency under, " ^
+      quot parent ^
+      "; stopped at ID=" ^ quot id
+    )
+  in
+
   let check_deps_resolvable (id : string) : unit =
-    let assert_nodeps id rels = try StringMap.find id rels with
-      | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
-    (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
-    in ignore (assert_nodeps id m.S.indeps);
+    (* Asserts identifier terminates in `m`, and hasn't already been seen. *)
+    let rec terminates (target : string) (haveSeen : bool StringMap.t) : unit =
+      assert_notseen id target haveSeen;
+
+      if not (StringMap.mem target m.S.indeps) then (
+        if StringMap.mem target m.S.deps
+        then
+          List.iter (
+            fun dp -> terminates dp (StringMap.add target true haveSeen);
+          ) (StringMap.find target m.S.deps)
+        else
+          (* TODO: NEXT STEP: make `test-lazyresolved-vars-increment-self` pass
+           *   this is done by passing in *two* maps to `assert_resolvable` -
+           *   the previous map and the current map.
+           *
+           *   IF all of the following:
+           *     1) `id` fails in *this* else branch
+           *     2) `target` == `id`
+           *     3) `id` is in the *old* map's `indeps` field
+           *   THEN allow it to pass
+           *)
+          fail (
+            "Unresolvable identifier, " ^ (quot target) ^
+            " found while following " ^ (quot id) ^
+            "'s dependency chain."
+          );
+      )
+
+    in terminates id StringMap.empty;
   in
 
   (* TODO: figure out how to ensure failures for `undefinedvar` in `e` for
-   * an expression: `find{ a = b = undefinedvar + 1}`
+   * an expression:  `find{ a = b = undefinedvar + 1}`
    *)
-  let rec chk_right_indep e : unit = match e with
-    | A.Id(id) -> check_deps_resolvable id;
-    | A.Literal(_) | A.Strlit(_) -> ();
-    | A.Binop(el, _, er) -> List.iter chk_right_indep [el; er];
-    | A.Unop(_, e) -> chk_right_indep e;
-    | A.Assign(_, e) -> chk_right_indep e;
-    | A.Builtin(_, eLi) -> List.iter chk_right_indep eLi;
-  in chk_right_indep expr
+  let rec chk_resolvable e : unit = match e with
+  | A.Id(id) -> (
+      if not (StringMap.mem id m.S.indeps)
+      then check_deps_resolvable id;
+    );
+  | A.Literal(_) | A.Strlit(_) -> ();
+  | A.Binop(el, _, er) -> List.iter chk_resolvable [el; er];
+  | A.Unop(_, e) -> chk_resolvable e;
+  | A.Assign(_, e) -> chk_resolvable e;
+  | A.Builtin(_, eLi) -> List.iter chk_resolvable eLi;
+  in chk_resolvable expr
 
 (* List.fold_left handler for find decl's fbody. *)
 let rec findStmtRelator (m, i) (st : A.stmt) =
   let rec findExprRelator (eMap, idx) (expr : A.expr) =
+    assert_resolvable expr (latest idx eMap);
+
     let i = idx + 1 in match expr with
-    | A.Id(_) | A.Literal(_) | A.Strlit(_) -> (eMap, i)
+    | A.Id(id) ->
+      ignore (assert_resolvable (A.Id(id)) (latest i eMap));
+      (eMap, i)
+    | A.Literal(_) | A.Strlit(_) -> (eMap, i)
     | A.Binop(eLeft, _, eRight) ->
       findExprRelator (findExprRelator (eMap, i) eLeft) eRight
     | A.Unop(_, e) -> findExprRelator (eMap, i) e
