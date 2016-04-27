@@ -112,10 +112,11 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
           StringMap.mem id latest.S.deps
         in
 
-        if isKnownEquation
-        then S.IntMap.add i latest eMap
-        else eMap
-
+        if not isKnownEquation then eMap else
+          let forked : S.equation_relations = {
+            S.deps = latest.S.deps; (* TODO: actually fork *)
+            S.indeps = latest.S.indeps;
+          } in S.IntMap.add i forked eMap
       in findExprRelator (maybeExtendedExprMap, i) e
     | A.Builtin(_, exprLis) -> List.fold_left findExprRelator (eMap, i) exprLis
 
