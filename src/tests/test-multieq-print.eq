@@ -1,5 +1,7 @@
 SomeContext = {
-  a = 40 + 2;
+  a = { print("42\n"); 
+        42;
+      }
 }
 
 SomeContext:find a {

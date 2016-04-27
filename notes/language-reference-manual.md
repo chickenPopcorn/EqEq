@@ -43,6 +43,34 @@ sequential statements, contexts and `find` blocks differ in their use:
 - `find` blocks on the other hand are expected to be the resolution to "find"
   missing said pieces, or simply apply completed solutions to new inputs.
 
+The `context` block consists of a list of single line and/or multi-line equations.
+The single line equations is expressed in assignment format.
+```c
+SomeCtx = { a = 42; }
+```
+Multi-line equations, like single line equations, must be expressed in assignment
+format, but right hand side is express in `{*... multi-line statements ...*}`. In
+this case right hand side variable is treated as a variable. However
+nested `{{}}` is considered illegal in eqeq.
+```c
+multi:{
+  // multi-line equation life
+  life = {
+    if (a == 42) {
+      a;
+    } else {
+      17;
+    }
+  }
+}
+
+multi: find life {
+  a = 42;
+  print("%.0f\n", life);
+  //prints out 42
+}
+```
+
 It follows then that `find` expressions _apply_ to contexts. Where a context
 might be shared for re-use, `find` expressions are designed to make local use of
 equations in a given context.
