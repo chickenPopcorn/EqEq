@@ -3,6 +3,7 @@ module S = Sast
 module StringMap = Map.Make(String)
 
 let fail msg = raise (Failure msg)
+let quot content = "\"" ^ content ^  "\""
 
 (* Newest value in `map`; ie: where largest key <= `i` *)
 let latest (asof : int) (m : S.equation_relations S.IntMap.t) =
@@ -71,10 +72,28 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
     }
   in StringMap.add ctx.A.context ctxScope relations
 
+let assert_resolvable (expr : A.expr) (m : S.equation_relations) : unit =
+  let check_deps_resolvable (id : string) : unit =
+    let assert_nodeps id rels = try StringMap.find id rels with
+      | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
+    (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
+    in ignore (assert_nodeps id m.S.indeps);
+  in
+
+  (* TODO: figure out how to ensure failures for `undefinedvar` in `e` for
+   * an expression: `find{ a = b = undefinedvar + 1}`
+   *)
+  let rec chk_right_indep e : unit = match e with
+    | A.Id(id) -> check_deps_resolvable id;
+    | A.Literal(_) | A.Strlit(_) -> ();
+    | A.Binop(el, _, er) -> List.iter chk_right_indep [el; er];
+    | A.Unop(_, e) -> chk_right_indep e;
+    | A.Assign(_, e) -> chk_right_indep e;
+    | A.Builtin(_, eLi) -> List.iter chk_right_indep eLi;
+  in chk_right_indep expr
+
 (* List.fold_left handler for find decl's fbody. *)
 let rec findStmtRelator (m, i) (st : A.stmt) =
-  let quot content = "\"" ^ content ^  "\"" in
-
   let rec findExprRelator (eMap, idx) (expr : A.expr) =
     let i = idx + 1 in match expr with
     | A.Id(_) | A.Literal(_) | A.Strlit(_) -> (eMap, i)
@@ -82,24 +101,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
       findExprRelator (findExprRelator (eMap, i) eLeft) eRight
     | A.Unop(_, e) -> findExprRelator (eMap, i) e
     | A.Assign(id, e) ->
-      let check_resolvable (index : int) (id : string) m =
-        let assert_nodeps id rels = try StringMap.find id rels with
-          | Not_found -> fail ("Unresolvable identifier, " ^ quot id)
-        (* TODO NEXT STEP: BFS on deps/indeps to give real answer *)
-        in assert_nodeps id (latest index m).S.indeps
-      in
-
-      (* TODO: figure out how to ensure failures for `undefinedvar` in `e` for
-       * an expression: `find{ a = b = undefinedvar + 1}`
-       *)
-      let rec chk_right_indep = function
-        | A.Id(id) -> ignore (check_resolvable i id eMap);
-        | A.Literal(_) | A.Strlit(_) -> ignore ();
-        | A.Binop(el, _, er) -> ignore (List.iter chk_right_indep [el; er]);
-        | A.Unop(_, e) -> ignore (chk_right_indep e);
-        | A.Assign(_, e) -> ignore (chk_right_indep e);
-        | A.Builtin(_, eLi) -> ignore (List.iter chk_right_indep eLi);
-      in ignore (chk_right_indep e);
+      assert_resolvable e (latest i eMap);
 
       (* If `id` already exists, then it's being redefined, in which case we'll
        * start a new `S.equation_relations` at the current expression index.
