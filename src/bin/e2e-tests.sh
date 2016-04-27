@@ -278,6 +278,9 @@ if [ "$opt_plain" -eq 0 ];then
     ))"
 fi
 
+# Returns "N%" where N is $2's percentage of $1
+percWhole() { printf '%d%%' $(printf '100 - (%d/(%d - %d))\n' $1 $1 $2 | bc); }
+
 # Test suite's stats:
 testNum=0; numFail=0; numSkip=0; numPass=0;
 logPlain() {
@@ -354,7 +357,7 @@ if [ "$opt_plain" -eq 0 ];then
     "${#testFiles[@]}" \
     "$(if [ "$numFail" -gt 0 ];then col red "$numFail FAILED\t";fi)" \
     "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
-    "$(col grn "$numPass PASSED")"
+    "$(col grn "$numPass PASSED") [$(percWhole ${#testFiles[@]} $numPass)]"
 else
   echo "TOTAL FAILED $numFail"
   echo "TOTAL SKIPPED $numSkip"
