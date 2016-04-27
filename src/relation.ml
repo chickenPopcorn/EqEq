@@ -19,11 +19,9 @@ let latest (asof : int) (m : S.equation_relations S.IntMap.t) =
         )
   in walkBack asof
 
-(* List.fold_left handler an initial map of contexts' equations, before, and
- * start an empty map for their find blocks. *)
-let relationCtxFolder (relations : S.eqResolutions) ctx =
-  (* internal helper *)
-  let rec getAssignDeps foundDeps stmt =
+(* Lists all `A.Id`s in the given `stmt` *)
+let getStmtDeps (stmt : A.stmt) : string list =
+  let rec getAssignDeps (foundDeps : string list) (st : A.stmt) =
     let rec getExprIDs found = function
       | A.Literal(_) -> found
       | A.Id(id) -> id::found
@@ -34,7 +32,7 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
       | A.Builtin(_,el) -> List.fold_left (fun l e -> getExprIDs l e) found el
     in
 
-    match stmt with
+    match st with
     | A.Block(sL) -> List.fold_left (fun l s -> getAssignDeps l s) foundDeps sL
     | A.Expr(e) -> getExprIDs foundDeps e
     | A.If(stmtOrTupleList) -> (
@@ -45,13 +43,16 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
         in idsInIf foundDeps stmtOrTupleList
       )
     | A.While(e, s) -> getExprIDs (getAssignDeps foundDeps s) e
-  in
+  in getAssignDeps [] stmt
 
+(* List.fold_left handler an initial map of contexts' equations, before, and
+ * start an empty map for their find blocks. *)
+let relationCtxFolder (relations : S.eqResolutions) ctx =
   let ctxScope =
     let (deps, indeps) =
       let ctx_body_folder (deps, indeps) mEq =
         let multi_eq_folder (deps, indeps) mEqBody =
-          let foundDeps = getAssignDeps [] mEqBody in
+          let foundDeps = getStmtDeps mEqBody in
           if List.length foundDeps > 0
           then (StringMap.add mEq.A.fname foundDeps deps, indeps)
           else (deps, StringMap.add mEq.A.fname mEq.A.fdbody indeps)
