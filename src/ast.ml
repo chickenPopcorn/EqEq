@@ -14,11 +14,16 @@ type expr =
   | Assign of string * expr
   | Builtin of string * expr list
 
+
 type stmt =
-    Block of stmt list
   | Expr of expr
-  | If of (expr option * stmt) list
-  | While of expr * stmt
+  | If of (expr option * stmt list) list
+  | While of expr * stmt list
+  | Break 
+  | Continue 
+
+type range =
+  | Range of string * expr * expr option * expr option
 
 (* multieq: we call this a "multi-line equation" *)
 type multi_eq = {
@@ -34,6 +39,7 @@ type ctx_decl = {
 type find_decl = {
     fcontext : string;
     ftarget : string;
+    frange: range list;
     fbody : stmt list;
   }
 
@@ -74,25 +80,43 @@ let rec string_of_expr = function
   | Builtin(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
 
+
 let rec string_of_stmt = function
-    Block(stmts) ->
-      "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | If(conds) -> "\n" ^ string_of_first_cond_stmts (List.hd conds) ^ "\n" ^
   (String.concat "\n" (List.map string_of_cond_stmts (List.tl conds)))
-  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ "{" ^ String.concat "\n" (List.map string_of_stmt s) ^ "}"
+  | Break -> "break"
+  | Continue -> "continue"
 
   and string_of_first_cond_stmts = function
-    | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
-    | (Some(expr), Block(stmts)) -> "if (" ^ (string_of_expr expr) ^ ")\n {\n" ^
+    | (None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts))
+    | (Some(expr), stmts) -> "if (" ^ (string_of_expr expr) ^ ")\n {\n" ^
                                         (String.concat "\n" (List.map string_of_stmt stmts)) ^
                                     "}\n"
-    | _ -> ""
   and string_of_cond_stmts = function
-    | (None, Block(stmts)) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^"}\n"
-    | (Some(expr), Block(stmts)) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^
+    | (None, stmts) -> "else {\n" ^ (String.concat "\n" (List.map string_of_stmt stmts)) ^"}\n"
+    | (Some(expr), stmts) -> "else if (" ^ (string_of_expr expr) ^ ")\n {\n" ^
                                     (String.concat "\n" (List.map string_of_stmt stmts)) ^ "}\n"
-    | _ -> ""
+
+let string_of_range range =
+   match range with
+   | [] -> ""
+   | hd::tl -> (match hd with Range(id, st, ed, inc) ->
+                (match st, ed, inc with
+                  | Literal(lst), Some(sed), Some(sinc) ->
+                    (match sed, sinc with Literal(led), Literal(linc) ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^
+                                   string_of_float led ^ ")"
+                                   | _ -> "")
+                  | Literal(lst), Some(sed), None ->
+                    (match sed with Literal(led) ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ "," ^
+                                   string_of_float led ^ ")"
+                                   | _ -> "")
+                  | Literal(lst), None, None ->
+                                   " " ^ id ^ " in range(" ^ string_of_float lst ^ ")"
+                  | _ -> ""))
 
 let string_of_multieq multieq =
   multieq.fname ^
@@ -110,6 +134,7 @@ let string_of_finddecl finddecl =
   finddecl.fcontext ^
   ": find " ^
   finddecl.ftarget ^
+  string_of_range finddecl.frange ^
   " {\n" ^
   String.concat "" (List.map string_of_stmt finddecl.fbody) ^
   "\n}\n"

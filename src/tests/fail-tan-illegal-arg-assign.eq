@@ -1,7 +1,8 @@
 SomeContext = {
-  a = 40 + 2;
+  a = { 42.333; }
+
 }
 
 SomeContext:find a {
-  print("%.0f\n", a);
+  tan(a=8);
 }
