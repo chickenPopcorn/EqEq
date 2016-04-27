@@ -12,9 +12,9 @@ module StringMap = Map.Make(String)
 let check (contexts, finds) =
   let fail msg = raise (Failure msg) in
   let quot content = "\"" ^ content ^  "\"" in
-  let ex_qt expr = quot (A.string_of_expr expr) in
-  let bop_qt bop = quot (A.string_of_op bop) in
-  let uop_qt uop = quot (A.string_of_uop uop) in
+  let ex_qt expr = A.string_of_expr expr in
+  let bop_qt bop = A.string_of_op bop in
+  let uop_qt uop = A.string_of_uop uop in
 
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
