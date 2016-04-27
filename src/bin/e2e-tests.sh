@@ -221,7 +221,7 @@ CheckTest() {
       local buildStatus=$?; echo -n "$buildLog" | log
       if [ $buildStatus -ne 0 ];then
         printf \
-          "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
+          "\n\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
           log
         return 1
       fi
