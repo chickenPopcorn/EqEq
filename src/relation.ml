@@ -72,7 +72,14 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
     }
   in StringMap.add ctx.A.context ctxScope relations
 
-let assert_resolvable (expr : A.expr) (m : S.equation_relations) : unit =
+
+let rec asrt_resolves (root : A.expr) (m : S.equation_relations S.IntMap.t) i =
+  let was_previously_resolvable : (string -> string -> bool) = (
+    fun prnt chld -> (prnt = chld) && (asrt_resolves root m (i - 1); true)
+  ) in
+
+  let m = latest i m in
+
   let assert_notseen parent id (visited : bool StringMap.t) : unit =
     if StringMap.mem id visited then fail (
       "Cyclical dependency under, " ^
@@ -83,19 +90,19 @@ let assert_resolvable (expr : A.expr) (m : S.equation_relations) : unit =
 
   let check_deps_resolvable (id : string) : unit =
     (* Asserts identifier terminates in `m`, and hasn't already been seen. *)
-    let rec terminates (target : string) (haveSeen : bool StringMap.t) : unit =
-      assert_notseen id target haveSeen;
+    let rec terminates (target : string) (seen : bool StringMap.t) : unit =
+      assert_notseen id target seen;
 
       if not (StringMap.mem target m.S.indeps) then (
         if StringMap.mem target m.S.deps
         then
           List.iter (
-            fun dp -> terminates dp (StringMap.add target true haveSeen);
+            fun dp -> terminates dp (StringMap.add target true seen);
           ) (StringMap.find target m.S.deps)
         else
-          (* TODO: NEXT STEP: make `test-lazyresolved-vars-increment-self` pass
-           *   this is done by passing in *two* maps to `assert_resolvable` -
-           *   the previous map and the current map.
+          (* TODO: NEXT STEP: make `test-lazyresolved-vars-increment-self`
+           *   pass this is done by passing in *two* maps to
+           *   `asrt_resolves`, the previous map and the current map.
            *
            *   IF all of the following:
            *     1) `id` fails in *this* else branch
@@ -103,7 +110,7 @@ let assert_resolvable (expr : A.expr) (m : S.equation_relations) : unit =
            *     3) `id` is in the *old* map's `indeps` field
            *   THEN allow it to pass
            *)
-          fail (
+          if not (was_previously_resolvable id target) then fail (
             "Unresolvable identifier, " ^ (quot target) ^
             " found while following " ^ (quot id) ^
             "'s dependency chain."
@@ -126,23 +133,21 @@ let assert_resolvable (expr : A.expr) (m : S.equation_relations) : unit =
   | A.Unop(_, e) -> chk_resolvable e;
   | A.Assign(_, e) -> chk_resolvable e;
   | A.Builtin(_, eLi) -> List.iter chk_resolvable eLi;
-  in chk_resolvable expr
+  in chk_resolvable root
 
 (* List.fold_left handler for find decl's fbody. *)
 let rec findStmtRelator (m, i) (st : A.stmt) =
   let rec findExprRelator (eMap, idx) (expr : A.expr) =
-    assert_resolvable expr (latest idx eMap);
+    asrt_resolves expr eMap idx;
 
     let i = idx + 1 in match expr with
-    | A.Id(id) ->
-      ignore (assert_resolvable (A.Id(id)) (latest i eMap));
-      (eMap, i)
+    | A.Id(id) -> asrt_resolves (A.Id(id)) eMap i; (eMap, i)
     | A.Literal(_) | A.Strlit(_) -> (eMap, i)
     | A.Binop(eLeft, _, eRight) ->
       findExprRelator (findExprRelator (eMap, i) eLeft) eRight
     | A.Unop(_, e) -> findExprRelator (eMap, i) e
     | A.Assign(id, e) ->
-      assert_resolvable e (latest i eMap);
+      asrt_resolves e eMap i;
 
       (* If `id` already exists, then it's being redefined, in which case we'll
        * start a new `S.equation_relations` at the current expression index.
