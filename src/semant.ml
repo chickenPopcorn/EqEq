@@ -374,4 +374,5 @@ in
     S.ast = (contexts, finds);
     S.eqs = eqrelations;
     S.vars = varmap;
+    S.lib = liblist;
   }

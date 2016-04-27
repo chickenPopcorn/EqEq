@@ -33,21 +33,25 @@ let latest (asof : int) (m : S.equation_relations S.IntMap.t) =
   in walkBack asof
 
 (* Lists all `A.Id`s in the given `stmt` *)
-let getStmtDeps (stmt : A.stmt) : string list =
-  let rec getAssignDeps (foundDeps : string list) (st : A.stmt) =
+let rec getStmtDeps (stmt : A.stmt) : string list =
+  let rec getAssignDeps (foundDeps : string list) (st : A.stmt) : string list =
     let getExprIDs (accum : string list) e : string list = (get_ids e)@accum in
 
+    let accumStmtLi accum (sLi : A.stmt list) =
+      List.fold_left (fun a s -> a@(getStmtDeps s)) accum sLi
+    in
+
     match st with
-    | A.Block(sL) -> List.fold_left (fun l s -> getAssignDeps l s) foundDeps sL
     | A.Expr(e) -> getExprIDs foundDeps e
     | A.If(stmtOrTupleList) -> (
         let rec idsInIf accumul = function
           | [] -> accumul
-          | (None,s)::t -> idsInIf (getAssignDeps accumul s) t
-          | (Some(e),s)::t -> idsInIf (getExprIDs (getAssignDeps accumul s) e) t
+          | (None,sLi)::t -> idsInIf (accumStmtLi accumul sLi) t
+          | (Some(e),sLi)::t ->
+              idsInIf (getExprIDs (accumStmtLi accumul sLi) e) t
         in idsInIf foundDeps stmtOrTupleList
       )
-    | A.While(e, s) -> getExprIDs (getAssignDeps foundDeps s) e
+    | A.While(e, s) -> getExprIDs (accumStmtLi foundDeps s) e
   in getAssignDeps [] stmt
 
 (* List.fold_left handler an initial map of contexts' equations, before, and
@@ -135,18 +139,22 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
     | A.Builtin(_, exprLis) -> List.fold_left findExprRelator (eMap, i) exprLis
 
   in match st with
-  | A.Block(s) -> List.fold_left findStmtRelator (m, i) s
   | A.Expr(e) -> findExprRelator (m, i) e
   | A.If(stmtTupleWithOptionalExpr) ->
     let rec relationsInIf accum = function
       | [] -> accum
-      | (None, s)::tail ->
-        relationsInIf (findStmtRelator accum s) tail
-      | (Some(e), s)::tail ->
+      | (None, sLi)::tail ->
         relationsInIf (
-          findStmtRelator (
-            findExprRelator accum e
-          ) s
+          List.fold_left (fun a s -> findStmtRelator a s) accum sLi
+        ) tail
+      | (Some(e), sLi)::tail ->
+        relationsInIf (
+          let exprRel = findExprRelator accum e
+          in List.fold_left (fun a s -> findStmtRelator a s) exprRel sLi
         ) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
-  | A.While(e, s) -> findStmtRelator (findExprRelator (m, i) e) s
+  | A.While(e, sLi) ->
+      List.fold_left
+        (fun a s -> findStmtRelator a s)
+        (findExprRelator (m, i) e)
+        sLi
