@@ -7,6 +7,7 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 - [Status](#status-)
 - [Coding, Building, Testing](#coding-building-testing)
+  - [Faster Code & Test Cycle](#faster-code-&-test-cycle)
   - [Writing Tests](#writing-tests)
   - [Debugging Compiler's Phases](#debugging-compilers-phases)
     - [Scanner: Tokens We Generate](#scanner-tokens-we-generate)
@@ -50,7 +51,7 @@ To run **all end-to-end checks**, simply: `make e2e`.
   Summary: PASSED
   ```
 
-### Writing Code Faster - Less Tests
+### Faster Code & Test Cycle
 
 **tl;dr** make use of the `TEST_OPTS=...` flag of `make test`
 
@@ -61,7 +62,11 @@ immediately)_.
 
 ```
 $ time { make test; }
+
 # ... `make test` output snipped...
+
+Summary of 118 tests:   9 SKIPPED       109 PASSED [87%]
+
 real    0m10.697s
 user    0m1.660s
 sys     0m0.868s
