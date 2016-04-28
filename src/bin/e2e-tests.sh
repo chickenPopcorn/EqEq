@@ -279,7 +279,7 @@ if [ "$opt_plain" -eq 0 ];then
 fi
 
 # Returns "N%" where N is $2's percentage of $1
-percWhole() { printf '%d%%' $(printf 'scale=9; (%d / %d) * 100\n' $2 $1 | bc); }
+percWhole() { printf '%.0f%%' $(printf 'scale=9; (%d / %d) * 100\n' $2 $1 | bc); }
 
 # Test suite's stats:
 testNum=0; numFail=0; numSkip=0; numPass=0;
