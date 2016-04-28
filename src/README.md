@@ -7,7 +7,7 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 - [Status](#status-)
 - [Coding, Building, Testing](#coding-building-testing)
-  - [Faster Code & Test Cycle](#faster-code-&-test-cycle)
+  - [Faster Code & Test Cycle](#faster-code--test-cycle)
   - [Writing Tests](#writing-tests)
   - [Debugging Compiler's Phases](#debugging-compilers-phases)
     - [Scanner: Tokens We Generate](#scanner-tokens-we-generate)
@@ -55,11 +55,6 @@ To run **all end-to-end checks**, simply: `make e2e`.
 
 **tl;dr** make use of the `TEST_OPTS=...` flag of `make test`
 
-With over a 100 tests, `make test` is easier to only before committing. When
-you're writing code, you might benefit from just running your tests _(and a few
-super-simple base cases you know you you'd like to see if you break,
-immediately)_.
-
 ```
 $ time { make test; }
 
@@ -71,6 +66,11 @@ real    0m10.697s
 user    0m1.660s
 sys     0m0.868s
 ```
+
+**Problem**: With over a 100 tests, you might want to punt a full `make test`
+for later. When you're writing code, you might benefit from **just running your
+own tests** _(plus a few super-simple general tests you'd like to see break,
+immediately)_.
 
 **Solution**: say you're developing "cool feature" against two new test files,
 `fail-cool-feature.eq` and `test-cool-feature.eq` and you want to not
