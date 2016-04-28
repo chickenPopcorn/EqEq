@@ -1,7 +1,6 @@
 SomeCtx = {
   a = { 42; }
   b = { 32; }
-
 }
 
 SomeCtx:find a {
@@ -17,14 +16,12 @@ SomeCtx:find a with c in range(0,3,1); {
   print("c = %0.0f\n", c);
 }
 
-
 SomeCtx:find a with c in range(2,-1,-1); {
   print("print for find with range (2,-1,-1)\n");
   print("a = %0.0f\n", a);
   print("b = %0.0f\n", b);
   print("c = %0.0f\n", c);
 }
-
 
 SomeCtx:find a with c in range(-1,-1, 1); {
   print("print for find with range (-1,-1,1)\n");
@@ -53,5 +50,3 @@ SomeCtx:find a with b = 10; c in range(2); {
   print("b = %0.0f\n", b);
   print("c = %0.0f\n", c);
 }
-
-

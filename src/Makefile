@@ -59,14 +59,16 @@ codegen.cmo : sast.cmo ast.cmo
 codegen.cmx : sast.cmx ast.cmx
 debugtokens.cmo : scanner.cmo parser.cmi ast.cmo
 debugtokens.cmx : scanner.cmx parser.cmx ast.cmx
-eqeq.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
-eqeq.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
+eqeq.cmo : semant.cmo scanner.cmo sast.cmo parser.cmi codegen.cmo ast.cmo
+eqeq.cmx : semant.cmx scanner.cmx sast.cmx parser.cmx codegen.cmx ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
+relation.cmo : sast.cmo ast.cmo
+relation.cmx : sast.cmx ast.cmx
 sast.cmo : ast.cmo
 sast.cmx : ast.cmx
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
-semant.cmo : sast.cmo ast.cmo
-semant.cmx : sast.cmx ast.cmx
+semant.cmo : sast.cmo relation.cmo ast.cmo
+semant.cmx : sast.cmx relation.cmx ast.cmx
 parser.cmi : ast.cmo

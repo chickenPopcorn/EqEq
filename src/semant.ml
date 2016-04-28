@@ -1,22 +1,35 @@
 (* Semantic checking for the EqualsEquals compiler *)
 
 module A = Ast
+module S = Sast
+module R = Relation
 module StringMap = Map.Make(String)
 
 (* Semantic checking of a program. Returns void if successful,
    throws an exception if something is wrong.
 
    Check each context, then check each find declaration *)
-
 let check (contexts, finds) =
   let fail msg = raise (Failure msg) in
-
-  (* string prettifiers *)
   let quot content = "\"" ^ content ^  "\"" in
   let ex_qt expr = A.string_of_expr expr in
   let bop_qt bop = A.string_of_op bop in
   let uop_qt uop = A.string_of_uop uop in
-
+  let rec get_global_contexts global_context new_contexts contexts = 
+  match contexts with 
+  | [] -> (global_context, new_contexts)
+  | hd::tl -> if (hd.A.context = "Global")
+              then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
+              else  (get_global_contexts global_context (hd::new_contexts) tl)
+  in
+  let add_multieqs_in_global_contexts_to_contexts tuple = 
+    List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody }) (snd tuple)
+  in
+  let new_contexts contexts = 
+    add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
+  in
+  let contexts:(A.ctx_decl list) = new_contexts contexts
+  in
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
   let check_assign lvaluet rvaluet err =
@@ -25,7 +38,64 @@ let check (contexts, finds) =
 
   TODO: possible ^ given how we've structured string-literals in our grammar? *)
 
-  (* Map of variables to their decls. For more, see: Sast.varMap *)
+  let eqrelations : S.eqResolutions =
+    (* `Sast.eqResolutions` to which we'll add `S.equation_relations` *)
+    let ctxRelations : S.eqResolutions =
+      List.fold_left R.relationCtxFolder StringMap.empty contexts
+    in
+
+    (* Add a complete picture of contexts' find decl relations, maintaining an
+     * index along the way, then discard the last index and just return the
+     * completed map. *)
+    let (sastEqRels, _) =
+      (* Fold `S.equation_relations` to respective Contexts' `S.ctx_scopes` *)
+      let relationFindFolder (relations, findIdx) fnDec =
+        let findName = Printf.sprintf "find_%s_%d" fnDec.A.fcontext findIdx in
+
+        (* `Sast.ctx_scopes` for which we're creating an `findName` entry. *)
+        let ctxScopes : Sast.ctx_scopes =
+          try StringMap.find fnDec.A.fcontext relations
+          with Not_found ->
+            fail ("find targeting unknown context, " ^ quot fnDec.A.fcontext)
+        in
+
+        (* TODO: after building deps/indeps (findBodyMap), ensure
+         * `fnDec.ftarget` is known key (of either deps or indeps is fine) *)
+
+        let extendedRels : S.eqResolutions =
+          (* Map from expression index to a `Sast.equation_relations` *)
+          let findRelationMap : (S.equation_relations S.IntMap.t) =
+            (* Build a complete map of expresion-index to relations for this
+             * find body, then discard the latest index and return that map. *)
+            let (eqRels, _) =
+              (* Initial map from starting with contexts' own relationships *)
+              let exprMap : S.equation_relations S.IntMap.t =
+                let baseRelations : S.equation_relations = {
+                  S.indeps = ctxScopes.S.ctx_indeps;
+                  S.deps = ctxScopes.S.ctx_deps;
+                } in S.IntMap.add 0 baseRelations S.IntMap.empty
+              in List.fold_left R.findStmtRelator (exprMap, 0) fnDec.A.fbody
+            in eqRels
+          in
+
+          let ctxFinds : S.find_scopes =
+            StringMap.add findName findRelationMap ctxScopes.S.ctx_finds
+          in
+
+          let scopes = {
+            S.ctx_deps = ctxScopes.S.ctx_deps;
+            S.ctx_indeps = ctxScopes.S.ctx_indeps;
+            S.ctx_finds = ctxFinds;
+          } in StringMap.add fnDec.A.fcontext scopes relations
+
+        in (extendedRels, findIdx + 1)
+
+      in List.fold_left relationFindFolder (ctxRelations, 0) finds
+
+    in sastEqRels
+  in
+
+  (* Map of variables to their decls. For more, see: S.varMap *)
   let varmap =
     let create_varmap map ctx =
       if StringMap.mem ctx.A.context map
@@ -320,14 +390,15 @@ in
   let new_contexts contexts = 
     add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
   in
-  List.iter check_ctx_break_continue (new_contexts contexts);
+  List.iter check_ctx_break_continue contexts;
   List.iter check_find_break_continue finds;
   List.iter check_range finds;
-  List.iter check_ctx (new_contexts contexts);
+  List.iter check_ctx contexts;
   List.iter check_find finds;
 
   {
-    Sast.ast = ((new_contexts contexts), finds);
-    Sast.vars = varmap;
-    Sast.lib = liblist
+    S.ast = ((new_contexts contexts), finds);
+    S.eqs = eqrelations;
+    S.vars = varmap;
+    S.lib = liblist;
   }

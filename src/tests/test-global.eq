@@ -1,10 +1,10 @@
 c = 1;;
 
 SomeContext = {
-     a={1;}
      b=1;
 }
 
+a = 1;;
 
 SomeContext: find a{
     while(a<4){

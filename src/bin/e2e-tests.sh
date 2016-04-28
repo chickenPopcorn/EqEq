@@ -221,7 +221,7 @@ CheckTest() {
       local buildStatus=$?; echo -n "$buildLog" | log
       if [ $buildStatus -ne 0 ];then
         printf \
-          "\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
+          "\n\tCRITICAL:\tEqEq's source test unexpectedly fails to compile!\n" |
           log
         return 1
       fi
@@ -277,6 +277,9 @@ if [ "$opt_plain" -eq 0 ];then
       done
     ))"
 fi
+
+# Returns "N%" where N is $2's percentage of $1
+percWhole() { printf '%d%%' $(printf '100 - (%d/(%d - %d))\n' $1 $1 $2 | bc); }
 
 # Test suite's stats:
 testNum=0; numFail=0; numSkip=0; numPass=0;
@@ -354,7 +357,7 @@ if [ "$opt_plain" -eq 0 ];then
     "${#testFiles[@]}" \
     "$(if [ "$numFail" -gt 0 ];then col red "$numFail FAILED\t";fi)" \
     "$(if [ "$numSkip" -gt 0 ];then col ylw "$numSkip SKIPPED\t";fi)" \
-    "$(col grn "$numPass PASSED")"
+    "$(col grn "$numPass PASSED") [$(percWhole ${#testFiles[@]} $numPass)]"
 else
   echo "TOTAL FAILED $numFail"
   echo "TOTAL SKIPPED $numSkip"
