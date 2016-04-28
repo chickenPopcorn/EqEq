@@ -314,20 +314,20 @@ in
                 then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
                 else  (get_global_contexts global_context (hd::new_contexts) tl)
   in
-  let add_global_context_to_newcontext tuple = 
-    { A.context = "Global"; A.cbody = fst tuple } :: (snd tuple)
+  let add_multieqs_in_global_contexts_to_contexts tuple = 
+    List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody }) (snd tuple)
   in
   let new_contexts contexts = 
-    add_global_context_to_newcontext (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
+    add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
   in
   List.iter check_ctx_break_continue (new_contexts contexts);
   List.iter check_find_break_continue finds;
   List.iter check_range finds;
-  List.iter check_ctx contexts;
+  List.iter check_ctx (new_contexts contexts);
   List.iter check_find finds;
 
   {
-    Sast.ast = (contexts, finds);
+    Sast.ast = ((new_contexts contexts), finds);
     Sast.vars = varmap;
     Sast.lib = liblist
   }
