@@ -73,7 +73,7 @@ own tests** _(plus a few super-simple general tests you'd like to see break,
 immediately)_.
 
 **Solution**: say you're developing "cool feature" against two new test files,
-`fail-cool-feature.eq` and `test-cool-feature.eq` and you want to not
+`fail-cool-feature.eq` and `test-cool-feature.eq` and you want to know
 *immediately* if you break `test-helloworld.eq`:
 
 ```
