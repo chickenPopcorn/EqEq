@@ -6,7 +6,7 @@
  *  4. codegen of from SAST
  *)
 
-type cli_arg = Ast | Compile
+type cli_arg = Ast | Sast | Compile
 
 exception Error of string
 
@@ -16,6 +16,7 @@ let _ =
     if Array.length Sys.argv > 1 then
       List.assoc Sys.argv.(1) [
         ("-a", Ast);       (* Print the AST only *)
+        ("-s", Sast);
         ("-c", Compile)    (* Generate, check C *)
       ]
     else Compile
@@ -54,3 +55,4 @@ let _ =
   | Ast -> print_string (Ast.string_of_program ast)
 
   | Compile -> print_string (Codegen.translate sast)
+  | Sast -> print_string (Sast.str_of_checked sast)
