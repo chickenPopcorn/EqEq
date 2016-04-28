@@ -4,11 +4,11 @@ OCAM_BLD_OPTS  = -use-ocamlfind
 PARSER_GENR   := ocamlyacc
 TEST_OPTS     := -v
 TEST_SUITE     = e2e-tests
-# Copy/pasted *.cmo make-targets (from generated list at bottom of file)
-OBJS = ast.cmo codegen.cmo eqeq.cmo parser.cmo scanner.cmo semant.cmo
-
 
 all : clean eqeq
+
+
+# Real targets:
 
 eqeq :
 	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) ./$@.native'
@@ -16,9 +16,9 @@ eqeq :
 scanner scanner.ml : scanner.mll
 	ocamllex scanner.mll
 
+# usage: `make PARSER_GENR=menhir {parser,eqeq,...}`
 parser parser.ml parser.mli : parser.mly
 	$(PARSER_GENR) parser.mly
-# eg: `make PARSER_GENR=menhir parser/whatever`
 
 %.cmo : %.ml
 	ocamlc -c $<
@@ -28,6 +28,7 @@ parser parser.ml parser.mli : parser.mly
 
 debugtokens : debugtokens.ml
 	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) ./$@.native'
+
 
 .PHONY : clean test eqeq all e2e
 
