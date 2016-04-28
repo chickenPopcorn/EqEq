@@ -50,6 +50,39 @@ To run **all end-to-end checks**, simply: `make e2e`.
   Summary: PASSED
   ```
 
+### Writing Code Faster - Less Tests
+
+**tl;dr** make use of the `TEST_OPTS=...` flag of `make test`
+
+With over a 100 tests, `make test` is easier to only before committing. When
+you're writing code, you might benefit from just running your tests _(and a few
+super-simple base cases you know you you'd like to see if you break,
+immediately)_.
+
+```
+$ time { make test; }
+# ... `make test` output snipped...
+real    0m10.697s
+user    0m1.660s
+sys     0m0.868s
+```
+
+**Solution**: say you're developing "cool feature" against two new test files,
+`fail-cool-feature.eq` and `test-cool-feature.eq` and you want to not
+*immediately* if you break `test-helloworld.eq`:
+
+```
+$ make TEST_OPTS='-v tests/*cool-feature*.eq tests/test-helloworld.eq' test
+Running 3 tests:
+  "cool feature"       "cool feature"
+  "helloworld"
+[ 1] "test-cool-feature"       asserting target's behavior      Result: PASS
+[ 2] "fail-cool-feature"       asserting compilation fails      Result: PASS
+[ 3] "test-helloworld"         asserting target's behavior      Result: PASS
+
+Summary of 3 tests:     3 PASSED [100%]
+```
+
 ### Writing Tests
 So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's
 computer? Great! Do this:
