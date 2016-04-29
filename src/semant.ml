@@ -16,19 +16,19 @@ let check (contexts, finds) =
   let bop_qt bop = A.string_of_op bop in
   let uop_qt uop = A.string_of_uop uop in
   (* add variable in global context to all the context *)
-  let rec get_global_contexts global_context new_contexts contexts = 
-  match contexts with 
+  let rec get_global_contexts global_context new_contexts contexts =
+  match contexts with
   | [] -> (global_context, new_contexts)
   | hd::tl -> if (hd.A.context = "Global")
               then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
               else  (get_global_contexts global_context (hd::new_contexts) tl)
   in
-  let add_multieqs_in_global_contexts_to_contexts tuple = 
+  let add_multieqs_in_global_contexts_to_contexts tuple =
     { A.context = "Global"; A.cbody = (fst tuple) } ::
-    (List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody }) 
+    (List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody })
               (snd tuple))
   in
-  let new_contexts contexts = 
+  let new_contexts contexts =
     add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
   in
   let contexts:(A.ctx_decl list) = new_contexts contexts
@@ -380,19 +380,19 @@ in
   (* check Break and Continue for the finds *)
   let check_find_break_continue findBlk = List.iter (check_stmt_break_continue "Finds_Declaration" "") findBlk.A.fbody
   in
-  let rec get_global_contexts global_context new_contexts contexts = 
-    match contexts with 
+  let rec get_global_contexts global_context new_contexts contexts =
+    match contexts with
     | [] -> (global_context, new_contexts)
     | hd::tl -> if (hd.A.context = "Global")
                 then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
                 else  (get_global_contexts global_context (hd::new_contexts) tl)
   in
-  let add_multieqs_in_global_contexts_to_contexts tuple = 
+  let add_multieqs_in_global_contexts_to_contexts tuple =
     { A.context = "Global"; A.cbody = (fst tuple) } ::
-    (List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody }) 
+    (List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody })
               (snd tuple))
   in
-  let new_contexts contexts = 
+  let new_contexts contexts =
     add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
   in
   let contexts:(A.ctx_decl list) = new_contexts contexts

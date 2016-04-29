@@ -62,7 +62,7 @@ global_assign_list:
 
 funcdecl:
     ID ASSIGN LBRACE stmt_list RBRACE
-      { { fname = $1; fdbody = List.rev $4 } }  
+      { { fname = $1; fdbody = List.rev $4 } }
   | ID ASSIGN stmt
       { { fname = $1; fdbody = [$3] } }
 
@@ -161,7 +161,7 @@ expr:
   | expr OR     expr { Binop($1, Or,    $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) } 
+  | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Builtin($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
