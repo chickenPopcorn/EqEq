@@ -36,8 +36,9 @@ let check (contexts, finds) =
   (* Map of variables to their decls. For more, see: S.varMap *)
   let varmap =
     let create_varmap map ctx =
-      if ((StringMap.mem ctx.A.context map) && (ctx.A.context != "Global"))
-      then fail ("duplicate context, " ^ (quot ctx.A.context))
+      if StringMap.mem ctx.A.context map then (
+        fail ("duplicate context, " ^ (quot ctx.A.context))
+      )
       else
         StringMap.add
           ctx.A.context
@@ -394,6 +395,8 @@ in
   let new_contexts contexts = 
     add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
   in
+  let contexts:(A.ctx_decl list) = new_contexts contexts
+  in
   List.iter check_ctx_break_continue contexts;
   List.iter check_find_break_continue finds;
   List.iter check_range finds;
@@ -401,7 +404,7 @@ in
   List.iter check_find finds;
 
   {
-    S.ast = ((new_contexts contexts), finds);
+    S.ast = (contexts, finds);
     S.eqs = eqrelations;
     S.vars = varmap;
     S.lib = liblist;
