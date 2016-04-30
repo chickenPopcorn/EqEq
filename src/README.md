@@ -7,6 +7,7 @@ _("LRM" for "Language [RM]" in code and comments)_.
 
 - [Status](#status-)
 - [Coding, Building, Testing](#coding-building-testing)
+  - [Faster Code & Test Cycle](#faster-code--test-cycle)
   - [Writing Tests](#writing-tests)
   - [Debugging Compiler's Phases](#debugging-compilers-phases)
     - [Scanner: Tokens We Generate](#scanner-tokens-we-generate)
@@ -49,6 +50,43 @@ To run **all end-to-end checks**, simply: `make e2e`.
 
   Summary: PASSED
   ```
+
+### Faster Code & Test Cycle
+
+**tl;dr** make use of the `TEST_OPTS=...` flag of `make test`
+
+```
+$ time { make test; }
+
+# ... `make test` output snipped...
+
+Summary of 118 tests:   9 SKIPPED       109 PASSED [87%]
+
+real    0m10.697s
+user    0m1.660s
+sys     0m0.868s
+```
+
+**Problem**: With over a 100 tests, you might want to punt a full `make test`
+for later. When you're writing code, you might benefit from **just running your
+own tests** _(plus a few super-simple general tests you'd like to see break,
+immediately)_.
+
+**Solution**: say you're developing "cool feature" against two new test files,
+`fail-cool-feature.eq` and `test-cool-feature.eq` and you want to know
+*immediately* if you break `test-helloworld.eq`:
+
+```
+$ make TEST_OPTS='-v tests/*cool-feature*.eq tests/test-helloworld.eq' test
+Running 3 tests:
+  "cool feature"       "cool feature"
+  "helloworld"
+[ 1] "test-cool-feature"       asserting target's behavior      Result: PASS
+[ 2] "fail-cool-feature"       asserting compilation fails      Result: PASS
+[ 3] "test-helloworld"         asserting target's behavior      Result: PASS
+
+Summary of 3 tests:     3 PASSED [100%]
+```
 
 ### Writing Tests
 So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's
