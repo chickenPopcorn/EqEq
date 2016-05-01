@@ -42,7 +42,7 @@ let translate sast =
     | A.Expr(expr) -> gen_expr expr ^ ";\n";
     | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt stmts)) ^ "}\n"
     | A.Continue -> "continue;\n"
-    | A.Break -> "break;\n" 
+    | A.Break -> "break;\n"
     | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
     (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
 
@@ -61,8 +61,15 @@ let translate sast =
                                       "}\n"
   in
   let rec gen_stmt_for_multieq = function
-    | A.Expr(expr) -> (match expr with | A.Builtin("print", el) -> gen_expr expr ^ ";\n"
-                                      | _ -> "return (double) (" ^ gen_expr expr ^ ");\n" )
+    | A.Expr(expr) -> (
+        match expr with
+        | A.Builtin("print", el) -> gen_expr expr ^ ";\n"
+        | A.Assign(left, expr) ->  (
+                match expr with
+                | A.Literal(l) -> "double " ^left ^ "=" ^ string_of_float l ^ ";\n"
+                | _ -> left ^ "=" ^ gen_expr expr ^ ";\n"
+          )
+        | _ -> "return (double) (" ^ gen_expr expr ^ ");\n" )
     | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt_for_multieq stmts)) ^ "}\n"
     | A.Continue -> "continue;\n"
     | A.Break -> "break;\n"
@@ -83,7 +90,7 @@ let translate sast =
                                            (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
                                       "}\n"
   in
-  
+
   let get_id_range finddecl =
     match finddecl.A.frange with
     | [] -> ""
@@ -97,24 +104,24 @@ let translate sast =
     StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
   in
 
-  let gen_function_for_one_ctx ctx = 
-    let rec gen_function_for_multieq count multieq_list = 
+  let gen_function_for_one_ctx ctx =
+    let rec gen_function_for_multieq count multieq_list =
       match multieq_list with
       | [] -> []
-      | hd::tl -> (Printf.sprintf "%s_%d (){\n %s }\n" hd.A.fname count 
+      | hd::tl -> (Printf.sprintf "%s_%d (){\n %s }\n" hd.A.fname count
                     (String.concat "\n" (List.map gen_stmt_for_multieq hd.A.fdbody))
                   ) :: (
                   gen_function_for_multieq (count+1) tl
                   )
-    in String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x) 
+    in String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x)
                 (gen_function_for_multieq 0 ctx.A.cbody))
   in
 
-  let gen_function_call_in_find ctx = 
-    let rec gen_function_call_for_multieq count multieq_list = 
+  let gen_function_call_in_find ctx =
+    let rec gen_function_call_for_multieq count multieq_list =
       match multieq_list with
       | [] -> []
-      | hd::tl -> (Printf.sprintf "%s = %s_%s_%d ();\n" hd.A.fname ctx.A.context hd.A.fname count 
+      | hd::tl -> (Printf.sprintf "%s = %s_%s_%d ();\n" hd.A.fname ctx.A.context hd.A.fname count
                   ) :: (gen_function_call_for_multieq (count+1) tl)
     in String.concat "\n" (gen_function_call_for_multieq 0 ctx.A.cbody)
   in
@@ -176,16 +183,16 @@ let translate sast =
                   )
     in List.rev (gen_wrapped_find_func_prototype 0 finddecl_list)
   in
-  let gen_all_ctx_function = 
+  let gen_all_ctx_function =
     String.concat "\n" (List.map gen_function_for_one_ctx contexts)
   in
-  let get_ctx_by_name ctx_name = 
-    let rec cmp_ctx_with_name ctxlist = 
+  let get_ctx_by_name ctx_name =
+    let rec cmp_ctx_with_name ctxlist =
       match ctxlist with
       | [] -> []
       | hd::tl -> if hd.A.context = ctx_name then [hd]
                   else cmp_ctx_with_name tl
-    in (match cmp_ctx_with_name contexts with 
+    in (match cmp_ctx_with_name contexts with
           | hd::tl -> Some(hd)
           | [] -> None
        )
@@ -194,8 +201,8 @@ let translate sast =
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
     find_funcname ^ " {\n  " ^
     String.concat ""(List.map gen_decl_ctx contexts) ^
-    (match (get_ctx_by_name finddecl.A.fcontext) with | Some(cxt) -> gen_function_call_in_find cxt 
-                                                      | None -> "") ^ 
+    (match (get_ctx_by_name finddecl.A.fcontext) with | Some(cxt) -> gen_function_call_in_find cxt
+                                                      | None -> "") ^
     (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
