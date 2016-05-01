@@ -312,25 +312,25 @@ let check (contexts, finds) =
   in
 
   let check_each_range findBlk =
-    let check_no_str (ctx : string) (target : string) (expr : A.expr) : unit =
+    let check_no_str field ctx (target : string) (expr : A.expr) : unit =
       match expr with
       | A.Strlit(str) -> fail (
           Printf.sprintf
-            "Find block in %s: %s has range with illegal argument, '%s'"
-            ctx target str
+            "Find block in %s: %s has range with illegal %s-argument, '%s'"
+            ctx target field str
         )
       | _ -> ()
     in
 
     let chk_rng (r : A.range) : unit = match r with A.Range(id, st, ed, inc) ->
-      let check_some_expr_not_str optional = match optional with
-        | Some(e) -> check_no_str findBlk.A.fcontext id e
+      let check_some_expr_not_str field optional = match optional with
+        | Some(e) -> check_no_str field findBlk.A.fcontext id e
         | _ -> ()
       in
 
-      check_no_str findBlk.A.fcontext id st;
-      check_some_expr_not_str ed;
-      check_some_expr_not_str inc
+      check_no_str "start" findBlk.A.fcontext id st;
+      check_some_expr_not_str "end" ed;
+      check_some_expr_not_str "increment" inc
     in
 
     match findBlk.A.frange with
