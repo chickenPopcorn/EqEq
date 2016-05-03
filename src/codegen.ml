@@ -10,6 +10,17 @@ let translate sast =
   let (contexts, finds) = sast.S.ast in
   let varmap = sast.S.vars in
   let liblist = sast.S.lib in
+  let eqs = sast.S.eqs in
+
+  let fail msg = raise (Failure msg) in
+
+  (* SAST helper functions *)
+  let get_deps_indeps_from_context ctxname =
+    let ctx_sast = StringMap.find ctxname eqs in
+    (ctx_sast.S.ctx_deps, ctx_sast.S.ctx_indeps)
+  in
+
+  (* SAST helper functions end *)
 
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
@@ -60,7 +71,8 @@ let translate sast =
                                            (String.concat "\n" (List.map gen_stmt stmts)) ^
                                       "}\n"
   in
-  let rec gen_stmt_for_multieq = function
+    (* param is_indeps: whether the stmt is generated for a variable in indeps *)
+  let rec gen_stmt_for_multieq is_indeps = function
     | A.Expr(expr) -> (
         match expr with
         | A.Builtin("print", el) -> gen_expr expr ^ ";\n"
@@ -69,25 +81,28 @@ let translate sast =
                 | A.Literal(l) -> "double " ^left ^ "=" ^ string_of_float l ^ ";\n"
                 | _ -> left ^ "=" ^ gen_expr expr ^ ";\n"
           )
-        | _ -> "return (double) (" ^ gen_expr expr ^ ");\n" )
-    | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt_for_multieq stmts)) ^ "}\n"
+        | _ ->
+          if is_indeps
+          then "(double) (" ^ gen_expr expr ^ ");\n"
+          else "return (double) (" ^ gen_expr expr ^ ");\n" )
+    | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^ "}\n"
     | A.Continue -> "continue;\n"
     | A.Break -> "break;\n"
-    | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
-    (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
+    | A.If (l) ->  (string_of_first_cond_exec is_indeps) (List.hd l) ^ "\n" ^
+    (String.concat "\n" (List.map (string_of_cond_exec is_indeps) (List.tl l)))
 
-  and string_of_first_cond_exec = function
+  and string_of_first_cond_exec is_indeps = function
     | (Some(expr), stmts) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^
-                                          (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
+                                          (String.concat "\n" (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^
                                       "}\n"
     | _ -> ""
 
-  and string_of_cond_exec = function
+  and string_of_cond_exec is_indeps = function
     | (None, stmts) -> "else {\n" ^
-                                    (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
+                                    (String.concat "\n" (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^
                                 "}\n"
     | (Some(expr), stmts) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^
-                                           (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
+                                           (String.concat "\n" (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^
                                       "}\n"
   in
 
@@ -105,15 +120,31 @@ let translate sast =
   in
 
   let gen_function_for_one_ctx ctx =
+    let (deps, indeps) = get_deps_indeps_from_context ctx.A.context in
     let rec gen_function_for_multieq count multieq_list =
       match multieq_list with
       | [] -> []
-      | hd::tl -> (Printf.sprintf "%s_%d (){\n %s }\n" hd.A.fname count
-                    (String.concat "\n" (List.map gen_stmt_for_multieq hd.A.fdbody))
-                  ) :: (
-                  gen_function_for_multieq (count+1) tl
-                  )
-    in String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x)
+      | hd::tl ->
+          if (StringMap.mem hd.A.fname deps) then
+            (Printf.sprintf "%s_%d (%s){\n %s }\n"
+              hd.A.fname count
+              (String.concat ", " (List.map (fun args -> "double " ^ args) (StringMap.find hd.A.fname deps)))
+              (String.concat "\n" (List.map (gen_stmt_for_multieq false) hd.A.fdbody))
+            ) :: (
+            gen_function_for_multieq (count+1) tl
+            )
+          else if (StringMap.mem hd.A.fname indeps) then
+            (Printf.sprintf "%s_%d =  %s"
+              hd.A.fname count
+              (String.concat "\n" (List.map (gen_stmt_for_multieq true) hd.A.fdbody))
+            ) :: (
+            gen_function_for_multieq (count+1) tl
+            )
+          else
+            fail "Something is deeply wrong"
+
+    in
+    String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x)
                 (gen_function_for_multieq 0 ctx.A.cbody))
   in
 
@@ -183,9 +214,6 @@ let translate sast =
                   )
     in List.rev (gen_wrapped_find_func_prototype 0 finddecl_list)
   in
-  let gen_all_ctx_function =
-    String.concat "\n" (List.map gen_function_for_one_ctx contexts)
-  in
   let get_ctx_by_name ctx_name =
     let rec cmp_ctx_with_name ctxlist =
       match ctxlist with
@@ -227,7 +255,7 @@ let translate sast =
 
   in
   String.concat "" lib ^
-  gen_all_ctx_function ^
+  String.concat "\n" (List.map gen_function_for_one_ctx contexts) ^
   String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
   String.concat "" (gen_wrapped_find_func_prototype_list finds) ^
   "int main() {\n" ^
