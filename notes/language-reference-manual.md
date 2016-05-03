@@ -168,6 +168,35 @@ Following are reserved keywords, and have special meaning in the language. See
 + `else`
 + `find`
 + `print`
++ `Global`
+
+Eqeq is translated into C, so it has the same set of reserved keyword as in C in additional to the reserved keywords above. 
++ `int`
++ `double`
++ `char`
++ `float`
++ `const`
++ `void`
++ `short`
++ `struct` 
++ `long`
++ `return`
++ `static`
++ `swtich`
++ `case`
++ `default`
++ `for`
++ `do`
++ `goto`
++ `auto`
++ `signed`
++ `extern` 
++ `register`
++ `enum`
++ `sizeof`
++ `typedef`
++ `union` 
++ `volatile`
 
 
 ## Declarations
@@ -267,7 +296,7 @@ Following are reserved keywords, and have special meaning in the language. See
 6. Scopes (access to variables):
 
   ```c
-  VAR = EXPR
+  VAR = EXPR;
 
   Scope_name {
     list of equations
@@ -284,10 +313,7 @@ Following are reserved keywords, and have special meaning in the language. See
   the bracket follow `Scope_name`.
 
   Any variable declared outside of a `Scope_name` is a global variable that can
-  be accessed from anywhere within the program. If a variable declared in some
-  `Scope_name` has the same name as some global variable, it will overwrite the
-  value within the `Scope_name`.  After getting out of the `Scope_name`, the
-  variable will restore its value.
+  be accessed from anywhere within the program. It can evaluate any variable in the global context and overwrite the expressions in the global context. If a variable declared in some `Scope_name` has the same name as some global variable, it will overwrite the value within the `Scope_name`.  After getting out of the `Scope_name`, the variable will restore its value.
 
   `Scope_name: find VAR [...]` is the evaluation part. A `with` clause is
   optional. See "With Statement" section below. `find` will evaluate the

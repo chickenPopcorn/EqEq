@@ -25,7 +25,7 @@ let check (contexts, finds) =
   in
   let add_multieqs_in_global_contexts_to_contexts tuple =
     { A.context = "Global"; A.cbody = (fst tuple) } ::
-    (List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody })
+    (List.map (fun x -> { A.context = x.A.context; A.cbody = x.A.cbody @ (fst tuple)})
               (snd tuple))
   in
   let new_contexts contexts =
@@ -389,7 +389,7 @@ in
   in
   let add_multieqs_in_global_contexts_to_contexts tuple =
     { A.context = "Global"; A.cbody = (fst tuple) } ::
-    (List.map (fun x -> { A.context = x.A.context; A.cbody = (fst tuple)@ x.A.cbody })
+    (List.map (fun x -> { A.context = x.A.context; A.cbody = x.A.cbody @ (fst tuple) })
               (snd tuple))
   in
   let new_contexts contexts =

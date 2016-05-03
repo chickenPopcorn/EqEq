@@ -1,4 +1,4 @@
-skipb = 23,
+b = 23,
 c = 1;
 
 SomeContext = {
