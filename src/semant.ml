@@ -15,7 +15,42 @@ let check (contexts, finds) =
   let ex_qt expr = A.string_of_expr expr in
   let bop_qt bop = A.string_of_op bop in
   let uop_qt uop = A.string_of_uop uop in
-
+  (* add variable in global context to all the context *)
+  let rec get_global_contexts global_context new_contexts contexts =
+  match contexts with
+  | [] -> (global_context, new_contexts)
+  | hd::tl -> if (hd.A.context = "Global")
+              then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
+              else  (get_global_contexts global_context (hd::new_contexts) tl)
+  in
+  let add_multieqs_in_global_contexts_to_contexts tuple =
+    { A.context = "Global"; A.cbody = (fst tuple) } ::
+    (List.map (fun x -> { A.context = x.A.context; A.cbody = x.A.cbody @ (fst tuple)})
+              (snd tuple))
+  in
+  let new_contexts contexts =
+    add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
+  in
+  let contexts:(A.ctx_decl list) = new_contexts contexts
+  in
+  (* Map of variables to their decls. For more, see: S.varMap *)
+  let varmap =
+    let create_varmap map ctx =
+      if StringMap.mem ctx.A.context map then (
+        fail ("duplicate context, " ^ (quot ctx.A.context))
+      )
+      else
+        StringMap.add
+          ctx.A.context
+          (List.fold_left
+            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
+            StringMap.empty
+            ctx.A.cbody
+          )
+          map
+    in
+    List.fold_left create_varmap StringMap.empty contexts
+  in
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
   let check_assign lvaluet rvaluet err =
@@ -80,24 +115,6 @@ let check (contexts, finds) =
 
     in sastEqRels
   in
-
-  (* Map of variables to their decls. For more, see: S.varMap *)
-  let varmap =
-    let create_varmap map ctx =
-      if StringMap.mem ctx.A.context map
-      then fail ("duplicate context, " ^ (quot ctx.A.context))
-      else
-        StringMap.add
-          ctx.A.context
-          (List.fold_left
-            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
-            StringMap.empty
-            ctx.A.cbody
-          )
-          map
-    in
-    List.fold_left create_varmap StringMap.empty contexts
-   in
    (* list of EqualsEquals symbols that require external library support *)
    let liblist =
     let rec add_lib_expre lis  = function
@@ -294,7 +311,7 @@ let check (contexts, finds) =
       | 0 -> fail ("missing return in equation " ^ quot eqName ^" under context "^quot ctxName)
       | _ -> ()
     in
-     let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context
+    let check_return_eq eq = check_return_count (check_return_stmt_list eq.A.fdbody) eq.A.fname ctxBlk.A.context
     in
     (* TODO: semantic analysis of variables, allow undeclared and all the stuff
      * that makes our lang special... right here!
@@ -363,7 +380,23 @@ in
   (* check Break and Continue for the finds *)
   let check_find_break_continue findBlk = List.iter (check_stmt_break_continue "Finds_Declaration" "") findBlk.A.fbody
   in
-
+  let rec get_global_contexts global_context new_contexts contexts =
+    match contexts with
+    | [] -> (global_context, new_contexts)
+    | hd::tl -> if (hd.A.context = "Global")
+                then (get_global_contexts (global_context @ hd.A.cbody) new_contexts tl)
+                else  (get_global_contexts global_context (hd::new_contexts) tl)
+  in
+  let add_multieqs_in_global_contexts_to_contexts tuple =
+    { A.context = "Global"; A.cbody = (fst tuple) } ::
+    (List.map (fun x -> { A.context = x.A.context; A.cbody = x.A.cbody @ (fst tuple) })
+              (snd tuple))
+  in
+  let new_contexts contexts =
+    add_multieqs_in_global_contexts_to_contexts (get_global_contexts ([]:(A.multi_eq list)) ([]:(A.ctx_decl list)) contexts)
+  in
+  let contexts:(A.ctx_decl list) = new_contexts contexts
+  in
   List.iter check_ctx_break_continue contexts;
   List.iter check_find_break_continue finds;
   List.iter check_range finds;

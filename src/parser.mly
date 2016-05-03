@@ -46,18 +46,29 @@ decls:
 
 /* TODO: improve funcdeclt_list to make it better */
 ctxtdecl:
-   CTX ASSIGN LBRACE funcdecl_list RBRACE
-     { { context = $1; cbody = List.rev $4 } }
+  | CTX ASSIGN LBRACE funcdecl_list RBRACE
+    { { context = $1; cbody = List.rev $4 } }
+  | global_assign global_assign_list SEMI
+    { { context = "Global"; cbody = $1 :: (List.rev $2) } }
+
+
+global_assign:
+  | ID ASSIGN LITERAL
+    { { fname = $1; fdbody = [Expr(Literal($3))] } }
+
+global_assign_list:
+   /* nothing */ { [] }
+  | global_assign_list COMMA global_assign { $3 :: $1 }
 
 funcdecl:
-   ID ASSIGN LBRACE stmt_list RBRACE
-     { { fname = $1; fdbody = List.rev $4 } }
-   | ID ASSIGN stmt
-       { { fname = $1; fdbody = [$3] } }
+    ID ASSIGN LBRACE stmt_list RBRACE
+      { { fname = $1; fdbody = List.rev $4 } }
+  | ID ASSIGN stmt
+      { { fname = $1; fdbody = [$3] } }
 
 finddecl:
    FIND ID LBRACE stmt_list RBRACE
-     { { fcontext = ""; (* global context *)
+     { { fcontext = "Global"; (* global context *)
          ftarget = $2;
          frange = [];
          fbody = List.rev $4 } }
@@ -67,7 +78,7 @@ finddecl:
          frange = [];
          fbody = List.rev $6 } }
  | FIND ID WITH stmt_list LBRACE stmt_list RBRACE
-     { { fcontext = ""; (* global context *)
+     { { fcontext = "Global"; (* global context *)
          ftarget = $2;
          frange = [];
          fbody = (List.rev $4) @ (List.rev $6) } }
@@ -77,7 +88,7 @@ finddecl:
          frange = [];
          fbody = (List.rev $6) @ (List.rev $8) } }
  | FIND ID WITH stmt_list range LBRACE stmt_list RBRACE
-     { { fcontext = ""; (* global context *)
+     { { fcontext = "Global"; (* global context *)
          ftarget = $2;
          frange = [$5];
          fbody = (List.rev $4) @ (List.rev $7) } }
