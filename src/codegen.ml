@@ -130,36 +130,41 @@ let translate sast =
       match multieq_list with
       | [] -> []
       | hd::tl ->
-          if (StringMap.mem hd.A.fname deps) then
-            (Printf.sprintf "%s_%d (%s){\n %s }\n"
-              hd.A.fname count
-              (String.concat ", " (List.map (fun args -> "double " ^ args) (StringMap.find hd.A.fname deps)))
-              (String.concat "\n" (List.map (gen_stmt_for_multieq false) hd.A.fdbody))
-            ) :: (
-            gen_function_for_multieq (count+1) tl
-            )
-          else if (StringMap.mem hd.A.fname indeps) then
-            (Printf.sprintf "%s_%d =  %s"
-              hd.A.fname count
-              (String.concat "\n" (List.map (gen_stmt_for_multieq true) hd.A.fdbody))
-            ) :: (
-            gen_function_for_multieq (count+1) tl
-            )
-          else
-            fail "Something is deeply wrong"
+          let arg_str =
+            if (StringMap.mem hd.A.fname deps) then
+              String.concat ", " (List.map (fun args -> "double " ^ args) (StringMap.find hd.A.fname deps))
+            else
+              ""
+          in
 
+          (Printf.sprintf "%s_%d (%s){\n%s}\n"
+            hd.A.fname count
+            arg_str
+            (String.concat "\n" (List.map (gen_stmt_for_multieq false) hd.A.fdbody))
+          ) :: (
+          gen_function_for_multieq (count+1) tl
+          )
     in
     String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x)
                 (gen_function_for_multieq 0 ctx.A.cbody))
   in
 
-  let gen_function_call_in_find ctx =
-    let rec gen_function_call_for_multieq count multieq_list =
-      match multieq_list with
-      | [] -> []
-      | hd::tl -> (Printf.sprintf "%s = %s_%s_%d ();\n" hd.A.fname ctx.A.context hd.A.fname count
-                  ) :: (gen_function_call_for_multieq (count+1) tl)
-    in String.concat "\n" (gen_function_call_for_multieq 0 ctx.A.cbody)
+  let rec gen_multieq_call_in_find (deps, indeps) visited varmap_for_ctx var =
+    let multieq_name = (StringMap.find var varmap_for_ctx).A.fname in
+
+    if StringMap.mem var visited then
+      ""
+    else
+      let visited = StringMap.add var "" visited in
+
+      if StringMap.mem var deps then
+        let deplist = StringMap.find var deps in
+        String.concat "\n" (List.map (gen_multieq_call_in_find (deps, indeps) (StringMap.add var "" visited) varmap_for_ctx) deplist) ^
+        Printf.sprintf "%s = %s(%s);\n" var multieq_name (String.concat ", " deplist)
+      else if StringMap.mem var indeps then
+        Printf.sprintf "%s = %s();\n" var multieq_name
+      else
+        fail "Something is deeply wrong"
   in
 
   let gen_finddecl finddecl =
@@ -228,15 +233,23 @@ let translate sast =
           | [] -> None
        )
   in
-  let gen_find_function find_funcname finddecl =
+
+  (* return: {variable_name: multieqname}, type String StringMap.t *)
+  let gen_find_function findname finddecl =
+    let (deps, indeps) = get_deps_indeps_from_context finddecl.A.fcontext in
+    let varmap_for_ctx = StringMap.find finddecl.A.fcontext varmap in
+    let varlist = StringMap.fold (fun key value lst -> key::lst) varmap_for_ctx [] in
+
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
-    "void " ^ find_funcname ^ "(" ^
-    ((fun x -> match x with "" -> " "
-                           | _ -> "double " ^ x ) (get_id_range finddecl)) ^
+    "void " ^ findname ^ "(" ^
+    ((fun x -> match x with | "" -> " "
+                            | _ -> "double " ^ x ) (get_id_range finddecl)) ^
     ")" ^ "{\n" ^
     String.concat ""(List.map gen_decl_ctx contexts) ^
-    (match (get_ctx_by_name finddecl.A.fcontext) with | Some(cxt) -> gen_function_call_in_find cxt
-                                                      | None -> "") ^
+    (match (get_ctx_by_name finddecl.A.fcontext) with
+      | Some(cxt) -> String.concat "\n" (List.map (gen_multieq_call_in_find (deps, indeps) StringMap.empty varmap_for_ctx) varlist)
+      | None -> ""
+    ) ^ "\n" ^
     (gen_finddecl finddecl) ^ "}\n" ^
     "\n"
   in
