@@ -150,7 +150,11 @@ let translate sast =
   in
 
   let rec gen_multieq_call_in_find (deps, indeps) visited varmap_for_ctx var =
-    let multieq_name = (StringMap.find var varmap_for_ctx).A.fname in
+    let multieq_name =
+      (try StringMap.find var varmap_for_ctx
+        with Not_found -> fail ("Something is deeply wrong (multieq_name): " ^ var)
+      ).A.fname
+    in
 
     if StringMap.mem var visited then
       ""

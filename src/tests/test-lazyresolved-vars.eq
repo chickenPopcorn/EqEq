@@ -35,6 +35,7 @@ void find_SomeCtx_0() {
   double c;
   double b;
   double a;
+  double d;
 
   c = SomeCtx_c_2;
 
