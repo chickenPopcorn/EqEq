@@ -20,6 +20,11 @@ let translate sast =
     (ctx_sast.S.ctx_deps, ctx_sast.S.ctx_indeps)
   in
 
+  let get_find_from_context ctxname findname =
+    let ctx_sast = StringMap.find ctxname eqs in
+    StringMap.find findname ctx_sast.S.ctx_finds
+  in
+
   (* SAST helper functions end *)
 
   let rec gen_expr = function
@@ -160,16 +165,14 @@ let translate sast =
   let gen_finddecl finddecl =
     String.concat "" (List.map gen_stmt finddecl.A.fbody)
   in
-  let gen_find_func_prototype_list finddecl_list =
-    let rec gen_find_func_prototype count find_list =
-      match find_list with
-      | [] -> []
-      | hd::tl -> ("void " ^ "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^
-                   " (" ^ ((fun x -> match x with "" -> " "
-                                                 | _ -> "double " ^ x ) (get_id_range hd)) ^ ")"
-                  )::(gen_find_func_prototype (count+1) tl)
-    in List.rev (gen_find_func_prototype 0 finddecl_list)
+
+  let rec gen_findname_from_find count = function
+    | [] -> []
+    | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count))
+                ::
+                (gen_findname_from_find (count+1) tl)
   in
+
   let gen_wrapped_find_func_prototype_list finddecl_list =
     let get_for_loop_range finddecl =
       match finddecl.A.frange with
@@ -227,7 +230,10 @@ let translate sast =
   in
   let gen_find_function find_funcname finddecl =
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
-    find_funcname ^ " {\n  " ^
+    "void " ^ find_funcname ^ "(" ^
+    ((fun x -> match x with "" -> " "
+                           | _ -> "double " ^ x ) (get_id_range finddecl)) ^
+    ")" ^ "{\n" ^
     String.concat ""(List.map gen_decl_ctx contexts) ^
     (match (get_ctx_by_name finddecl.A.fcontext) with | Some(cxt) -> gen_function_call_in_find cxt
                                                       | None -> "") ^
@@ -256,7 +262,7 @@ let translate sast =
   in
   String.concat "" lib ^
   String.concat "\n" (List.map gen_function_for_one_ctx contexts) ^
-  String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
+  String.concat "" (List.map2 gen_find_function (gen_findname_from_find 0 finds) finds) ^
   String.concat "" (gen_wrapped_find_func_prototype_list finds) ^
   "int main() {\n" ^
   String.concat "" (gen_find_func_call_list finds) ^
