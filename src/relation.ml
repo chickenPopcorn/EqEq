@@ -121,16 +121,16 @@ let rec asrt_resolves (root : string) (m : S.equation_relations S.IntMap.t) i =
  *)
 (* TODO(BUG) `mustResolve` not implemented; ie: practically, always `true`. *)
 let rec stRelator (mustResolve: bool) ((m : S.equation_relations S.IntMap.t), (i : int)) (st : A.stmt) =
-  let rec findExprRelator (eMap, idx) (expr : A.expr) =
+  let rec exprRelator (eMap, idx) (expr : A.expr) =
     let i = idx + 1 in match expr with
     | A.Id(id) -> asrt_resolves id eMap i; (eMap, i)
     | A.Literal(_) | A.Strlit(_) -> (eMap, i)
     | A.Binop(eLeft, _, eRight) ->
-      findExprRelator (findExprRelator (eMap, i) eLeft) eRight
-    | A.Unop(_, e) -> findExprRelator (eMap, i) e
+      exprRelator (exprRelator (eMap, i) eLeft) eRight
+    | A.Unop(_, e) -> exprRelator (eMap, i) e
     | A.Assign(id, e) ->
       (** traverse depth first *)
-      let (m, i) = findExprRelator (eMap, i) e in
+      let (m, i) = exprRelator (eMap, i) e in
 
       let current = latest i m in
       let deps = List.filter (fun dep -> dep <> id) (get_ids e) in
@@ -148,23 +148,23 @@ let rec stRelator (mustResolve: bool) ((m : S.equation_relations S.IntMap.t), (i
             S.indeps = StringMap.add id [A.Expr(e)] current.S.indeps;
           }
       in ((S.IntMap.add i forked m), i)
-    | A.Builtin(_, exprLis) -> List.fold_left findExprRelator (eMap, i) exprLis
+    | A.Builtin(_, exprLis) -> List.fold_left exprRelator (eMap, i) exprLis
   in
 
-  let findStmtLi acc (sLi : A.stmt list) =
+  let stLiRelator acc (sLi : A.stmt list) =
     List.fold_left (fun a s -> stRelator mustResolve a s) acc sLi
 
   in match st with
   | A.Break | A.Continue -> (m, i)
-  | A.Expr(e) -> findExprRelator (m, i) e
+  | A.Expr(e) -> exprRelator (m, i) e
   | A.If(stmtTupleWithOptionalExpr) ->
     let rec relationsInIf accum = function
       | [] -> accum
-      | (None, sLi)::tail -> relationsInIf (findStmtLi accum sLi) tail
+      | (None, sLi)::tail -> relationsInIf (stLiRelator accum sLi) tail
       | (Some(e), sLi)::tail ->
-        relationsInIf (findStmtLi (findExprRelator accum e) sLi) tail
+        relationsInIf (stLiRelator (exprRelator accum e) sLi) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
-  | A.While(e, sLi) -> findStmtLi (findExprRelator (m, i) e) sLi
+  | A.While(e, sLi) -> stLiRelator (exprRelator (m, i) e) sLi
 
 (* List.fold_left handler for find decl's fbody. *)
 let findStmtRelator a (st : A.stmt) = stRelator true (*mustResolve*) a st
