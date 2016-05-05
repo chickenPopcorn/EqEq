@@ -328,20 +328,31 @@ let check (contexts, finds) =
     List.iter check_eq ctxBlk.A.cbody; List.iter check_return_eq ctxBlk.A.cbody
   in
 
-  let check_range findBlk =
-      match findBlk.A.frange with
-      | [] -> ()
-      | hd::tl -> (match hd with
-        A.Range(id, st, ed, inc) -> (match st with A.Strlit(str) -> fail ( "Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                   | _ -> ());
-                                    (match ed with Some(str) ->
-                                      (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                      | _ -> ())
-                                                   | _ -> ());
-                                    (match inc with Some(str) ->
-                                      (match str with A.Strlit(str) -> fail ("Find block in " ^ findBlk.A.fcontext ^ ": " ^ id ^ " has range with illegal argument, " ^ quot str)
-                                                      | _ -> ())
-                                                   | _ -> ()))
+  let check_each_range findBlk =
+    let check_no_str field ctx (target : string) (expr : A.expr) : unit =
+      match expr with
+      | A.Strlit(str) -> fail (
+          Printf.sprintf
+            "Find block in %s: %s has range with illegal %s-argument, '%s'"
+            ctx target field str
+        )
+      | _ -> ()
+    in
+
+    let chk_rng (r : A.range) : unit = match r with A.Range(id, st, ed, inc) ->
+      let check_some_expr_not_str field optional = match optional with
+        | Some(e) -> check_no_str field findBlk.A.fcontext id e
+        | _ -> ()
+      in
+
+      check_no_str "start" findBlk.A.fcontext id st;
+      check_some_expr_not_str "end" ed;
+      check_some_expr_not_str "increment" inc
+    in
+
+    match findBlk.A.frange with
+    | [] -> ()
+    | hd::tl -> chk_rng hd
   in
   (**** Checking Find blocks ****)
   let check_find findBlk =
@@ -399,7 +410,7 @@ in
   in
   List.iter check_ctx_break_continue contexts;
   List.iter check_find_break_continue finds;
-  List.iter check_range finds;
+  List.iter check_each_range finds;
   List.iter check_ctx contexts;
   List.iter check_find finds;
 

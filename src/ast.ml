@@ -39,6 +39,7 @@ type ctx_decl = {
 type find_decl = {
     fcontext : string;
     ftarget : string;
+    (* TODO: update range to not be a list *)
     frange: range list;
     fbody : stmt list;
   }
