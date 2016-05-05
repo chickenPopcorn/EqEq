@@ -337,27 +337,27 @@ let check (contexts, finds) =
       let ctx_name = findBlk.A.fcontext in
       try StringMap.find ctx_name varmap
       with Not_found -> fail ("unrecognized context, " ^ quot ctx_name)
+    in
+    (* Verify a particular `statement` in `find` or throw an exception *)
+    let rec check_stmt_for_find = function
+        | A.Expr e -> check_expr e;(
+          match e with
+          | A.Builtin(name, expr) -> ()
+          | A.Assign(left, expr) -> ()
+          | a -> fail ("invalid return in find " ^ quot (ex_qt  a))
+        )
+        (*check_expr e*)
+        | A.If(l) -> let rec check_if_list = function
+                      | [] -> ()
+                      | hd::tl -> check_if hd; check_if_list tl
+                      in check_if_list l
+        | A.While(p, stmts) -> check_expr p; List.iter check_stmt_for_find stmts
+        | A.Continue -> ()
+        | A.Break -> ()
+    in
+      ignore (check_have_var findBlk.A.ftarget symbolmap);
+      List.iter check_stmt_for_find findBlk.A.fbody
   in
-  (* Verify a particular `statement` in `find` or throw an exception *)
-  let rec check_stmt_for_find = function
-      | A.Expr e -> check_expr e;(
-        match e with
-        | A.Builtin(name, expr) -> ()
-        | A.Assign(left, expr) -> ()
-        | a -> fail ("invalid return in find " ^ quot (ex_qt  a))
-      )
-      (*check_expr e*)
-      | A.If(l) -> let rec check_if_list = function
-                    | [] -> ()
-                    | hd::tl -> check_if hd; check_if_list tl
-                    in check_if_list l
-      | A.While(p, stmts) -> check_expr p; List.iter check_stmt_for_find stmts
-      | A.Continue -> ()
-      | A.Break -> ()
-  in
-    ignore (check_have_var findBlk.A.ftarget symbolmap);
-    List.iter check_stmt_for_find findBlk.A.fbody
-in
   (*add function to cheack the usage of Break and Continue
     Break & Continue are allowed only in While loop *)
   (* check Break and Continue for the contexts *)
