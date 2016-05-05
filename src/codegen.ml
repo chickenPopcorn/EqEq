@@ -2,6 +2,7 @@
 
 module A = Ast
 module S = Sast
+module IntMap = S.IntMap
 
 module StringMap = Map.Make(String)
 
@@ -117,11 +118,31 @@ let translate sast =
     | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> id)
   in
 
+  let gen_varlist varname _ varlist =
+    if StringMap.mem varname varlist then
+      varlist
+    else
+      StringMap.add varname "whatever" varlist
+  in
+
+  let gen_varlist_from_find_relation _ relation varlist =
+    let varlist =
+      StringMap.fold gen_varlist relation.S.deps varlist
+    in
+    StringMap.fold gen_varlist relation.S.indeps varlist
+  in
+
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
   in
-  let gen_decl_ctx ctx =
-    StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
+
+  let gen_decl_ctx_and_find (find_sast: S.equation_relations IntMap.t) ctxname =
+    let varmap_for_ctx = StringMap.find ctxname varmap in
+    (* varlist: is a map of with the key is the variable needed to generate declaration for variables *)
+    let varlist = StringMap.fold gen_varlist varmap_for_ctx StringMap.empty in
+    let varlist = IntMap.fold gen_varlist_from_find_relation find_sast varlist in
+
+    StringMap.fold gen_decl_var varlist "\n"
   in
 
   let gen_function_for_one_ctx ctx =
@@ -241,6 +262,7 @@ let translate sast =
   (* return: {variable_name: multieqname}, type String StringMap.t *)
   let gen_find_function findname finddecl =
     let (deps, indeps) = get_deps_indeps_from_context finddecl.A.fcontext in
+    let find_sast = get_find_from_context finddecl.A.fcontext findname in
     let varmap_for_ctx = StringMap.find finddecl.A.fcontext varmap in
     let varlist = StringMap.fold (fun key value lst -> key::lst) varmap_for_ctx [] in
 
@@ -249,7 +271,7 @@ let translate sast =
     ((fun x -> match x with | "" -> " "
                             | _ -> "double " ^ x ) (get_id_range finddecl)) ^
     ")" ^ "{\n" ^
-    String.concat ""(List.map gen_decl_ctx contexts) ^
+    gen_decl_ctx_and_find find_sast finddecl.A.fcontext ^
     (match (get_ctx_by_name finddecl.A.fcontext) with
       | Some(cxt) -> String.concat "\n" (List.map (gen_multieq_call_in_find (deps, indeps) StringMap.empty varmap_for_ctx) varlist)
       | None -> ""
