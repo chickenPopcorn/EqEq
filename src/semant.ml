@@ -336,7 +336,6 @@ let check (contexts, finds) =
     match findBlk.A.frange with
     | [] -> ()
     | hd::tl -> chk_rng hd
-    (* TODO: why are we just dropping tail? *) 
   in
   (**** Checking Find blocks ****)
   let check_find findBlk =
