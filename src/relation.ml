@@ -63,9 +63,16 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
       let ctx_body_folder (deps, indeps) mEq =
         let multi_eq_folder (deps, indeps) mEqBody =
           let foundDeps = getStmtDeps mEqBody in
+          let eqName = mEq.A.fname in
           if List.length foundDeps > 0
-          then (StringMap.add mEq.A.fname foundDeps deps, indeps)
-          else (deps, StringMap.add mEq.A.fname mEq.A.fdbody indeps)
+          then (
+            StringMap.add eqName foundDeps deps,
+            StringMap.remove eqName indeps
+          )
+          else (
+            StringMap.remove eqName deps,
+            StringMap.add eqName mEq.A.fdbody indeps
+          )
 
         in List.fold_left multi_eq_folder (deps, indeps) mEq.A.fdbody
 
