@@ -18,7 +18,7 @@ let get_ids (e : A.expr) : string list =
   in ids e []
 
 (* Newest value in `map`; ie: where largest key <= `i` *)
-let latest (asof : int) (m : S.equation_relations S.IntMap.t) =
+let latest (asof : int) (m : S.equation_relations S.IntMap.t) : S.equation_relations =
   let rec walkBack i =
     try S.IntMap.find i m with Not_found ->
       if i > 0 then walkBack (i - 1) else fail (
@@ -115,8 +115,12 @@ let rec asrt_resolves (root : string) (m : S.equation_relations S.IntMap.t) i =
     in terminates id StringMap.empty;
   in check_deps_resolvable root
 
-(* List.fold_left handler for find decl's fbody. *)
-let rec findStmtRelator (m, i) (st : A.stmt) =
+(* Statement relator; a `List.fold_left` handler for list of statements.
+ * - mustResolve: whether to throw for unresolvable statements dependencies
+ * - (m, i): accumulator to return. `S.equation_relations`
+ *)
+(* TODO(BUG) `mustResolve` not implemented; ie: practically, always `true`. *)
+let rec stRelator (mustResolve: bool) ((m : S.equation_relations S.IntMap.t), (i : int)) (st : A.stmt) =
   let rec findExprRelator (eMap, idx) (expr : A.expr) =
     let i = idx + 1 in match expr with
     | A.Id(id) -> asrt_resolves id eMap i; (eMap, i)
@@ -148,7 +152,7 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
   in
 
   let findStmtLi acc (sLi : A.stmt list) =
-    List.fold_left (fun a s -> findStmtRelator a s) acc sLi
+    List.fold_left (fun a s -> stRelator mustResolve a s) acc sLi
 
   in match st with
   | A.Break | A.Continue -> (m, i)
@@ -161,3 +165,11 @@ let rec findStmtRelator (m, i) (st : A.stmt) =
         relationsInIf (findStmtLi (findExprRelator accum e) sLi) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
   | A.While(e, sLi) -> findStmtLi (findExprRelator (m, i) e) sLi
+
+(* List.fold_left handler for find decl's fbody. *)
+let findStmtRelator a (st : A.stmt) = stRelator true (*mustResolve*) a st
+
+(* List.fold_left handler for an equation's statements in a context. *)
+let contextEqRelator acc (st : A.stmt) : S.equation_relations =
+  let (rels, peek) = stRelator false (*mustResolve*) acc st
+  in latest peek rels
