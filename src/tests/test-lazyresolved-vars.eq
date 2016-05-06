@@ -42,7 +42,7 @@ void find_SomeCtx_0() {
 
   b = SomeCtx_b_1(c);
 
-  a = SomeCtx_a_0(SomeCtx_b_1(SomeCtx_c_2));
+  a = SomeCtx_a_0(b);
 
   f = SomeCtx_f_3;
 
@@ -51,6 +51,8 @@ void find_SomeCtx_0() {
   printf("a = %.0f (when b = %.0f)\n", (double) (a), (double) (b));
 
   b = 2.;
+
+  a = SomeCtx_a_0(b);
 
   printf("a = %.0f (when b = %.0f)\n", (double) (a), (double) (b));
 }
