@@ -20,9 +20,9 @@ let context_id = uppercase identifier
 let whitespace = [' ' '\t' '\r']
 let newline = '\n' | "\r\n"
 let reserved = ("int" | "double" | "char" | "float" | "const" | "void" | "short" | "struct" 
-				| "long" | "return" | "static" | "swtich" | "case" | "default" | "for" | "do" | "go to"
+				| "long" | "return" | "static" | "swtich" | "case" | "default" | "for" | "do" | "goto"
 				| "auto" | "signed" | "extern" | "register" | "enum" | "sizeof" | "typedef" | "union" 
-				| "volatile")
+				| "volatile" | "Global")
 
 rule token = parse
 | whitespace                 { token lexbuf }
