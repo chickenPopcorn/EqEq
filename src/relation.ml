@@ -55,72 +55,128 @@ let rec getStmtDeps (stmt : A.stmt) : string list =
     | A.While(e, s) -> getExprIDs (accumStmtLi foundDeps s) e
   in getAssignDeps [] stmt
 
+let check_deps_resolvable (id : string) (m : S.equation_relations) : unit =
+  (* Asserts identifier terminates in `m`, and hasn't already been seen. *)
+  let rec terminates (target : string) (seen : bool StringMap.t) : unit =
+    if StringMap.mem target seen
+    then fail (
+      "Cyclical dependency under, " ^
+      quot target ^ "; stopped at ID=" ^ quot id
+    )
+    else if not (StringMap.mem target m.S.indeps) then (
+      if StringMap.mem target m.S.deps
+      then
+        List.iter (
+          fun dp -> terminates dp (StringMap.add target true seen);
+        ) (StringMap.find target m.S.deps)
+      else
+        fail (
+          "Unresolvable identifier, " ^ (quot target) ^
+          " found while following " ^ (quot id) ^
+          "'s dependency chain."
+        );
+    )
+  in terminates id StringMap.empty
+
+(* List.fold_left handler for a context.A.cbody; Returns its accumulator. *)
+let ctxBodyRelator ((m : S.equation_relations), (urs : string list)) (meq : A.multi_eq) =
+  let is_resolvable id m : bool =
+    try
+      check_deps_resolvable id m;
+      true
+    with _ -> false
+  in
+
+  let rec exprRelator (eRels, unresolveds) = function
+    | A.Id(id) ->
+        if is_resolvable id eRels
+        then (eRels, unresolveds)
+        else (eRels, id::unresolveds)
+    | A.Literal(_) | A.Strlit(_) -> (eRels, unresolveds)
+    | A.Binop(eLeft, _, eRight) ->
+      exprRelator (exprRelator (eRels, unresolveds) eLeft) eRight
+    | A.Unop(_, e) -> exprRelator (eRels, unresolveds) e
+    | A.Assign(id, e) ->
+      (** traverse depth first *)
+      let (current, u) = exprRelator (eRels, unresolveds) e in
+
+      let forked : S.equation_relations =
+        if List.length u > 0
+        then
+          {
+            S.deps = StringMap.add id u current.S.deps;
+            S.indeps = StringMap.remove id current.S.indeps;
+          }
+        else
+          {
+            S.deps = StringMap.remove id current.S.deps;
+            S.indeps = StringMap.add id [A.Expr(e)] current.S.indeps;
+          }
+      in (forked, u)
+    | A.Builtin(_, exprLis) ->
+        List.fold_left exprRelator (eRels, unresolveds) exprLis
+  in
+
+  let rec stLiRelator acc (sLi : A.stmt list) : (S.equation_relations * string list) =
+    let statementRelator (m, u) = function
+      | A.Break | A.Continue -> (m, u)
+      | A.Expr(e) -> exprRelator (m, u) e
+      | A.If(stmtTupleWithOptionalExpr) ->
+        let rec relationsInIf accum = function
+          | [] -> accum
+          | (None, sLi)::tail -> relationsInIf (stLiRelator accum sLi) tail
+          | (Some(e), sLi)::tail ->
+            relationsInIf (stLiRelator (exprRelator accum e) sLi) tail
+        in relationsInIf (m, u) stmtTupleWithOptionalExpr
+      | A.While(e, sLi) -> stLiRelator (exprRelator (m, u) e) sLi
+    in
+      List.fold_left (fun a s -> statementRelator a s) acc sLi
+  in stLiRelator (m, urs) meq.A.fdbody
+
 (* List.fold_left handler an initial map of contexts' equations, before, and
  * start an empty map for their find blocks. *)
 let relationCtxFolder (relations : S.eqResolutions) ctx =
-  let ctxScope =
-    let (deps, indeps) =
-      let ctx_body_folder (deps, indeps) mEq =
-        let multi_eq_folder (deps, indeps) mEqBody =
-          let foundDeps = getStmtDeps mEqBody in
-          let eqName = mEq.A.fname in
-          if List.length foundDeps > 0
-          then (
-            StringMap.add eqName foundDeps deps,
-            StringMap.remove eqName indeps
-          )
-          else (
-            StringMap.remove eqName deps,
-            StringMap.add eqName mEq.A.fdbody indeps
-          )
+  let diToRelations d i : S.equation_relations =
+    { S.deps = d; S.indeps = i; }
+  in
 
-        in List.fold_left multi_eq_folder (deps, indeps) mEq.A.fdbody
+  let ctxScope =
+    let equationRels : S.equation_relations =
+      let ctx_body_folder rels mEq =
+        let (r, unresolveds) = ctxBodyRelator (rels, []) mEq in
+
+        let eqName = mEq.A.fname in
+        if List.length unresolveds > 0
+        then (
+          diToRelations
+            (StringMap.add eqName unresolveds r.S.deps)
+            (StringMap.remove eqName r.S.indeps)
+        )
+        else (
+          diToRelations
+            (StringMap.remove eqName r.S.deps)
+            (StringMap.add eqName mEq.A.fdbody r.S.indeps)
+        )
 
       in List.fold_left
         ctx_body_folder
-        (StringMap.empty, StringMap.empty)
+        (diToRelations StringMap.empty StringMap.empty)
         ctx.A.cbody
 
     in {
-      S.ctx_deps = deps;
-      S.ctx_indeps = indeps;
+      S.ctx_deps = equationRels.S.deps;
+      S.ctx_indeps = equationRels.S.indeps;
       S.ctx_finds = StringMap.empty; (* is handled using `findStmtRelator` *)
     }
   in StringMap.add ctx.A.context ctxScope relations
 
-let rec asrt_resolves (root : string) (m : S.equation_relations S.IntMap.t) i =
-  let m = latest i m in
 
-  let check_deps_resolvable (id : string) : unit =
-    (* Asserts identifier terminates in `m`, and hasn't already been seen. *)
-    let rec terminates (target : string) (seen : bool StringMap.t) : unit =
-      if StringMap.mem target seen
-      then fail (
-        "Cyclical dependency under, " ^
-        quot target ^ "; stopped at ID=" ^ quot id
-      )
-      else if not (StringMap.mem target m.S.indeps) then (
-        if StringMap.mem target m.S.deps
-        then
-          List.iter (
-            fun dp -> terminates dp (StringMap.add target true seen);
-          ) (StringMap.find target m.S.deps)
-        else
-          fail (
-            "Unresolvable identifier, " ^ (quot target) ^
-            " found while following " ^ (quot id) ^
-            "'s dependency chain."
-          );
-      )
-    in terminates id StringMap.empty;
-  in check_deps_resolvable root
+(* List.fold_left handler for find decl's fbody. *)
+let rec findStmtRelator ((m : S.equation_relations S.IntMap.t), (i : int)) (st : A.stmt) =
+  let asrt_resolves (root : string) (m : S.equation_relations S.IntMap.t) i =
+    check_deps_resolvable root (latest i m)
+  in
 
-(* Statement relator; a `List.fold_left` handler for list of statements.
- * - mustResolve: whether to throw for unresolvable statements dependencies
- * - (m, i): accumulator to return. `S.equation_relations`
- *)
-(* TODO(BUG) `mustResolve` not implemented; ie: practically, always `true`. *)
-let rec stRelator (mustResolve: bool) ((m : S.equation_relations S.IntMap.t), (i : int)) (st : A.stmt) =
   let rec exprRelator (eMap, idx) (expr : A.expr) =
     let i = idx + 1 in match expr with
     | A.Id(id) -> asrt_resolves id eMap i; (eMap, i)
@@ -152,7 +208,7 @@ let rec stRelator (mustResolve: bool) ((m : S.equation_relations S.IntMap.t), (i
   in
 
   let stLiRelator acc (sLi : A.stmt list) =
-    List.fold_left (fun a s -> stRelator mustResolve a s) acc sLi
+    List.fold_left (fun a s -> findStmtRelator a s) acc sLi
 
   in match st with
   | A.Break | A.Continue -> (m, i)
@@ -165,11 +221,3 @@ let rec stRelator (mustResolve: bool) ((m : S.equation_relations S.IntMap.t), (i
         relationsInIf (stLiRelator (exprRelator accum e) sLi) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
   | A.While(e, sLi) -> stLiRelator (exprRelator (m, i) e) sLi
-
-(* List.fold_left handler for find decl's fbody. *)
-let findStmtRelator a (st : A.stmt) = stRelator true (*mustResolve*) a st
-
-(* List.fold_left handler for an equation's statements in a context. *)
-let contextEqRelator acc (st : A.stmt) : S.equation_relations =
-  let (rels, peek) = stRelator false (*mustResolve*) acc st
-  in latest peek rels
