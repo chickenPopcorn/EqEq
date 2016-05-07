@@ -221,3 +221,17 @@ let rec findStmtRelator ((m : S.equation_relations S.IntMap.t), (i : int)) (st :
         relationsInIf (stLiRelator (exprRelator accum e) sLi) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
   | A.While(e, sLi) -> stLiRelator (exprRelator (m, i) e) sLi
+
+
+let findInitRelator (c : S.ctx_scopes) : (S.equation_relations S.IntMap.t * int) =
+  (* Initial map from starting with contexts' own relationships *)
+  let inheritedCtxMap : S.equation_relations S.IntMap.t =
+    let baseRelations : S.equation_relations = {
+      S.indeps = c.S.ctx_indeps;
+      S.deps = c.S.ctx_deps;
+    } in S.IntMap.add 0 baseRelations S.IntMap.empty
+  in
+  let analyzeRangeRelations (m, i) =
+    (* TODO: dig into `range` decl to expand upon `m` *)
+    (m, i)
+  in analyzeRangeRelations (inheritedCtxMap, 0)
