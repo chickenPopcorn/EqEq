@@ -1,7 +1,7 @@
 MyCtx = {
   a = {
-    dep = 10;
-    dep + 1;
+    internalVar = 10;
+    internalVar + 1;
   }
 }
 
