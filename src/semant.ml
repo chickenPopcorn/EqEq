@@ -91,7 +91,7 @@ let check (contexts, finds) =
             let (eqRels, _) =
               List.fold_left
                 R.findStmtRelator
-                (R.findInitRelator ctxScopes)
+                (R.findInitRelator fnDec ctxScopes)
                 fnDec.A.fbody
             in eqRels
           in
