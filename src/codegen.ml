@@ -13,11 +13,11 @@ let translate sast =
   let liblist = sast.S.lib in
   let eqs = sast.S.eqs in
 
-  let fail msg = raise (Failure msg) in
+  (* let fail msg = raise (Failure msg) in *)
 
   (* to remove debug messages: `let debug msg = "" in` *)
-  let debug msg = msg in
-  let info msg = msg in
+  (* let debug msg = msg in *)
+  (* let info msg = msg in *)
 
   (* SAST helper functions *)
   let get_deps_indeps_from_context ctxname =
@@ -216,10 +216,6 @@ let translate sast =
         ""
   in
 
-  let gen_finddecl finddecl =
-    String.concat "" (List.map gen_stmt finddecl.A.fbody)
-  in
-
   let rec gen_findname_from_find count = function
     | [] -> []
     | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count))
@@ -352,7 +348,7 @@ let translate sast =
             (List.map (gen_multieq_call_in_find (deps, indeps) StringMap.empty varmap_for_ctx) varlist)
       | None -> ""
     ) ^ "\n" ^
-    info "//-----gen_finddecl_stmt-----\n" ^
+    (* info "//-----gen_finddecl_stmt-----\n" ^ *)
     (fun (a, _, _) -> a) (List.fold_left gen_finddecl_stmt ("", 0, 0) finddecl.A.fbody) ^
     "}\n\n"
   in

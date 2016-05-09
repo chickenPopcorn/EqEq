@@ -33,24 +33,30 @@ let check (contexts, finds) =
   in
   let contexts:(A.ctx_decl list) = new_contexts contexts
   in
+
   (* Map of variables to their decls. For more, see: S.varMap *)
   let varmap =
     let create_varmap map ctx =
-      if StringMap.mem ctx.A.context map then (
-        fail ("duplicate context, " ^ (quot ctx.A.context))
-      )
+      let gen_varmap (map, count) multieq =
+        let modified_multieq = {
+            A.fname = ctx.A.context ^ "_" ^ multieq.A.fname ^ "_" ^ (string_of_int count);
+            A.fdbody = multieq.A.fdbody;
+          }
+        in
+        (StringMap.add multieq.A.fname modified_multieq map, count + 1)
+      in
+
+      if StringMap.mem ctx.A.context map
+      then fail ("duplicate context, " ^ (quot ctx.A.context))
       else
         StringMap.add
           ctx.A.context
-          (List.fold_left
-            (fun map meqdecl -> StringMap.add meqdecl.A.fname meqdecl map)
-            StringMap.empty
-            ctx.A.cbody
-          )
+          (fst (List.fold_left gen_varmap (StringMap.empty, 0) ctx.A.cbody))
           map
     in
     List.fold_left create_varmap StringMap.empty contexts
-  in
+   in
+
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type
   let check_assign lvaluet rvaluet err =
@@ -112,29 +118,6 @@ let check (contexts, finds) =
 
     in sastEqRels
   in
-
-  (* Map of variables to their decls. For more, see: S.varMap *)
-  let varmap =
-    let create_varmap map ctx =
-      let gen_varmap (map, count) multieq =
-        let modified_multieq = {
-            A.fname = ctx.A.context ^ "_" ^ multieq.A.fname ^ "_" ^ (string_of_int count);
-            A.fdbody = multieq.A.fdbody;
-          }
-        in
-        (StringMap.add multieq.A.fname modified_multieq map, count + 1)
-      in
-
-      if StringMap.mem ctx.A.context map
-      then fail ("duplicate context, " ^ (quot ctx.A.context))
-      else
-        StringMap.add
-          ctx.A.context
-          (fst (List.fold_left gen_varmap (StringMap.empty, 0) ctx.A.cbody))
-          map
-    in
-    List.fold_left create_varmap StringMap.empty contexts
-   in
 
    (* list of EqualsEquals symbols that require external library support *)
    let liblist =
