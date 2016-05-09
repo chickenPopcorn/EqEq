@@ -140,11 +140,25 @@ let translate sast =
     "double " ^ varname ^ ";\n" ^ str
   in
 
-  let gen_decl_ctx_and_find (find_sast: S.equation_relations IntMap.t) ctxname =
+  let gen_decl_ctx_and_find (find_sast: S.equation_relations IntMap.t) finddecl =
+    let ctxname = finddecl.A.fcontext in
+    let rangelist = finddecl.A.frange in
     let varmap_for_ctx = StringMap.find ctxname varmap in
     (* varlist: is a map of with the key is the variable needed to generate declaration for variables *)
     let varlist = StringMap.fold gen_varlist varmap_for_ctx StringMap.empty in
     let varlist = IntMap.fold gen_varlist_from_find_relation find_sast varlist in
+    let varlist =
+      List.fold_left
+        (fun varlist range ->
+          match range with A.Range(varname, _, _, _) ->
+            if StringMap.mem varname varlist then
+              StringMap.remove varname varlist
+            else
+              varlist
+        )
+        varlist
+        rangelist
+    in
 
     StringMap.fold gen_decl_var varlist "\n"
   in
@@ -330,7 +344,7 @@ let translate sast =
     ((fun x -> match x with | "" -> " "
                             | _ -> "double " ^ x ) (get_id_range finddecl)) ^
     ")" ^ "{\n" ^
-    gen_decl_ctx_and_find find_sast finddecl.A.fcontext ^
+    gen_decl_ctx_and_find find_sast finddecl ^
     (match (get_ctx_by_name finddecl.A.fcontext) with
       | Some(cxt) ->
           String.concat
