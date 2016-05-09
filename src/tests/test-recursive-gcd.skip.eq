@@ -1,6 +1,4 @@
 Gcd = {
-    a = 10;
-    b = 20;
     gcd = {
         if (b == 0) { a; }
         else if (a == 0) { b; }
@@ -19,5 +17,7 @@ Gcd = {
 }
 
 Gcd:find gcd {
-  print("gcd between 10 and 20 is %0.f\n", gcd);
+    a = 10;
+    b = 20;
+    print("gcd between %0.f and %0.f is %0.f\n", a, b, gcd);
 }
