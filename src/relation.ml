@@ -189,18 +189,20 @@ let rec findStmtRelator ((m : S.equation_relations S.IntMap.t), (i : int)) (st :
 
       let current = latest i m in
       let deps = List.filter (fun dep -> dep <> id) (get_ids e) in
-
       let forked : S.equation_relations =
-        if List.length deps > 0
+        let isReAssignOfDependent : bool = StringMap.mem id current.S.deps in
+        let isIndependent = List.length deps <= 0 in
+
+        if isReAssignOfDependent || isIndependent
         then
-          {
-            S.deps = StringMap.add id deps current.S.deps;
-            S.indeps = StringMap.remove id current.S.indeps;
-          }
-        else
           {
             S.deps = StringMap.remove id current.S.deps;
             S.indeps = StringMap.add id [A.Expr(e)] current.S.indeps;
+          }
+        else
+          {
+            S.deps = StringMap.add id deps current.S.deps;
+            S.indeps = StringMap.remove id current.S.indeps;
           }
       in ((S.IntMap.add i forked m), i)
     | A.Builtin(_, exprLis) -> List.fold_left exprRelator (eMap, i) exprLis
