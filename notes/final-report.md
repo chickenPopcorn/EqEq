@@ -732,14 +732,54 @@ roles and one example of a part we contributed heavily in
 | Time | Events|
 |------|-------|
 |Jan 25|First Commit|
-|Jan 25|First Commit|
-|Jan 25|First Commit|
-|Jan 25|First Commit|
+|Jan 25|Submitted Project Proposal|
+|April 6|Front End Finished|
+|April 6|Automated Testing on Travis CI|
+|Jan 25|Submitted Language Reference Manual|
+|Jan 25|Successfully Generated Code (“Hello World”)|
+|May 9|Variable Dependency Resolved |
+|May 9|Presentation Presentation|
+|May 11|Project Submission|
 ## Specification
+We chose to make eqeq
 ## Development
+The roadmap for our development was quite straightforward. We decided it was
+important to finish the whole pipeline first with very simple types ­ numerals, booleans,
+strings. Therefore, our first milestone was to make a very basic scanner, parser, and
+generator. We then added the analyzer for type inferences and semantic analysis.
+Finally, we built up the basic pipeline by building in lists and distributions. Whenever we
+worked on a new feature, we always created a new branch and never pushed straight to
+master. No pull request was accepted unless it passed all of the tests and if it didn’t
+break the master branch after merging.
 ## Testing
+While developing the code, we concurrently tested what we wrote. When we initially developeing our language we had `debugtokenizer.ml` and `debug_frontend.py` to test the font end of our language. The first program splits out correct recognized tokens when fed with source code in eqeq, while the second one runs the tokens through `parser.ml` with `menhir`.   After we finish the bulk of the front end of our compiler. We set up automated testing on Travis to test if our language is comipling properly for each commit. All the testing suite and processes will be discussed in detail later in the testing section of this report
 ## Software Development Environment
+**Programming Language Stack**
+- Git Repository (Hosted on Github) for version control system that contains
+the compiler code and test suite
+- Ocaml for scanning, parsing, and semantically checking the odds source
+code and generation of C target code
+- Bash Shell Scripts for running our program given an input eqeq file (.eqeq) and
+an output C file (.c) file, as well as automating testing
+- Makefile for all things compiling, linking, and test related 
+
+
+**Tools**
+- Travis CI for automated continuous integration testing through Github to make
+sure no new code modifies the correct functionality of the language
+- Sublime Text, Atom, vim for text editing, depending on each team member’s
+preference
+
 ## Programming Style Guide
+While programming, all group members followed these following style guidelines to
+ensure our project stayed consistent:
+- Lines of code should not be more than 80 characters
+- No tabs for indentation
+- Indentation is always 4 spaces
+- Naming consistency between the different program files
+- Newline at the end of each file
+- One line between each declaration block
+- White space for readability
 <!-- end project plan } -->
 
 # Translator Architecture <!-- { DRI: Nam -->
