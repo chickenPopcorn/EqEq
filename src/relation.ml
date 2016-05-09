@@ -99,11 +99,13 @@ let ctxBodyRelator ((m : S.equation_relations), (urs : string list)) (meq : A.mu
       (** traverse depth first *)
       let (current, u) = exprRelator (eRels, unresolveds) e in
 
+      let deps = List.sort_uniq String.compare u in
+
       let forked : S.equation_relations =
-        if List.length u > 0
+        if List.length deps > 0
         then
           {
-            S.deps = StringMap.add id u current.S.deps;
+            S.deps = StringMap.add id deps current.S.deps;
             S.indeps = StringMap.remove id current.S.indeps;
           }
         else
@@ -111,7 +113,7 @@ let ctxBodyRelator ((m : S.equation_relations), (urs : string list)) (meq : A.mu
             S.deps = StringMap.remove id current.S.deps;
             S.indeps = StringMap.add id [A.Expr(e)] current.S.indeps;
           }
-      in (forked, u)
+      in (forked, deps)
     | A.Builtin(_, exprLis) ->
         List.fold_left exprRelator (eRels, unresolveds) exprLis
   in
@@ -144,11 +146,13 @@ let relationCtxFolder (relations : S.eqResolutions) ctx =
       let ctx_body_folder rels mEq =
         let (r, unresolveds) = ctxBodyRelator (rels, []) mEq in
 
+        let deps = List.sort_uniq String.compare unresolveds in
+
         let eqName = mEq.A.fname in
-        if List.length unresolveds > 0
+        if List.length deps > 0
         then (
           diToRelations
-            (StringMap.add eqName unresolveds r.S.deps)
+            (StringMap.add eqName deps r.S.deps)
             (StringMap.remove eqName r.S.indeps)
         )
         else (
