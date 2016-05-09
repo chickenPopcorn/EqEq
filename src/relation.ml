@@ -78,15 +78,14 @@ let check_deps_resolvable (id : string) (m : S.equation_relations) : unit =
     )
   in terminates id StringMap.empty
 
+let is_resolvable id m : bool =
+  try
+    check_deps_resolvable id m;
+    true
+  with _ -> false
+
 (* List.fold_left handler for a context.A.cbody; Returns its accumulator. *)
 let ctxBodyRelator ((m : S.equation_relations), (urs : string list)) (meq : A.multi_eq) =
-  let is_resolvable id m : bool =
-    try
-      check_deps_resolvable id m;
-      true
-    with _ -> false
-  in
-
   let rec exprRelator (eRels, unresolveds) = function
     | A.Id(id) ->
         if is_resolvable id eRels
@@ -221,3 +220,73 @@ let rec findStmtRelator ((m : S.equation_relations S.IntMap.t), (i : int)) (st :
         relationsInIf (stLiRelator (exprRelator accum e) sLi) tail
     in relationsInIf (m, i) stmtTupleWithOptionalExpr
   | A.While(e, sLi) -> stLiRelator (exprRelator (m, i) e) sLi
+
+
+let findInitRelator (f : A.find_decl) (c : S.ctx_scopes) : (S.equation_relations S.IntMap.t * int) =
+  let dummyRangeExpr id : A.stmt list =
+    let placeholderMessage =
+      Printf.sprintf
+        "SHOULD NEVER PRINT! dummy placeholder to indicate `%s = range(...)` has no depenences"
+        id
+    in [A.Expr(A.Builtin("print", [A.Strlit(placeholderMessage)]))]
+  in
+  (* Initial map from starting with contexts' own relationships *)
+  let inheritedCtxMap : S.equation_relations S.IntMap.t =
+    let baseRelations : S.equation_relations = {
+      S.indeps = c.S.ctx_indeps;
+      S.deps = c.S.ctx_deps;
+    } in S.IntMap.add 0 baseRelations S.IntMap.empty
+  in
+
+  let range_folder ((m : S.equation_relations S.IntMap.t), (i : int)) (r : A.range) =
+    let (assignTo, start, last, incr) = match r with | A.Range (a, s, l, i) ->
+        (a,        s,     l,    i)
+    in
+
+    let keysOfMap m : string list = StringMap.fold (fun k v li -> k::li) m [] in
+
+    let originalDeps : string list = keysOfMap ((latest i m).S.deps) in
+
+    (* list-compare; is list `newRels` equal to `originalDeps` *)
+    let haveDepsGrown (newDeps : string list) : bool =
+      let left : string list = List.sort String.compare originalDeps in
+      let right : string list = List.sort String.compare newDeps in
+
+        left != right
+    in
+
+    let (rangeRels, idx) =
+      let optExprRelator accum optE : 'accum =
+        match optE with
+        | None -> accum (* do nothing *)
+        | Some(e) -> findStmtRelator accum (A.Expr(e))
+      in
+
+        List.fold_left
+          (fun a optExpr -> optExprRelator a optExpr)
+          (findStmtRelator (m, i) (A.Expr(start)))
+          [last; incr]
+    in
+
+    let forked : S.equation_relations =
+      let id = assignTo in
+      let current = latest idx rangeRels in
+      let newDeps = keysOfMap (current.S.deps) in
+
+      if haveDepsGrown newDeps
+      then
+        {
+          S.deps = StringMap.add id newDeps current.S.deps;
+          S.indeps = StringMap.remove id current.S.indeps;
+        }
+      else
+        {
+          S.deps = StringMap.remove id current.S.deps;
+          S.indeps = StringMap.add id (dummyRangeExpr id) current.S.indeps;
+        }
+    in
+
+    let rangeIdx = idx + 1 in
+
+      ((S.IntMap.add rangeIdx forked rangeRels), rangeIdx)
+  in List.fold_left range_folder (inheritedCtxMap, 0) f.A.frange
