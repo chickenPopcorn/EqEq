@@ -89,13 +89,10 @@ let check (contexts, finds) =
             (* Build a complete map of expresion-index to relations for this
              * find body, then discard the latest index and return that map. *)
             let (eqRels, _) =
-              (* Initial map from starting with contexts' own relationships *)
-              let exprMap : S.equation_relations S.IntMap.t =
-                let baseRelations : S.equation_relations = {
-                  S.indeps = ctxScopes.S.ctx_indeps;
-                  S.deps = ctxScopes.S.ctx_deps;
-                } in S.IntMap.add 0 baseRelations S.IntMap.empty
-              in List.fold_left R.findStmtRelator (exprMap, 0) fnDec.A.fbody
+              List.fold_left
+                R.findStmtRelator
+                (R.findInitRelator fnDec ctxScopes)
+                fnDec.A.fbody
             in eqRels
           in
 

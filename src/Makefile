@@ -30,11 +30,15 @@ debugtokens : debugtokens.ml
 	bash -c 'source $(OPAM_INIT) && ocamlbuild $(OCAM_BLD_OPTS) ./$@.native'
 
 
-.PHONY : clean test eqeq all e2e
+.PHONY : clean test eqeq all e2e warnEqeq
 
 e2e : test lint
 
-test : clean eqeq $(BIN_DIR)/$(TEST_SUITE).sh
+# colorize warnings from ocaml compiler
+warnEqeq:
+	$(MAKE) eqeq | grep --color=auto -E '^|^Warning'
+
+test : clean warnEqeq $(BIN_DIR)/$(TEST_SUITE).sh
 	$(BIN_DIR)/$(TEST_SUITE).sh $(TEST_OPTS)
 
 lint:
