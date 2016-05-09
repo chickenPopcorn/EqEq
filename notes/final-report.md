@@ -717,6 +717,25 @@ the order of their precedence.
 
 # Project Plan <!-- { DRI: Jimmy -->
 ## Roles and Responsibilities
+we assigned four main roles ­ Manager(two), Language Guru, System
+Architect, Tester ­ to each member on the team. As we developed our language.
+The role were not that clearly divided. The team would help each other when we ran into a particularly difficult problem, and assign each other pull request to review before merge. The table below illustrates the main
+roles we split into, and one example of a part we contributed heavily in and/or
+spearheaded:
+| Tables   |      Are      |  
+|----------|:-------------:|
+| col 1 is |  left-aligned |
+| col 2 is |    centered   |
+| col 3 is | right-aligned |
+
+
+| name | Responsibilities|
+|------|-------|
+| Nam Nhat Hoang |  System Architect, SAST, Code Generation|
+| Tianci Zhong   | Manager, Parser, Code Generation|
+| Ruicong Xie    | Manager, Parser, Semantic Analysis|
+| Lanting He     | Tester, Semantic Analysis|
+| Jonathan Zacsh | Language Guru |
 ## Planning
 ## Specification
 ## Development
