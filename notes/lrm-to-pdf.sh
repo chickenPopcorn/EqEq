@@ -42,7 +42,7 @@ printCustomWebDev() {
   <style type="text/css">
     body {
       padding: 4em;
-      font-family: LiberationSerif, serif;
+      font-family: "Latin Modern Roman", LiberationSerif, serif;
       font-size: 12pt;
     }
     #toc,
