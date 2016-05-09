@@ -720,23 +720,21 @@ the order of their precedence.
 we assigned four main roles ­ Manager(two), Language Guru, System
 Architect, Tester ­ to each member on the team. As we developed our language.
 The role were not that clearly divided. The team would help each other when we ran into a particularly difficult problem, and assign each other pull request to review before merge. The table below illustrates the main
-roles we split into, and one example of a part we contributed heavily in and/or
-spearheaded:
-| Tables   |      Are      |  
-|----------|:-------------:|
-| col 1 is |  left-aligned |
-| col 2 is |    centered   |
-| col 3 is | right-aligned |
-
-
+roles and one example of a part we contributed heavily in 
 | name | Responsibilities|
 |------|-------|
-| Nam Nhat Hoang |  System Architect, SAST, Code Generation|
-| Tianci Zhong   | Manager, Parser, Code Generation|
-| Ruicong Xie    | Manager, Parser, Semantic Analysis|
+| Nam Nhat Hoang |  System Architect,  Code Generation|
+| Tianci Zhong   | Manager,  Code Generation|
+| Ruicong Xie    | Manager, Semantic Analysis|
 | Lanting He     | Tester, Semantic Analysis|
-| Jonathan Zacsh | Language Guru |
-## Planning
+| Jonathan Zacsh | Language Guru, Relation|
+## Timeline
+| Time | Events|
+|------|-------|
+|Jan 25|First Commit|
+|Jan 25|First Commit|
+|Jan 25|First Commit|
+|Jan 25|First Commit|
 ## Specification
 ## Development
 ## Testing
