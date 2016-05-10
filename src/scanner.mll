@@ -19,16 +19,16 @@ let context_id = uppercase identifier
 
 let whitespace = [' ' '\t' '\r']
 let newline = '\n' | "\r\n"
-let reserved = ("int" | "double" | "char" | "float" | "const" | "void" | "short" | "struct" 
-				| "long" | "return" | "static" | "swtich" | "case" | "default" | "for" | "do" | "goto"
-				| "auto" | "signed" | "extern" | "register" | "enum" | "sizeof" | "typedef" | "union" 
+let reserved = ("int" | "double" | "char" | "float" | "const" | "void" | "short" | "struct"
+				| "long" | "return" | "static" | "switch" | "case" | "default" | "for" | "do" | "goto"
+				| "auto" | "signed" | "extern" | "register" | "enum" | "sizeof" | "typedef" | "union"
 				| "volatile" | "Global")
 
 rule token = parse
 | whitespace                 { token lexbuf }
 | "/*"                       { comment lexbuf }
 | newline                    { Lexing.new_line lexbuf; token lexbuf }
-| reserved as illegalid      { raise (Failure("illegal namespace " ^ String.escaped illegalid)) } 
+| reserved as illegalid      { raise (Failure("illegal namespace " ^ String.escaped illegalid)) }
 | '('                        { LPAREN }
 | ')'                        { RPAREN }
 | '{'                        { LBRACE }

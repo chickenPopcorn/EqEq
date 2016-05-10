@@ -2,6 +2,7 @@
 
 module A = Ast
 module S = Sast
+module IntMap = S.IntMap
 
 module StringMap = Map.Make(String)
 
@@ -10,6 +11,26 @@ let translate sast =
   let (contexts, finds) = sast.S.ast in
   let varmap = sast.S.vars in
   let liblist = sast.S.lib in
+  let eqs = sast.S.eqs in
+
+  (* let fail msg = raise (Failure msg) in *)
+
+  (* to remove debug messages: `let debug msg = "" in` *)
+  (* let debug msg = msg in *)
+  (* let info msg = msg in *)
+
+  (* SAST helper functions *)
+  let get_deps_indeps_from_context ctxname =
+    let ctx_sast = StringMap.find ctxname eqs in
+    (ctx_sast.S.ctx_deps, ctx_sast.S.ctx_indeps)
+  in
+
+  let get_find_from_context ctxname findname =
+    let ctx_sast = StringMap.find ctxname eqs in
+    StringMap.find findname ctx_sast.S.ctx_finds
+  in
+
+  (* SAST helper functions end *)
 
   let rec gen_expr = function
     | A.Strlit(l) -> "\"" ^ l ^ "\""
@@ -60,7 +81,8 @@ let translate sast =
                                            (String.concat "\n" (List.map gen_stmt stmts)) ^
                                       "}\n"
   in
-  let rec gen_stmt_for_multieq = function
+    (* param is_indeps: whether the stmt is generated for a variable in indeps *)
+  let rec gen_stmt_for_multieq is_indeps = function
     | A.Expr(expr) -> (
         match expr with
         | A.Builtin("print", el) -> gen_expr expr ^ ";\n"
@@ -69,25 +91,28 @@ let translate sast =
                 | A.Literal(l) -> "double " ^left ^ "=" ^ string_of_float l ^ ";\n"
                 | _ -> left ^ "=" ^ gen_expr expr ^ ";\n"
           )
-        | _ -> "return (double) (" ^ gen_expr expr ^ ");\n" )
-    | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map gen_stmt_for_multieq stmts)) ^ "}\n"
+        | _ ->
+          if is_indeps
+          then "(double) (" ^ gen_expr expr ^ ");\n"
+          else "return (double) (" ^ gen_expr expr ^ ");\n" )
+    | A.While(e, stmts) -> "while (" ^ gen_expr e ^ "){\n" ^ String.concat "\n" (List.rev (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^ "}\n"
     | A.Continue -> "continue;\n"
     | A.Break -> "break;\n"
-    | A.If (l) ->  string_of_first_cond_exec (List.hd l) ^ "\n" ^
-    (String.concat "\n" (List.map string_of_cond_exec (List.tl l)))
+    | A.If (l) ->  (string_of_first_cond_exec is_indeps) (List.hd l) ^ "\n" ^
+    (String.concat "\n" (List.map (string_of_cond_exec is_indeps) (List.tl l)))
 
-  and string_of_first_cond_exec = function
+  and string_of_first_cond_exec is_indeps = function
     | (Some(expr), stmts) -> "if (" ^ (gen_expr expr) ^ ")\n {\n" ^
-                                          (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
+                                          (String.concat "\n" (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^
                                       "}\n"
     | _ -> ""
 
-  and string_of_cond_exec = function
+  and string_of_cond_exec is_indeps = function
     | (None, stmts) -> "else {\n" ^
-                                    (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
+                                    (String.concat "\n" (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^
                                 "}\n"
     | (Some(expr), stmts) -> "else if (" ^ (gen_expr expr) ^ ")\n {\n" ^
-                                           (String.concat "\n" (List.map gen_stmt_for_multieq stmts)) ^
+                                           (String.concat "\n" (List.map (gen_stmt_for_multieq is_indeps) stmts)) ^
                                       "}\n"
   in
 
@@ -97,48 +122,107 @@ let translate sast =
     | hd :: tl -> (match hd with A.Range(id, st, ed, inc) -> id)
   in
 
+  let gen_varlist varname _ varlist =
+    if StringMap.mem varname varlist then
+      varlist
+    else
+      StringMap.add varname "whatever" varlist
+  in
+
+  let gen_varlist_from_find_relation _ relation varlist =
+    let varlist =
+      StringMap.fold gen_varlist relation.S.deps varlist
+    in
+    StringMap.fold gen_varlist relation.S.indeps varlist
+  in
+
   let gen_decl_var varname funcdecl str =
     "double " ^ varname ^ ";\n" ^ str
   in
-  let gen_decl_ctx ctx =
-    StringMap.fold gen_decl_var (StringMap.find ctx.A.context varmap) "\n"
+
+  let gen_decl_ctx_and_find (find_sast: S.equation_relations IntMap.t) finddecl =
+    let ctxname = finddecl.A.fcontext in
+    let rangelist = finddecl.A.frange in
+    let varmap_for_ctx = StringMap.find ctxname varmap in
+    (* varlist: is a map of with the key is the variable needed to generate declaration for variables *)
+    let varlist = StringMap.fold gen_varlist varmap_for_ctx StringMap.empty in
+    let varlist = IntMap.fold gen_varlist_from_find_relation find_sast varlist in
+    let varlist =
+      List.fold_left
+        (fun varlist range ->
+          match range with A.Range(varname, _, _, _) ->
+            if StringMap.mem varname varlist then
+              StringMap.remove varname varlist
+            else
+              varlist
+        )
+        varlist
+        rangelist
+    in
+
+    StringMap.fold gen_decl_var varlist "\n"
   in
 
   let gen_function_for_one_ctx ctx =
+    let (deps, indeps) = get_deps_indeps_from_context ctx.A.context in
     let rec gen_function_for_multieq count multieq_list =
       match multieq_list with
       | [] -> []
-      | hd::tl -> (Printf.sprintf "%s_%d (){\n %s }\n" hd.A.fname count
-                    (String.concat "\n" (List.map gen_stmt_for_multieq hd.A.fdbody))
-                  ) :: (
-                  gen_function_for_multieq (count+1) tl
-                  )
-    in String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x)
+      | hd::tl ->
+          let arg_str =
+            if (StringMap.mem hd.A.fname deps) then
+              String.concat ", " (List.map (fun args -> "double " ^ args) (StringMap.find hd.A.fname deps))
+            else
+              ""
+          in
+
+          (Printf.sprintf "%s_%d (%s){\n%s}\n"
+            hd.A.fname count
+            arg_str
+            (String.concat "\n" (List.map (gen_stmt_for_multieq false) hd.A.fdbody))
+          ) :: (
+          gen_function_for_multieq (count+1) tl
+          )
+    in
+    String.concat "\n" (List.map (fun x -> Printf.sprintf "double %s_%s" ctx.A.context x)
                 (gen_function_for_multieq 0 ctx.A.cbody))
   in
 
-  let gen_function_call_in_find ctx =
-    let rec gen_function_call_for_multieq count multieq_list =
-      match multieq_list with
-      | [] -> []
-      | hd::tl -> (Printf.sprintf "%s = %s_%s_%d ();\n" hd.A.fname ctx.A.context hd.A.fname count
-                  ) :: (gen_function_call_for_multieq (count+1) tl)
-    in String.concat "\n" (gen_function_call_for_multieq 0 ctx.A.cbody)
+  (* NOTE: this's still not working as expected... `visited` doesn't prevent duplicate assignments *)
+  (*       but since duplicates are not a problem we don't neccessarily have to fix this if we don't have time *)
+  let rec gen_multieq_call_in_find (deps, indeps) visited varmap_for_ctx varname =
+    if StringMap.mem varname visited then
+      ""
+    else if not (StringMap.mem varname varmap_for_ctx) then
+      (* happens when a variable is first defined in `finddecl` *)
+      ""
+    else
+      let multieq_name = (StringMap.find varname varmap_for_ctx).A.fname in
+      let visited = StringMap.add varname "" visited in
+
+      if StringMap.mem varname deps then
+        let deplist = StringMap.find varname deps in
+        String.concat
+          "\n"
+          (List.map
+            (gen_multieq_call_in_find (deps, indeps) (StringMap.add varname "" visited) varmap_for_ctx)
+            deplist)
+        ^
+        Printf.sprintf "%s = %s(%s);\n" varname multieq_name (String.concat ", " deplist)
+      else if StringMap.mem varname indeps then
+        Printf.sprintf "%s = %s();\n" varname multieq_name
+      else
+        (* assume that the variable is declared elsewhere before this function is called *)
+        ""
   in
 
-  let gen_finddecl finddecl =
-    String.concat "" (List.map gen_stmt finddecl.A.fbody)
+  let rec gen_findname_from_find count = function
+    | [] -> []
+    | hd::tl -> ("find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count))
+                ::
+                (gen_findname_from_find (count+1) tl)
   in
-  let gen_find_func_prototype_list finddecl_list =
-    let rec gen_find_func_prototype count find_list =
-      match find_list with
-      | [] -> []
-      | hd::tl -> ("void " ^ "find_" ^ hd.A.fcontext ^ "_" ^ (string_of_int count) ^
-                   " (" ^ ((fun x -> match x with "" -> " "
-                                                 | _ -> "double " ^ x ) (get_id_range hd)) ^ ")"
-                  )::(gen_find_func_prototype (count+1) tl)
-    in List.rev (gen_find_func_prototype 0 finddecl_list)
-  in
+
   let gen_wrapped_find_func_prototype_list finddecl_list =
     let get_for_loop_range finddecl =
       match finddecl.A.frange with
@@ -183,9 +267,6 @@ let translate sast =
                   )
     in List.rev (gen_wrapped_find_func_prototype 0 finddecl_list)
   in
-  let gen_all_ctx_function =
-    String.concat "\n" (List.map gen_function_for_one_ctx contexts)
-  in
   let get_ctx_by_name ctx_name =
     let rec cmp_ctx_with_name ctxlist =
       match ctxlist with
@@ -197,14 +278,79 @@ let translate sast =
           | [] -> None
        )
   in
-  let gen_find_function find_funcname finddecl =
+
+  (* return: {variable_name: multieqname}, type String StringMap.t *)
+  let gen_find_function findname finddecl =
+    let (deps, indeps) = get_deps_indeps_from_context finddecl.A.fcontext in
+    let find_sast = get_find_from_context finddecl.A.fcontext findname in
+    let varmap_for_ctx = StringMap.find finddecl.A.fcontext varmap in
+    let varlist = StringMap.fold (fun key value lst -> key::lst) varmap_for_ctx [] in
+
+    (***** Helper functions for the current finddecl { *****)
+    let rec gen_finddecl_deps (str, count, cur_expr_number) expr =
+      let count = count + 1 in
+      let cur_expr_number =
+        if IntMap.mem count find_sast then
+          count
+        else
+          cur_expr_number
+      in
+      (* let str = debug (str ^ "// cur_expr = " ^ (A.string_of_expr expr) ^ "\n") in *)
+      (* let str = debug (str ^ "// cur_expr_number = " ^ (string_of_int cur_expr_number) ^ "\n") in *)
+      (* let str = debug (str ^ "// count = " ^ (string_of_int count) ^ "\n") in *)
+
+      match expr with
+        | A.Id(_) | A.Literal(_) | A.Strlit(_) -> (str, count, cur_expr_number)
+        | A.Binop(eLeft, _, eRight) ->
+          gen_finddecl_deps (gen_finddecl_deps (str, count, cur_expr_number) eLeft) eRight
+        | A.Unop(_, e) -> gen_finddecl_deps (str, count, cur_expr_number) e
+        | A.Assign(id, e) ->
+          let (str, count, cur_expr_number) = gen_finddecl_deps (str, count, cur_expr_number) e in
+          let deps = (IntMap.find cur_expr_number find_sast).S.deps in
+          let deplist =
+            StringMap.fold (fun key value lst -> key::lst) deps []
+          in
+
+          ( str ^
+            String.concat
+              ""
+              (List.map
+                (gen_multieq_call_in_find (deps, StringMap.empty) StringMap.empty varmap_for_ctx)
+                deplist)
+            , count, cur_expr_number
+          )
+        | A.Builtin(_, exprlist) -> List.fold_left gen_finddecl_deps (str, count, cur_expr_number) exprlist
+    in
+
+    let gen_finddecl_stmt (str, count, cur_expr_number) stmt =
+      let str = str ^ (gen_stmt stmt) in
+
+      match stmt with
+        | A.Expr(expr) ->
+            let (str, count, cur_expr_number) =
+              (gen_finddecl_deps (str, count, cur_expr_number) expr)
+            in
+            (str, count, cur_expr_number)
+        | _ -> (str, count, cur_expr_number)
+    in
+    (***** Helper functions for the current finddecl end } *****)
+
     (* naming of the function: find_(context_name)_(golabl_counting_num) *)
-    find_funcname ^ " {\n  " ^
-    String.concat ""(List.map gen_decl_ctx contexts) ^
-    (match (get_ctx_by_name finddecl.A.fcontext) with | Some(cxt) -> gen_function_call_in_find cxt
-                                                      | None -> "") ^
-    (gen_finddecl finddecl) ^ "}\n" ^
-    "\n"
+    "void " ^ findname ^ "(" ^
+    ((fun x -> match x with | "" -> " "
+                            | _ -> "double " ^ x ) (get_id_range finddecl)) ^
+    ")" ^ "{\n" ^
+    gen_decl_ctx_and_find find_sast finddecl ^
+    (match (get_ctx_by_name finddecl.A.fcontext) with
+      | Some(cxt) ->
+          String.concat
+            "\n"
+            (List.map (gen_multieq_call_in_find (deps, indeps) StringMap.empty varmap_for_ctx) varlist)
+      | None -> ""
+    ) ^ "\n" ^
+    (* info "//-----gen_finddecl_stmt-----\n" ^ *)
+    (fun (a, _, _) -> a) (List.fold_left gen_finddecl_stmt ("", 0, 0) finddecl.A.fbody) ^
+    "}\n\n"
   in
   let gen_find_func_call_list finddecl_list =
     let rec gen_find_func_call count find_list =
@@ -227,8 +373,8 @@ let translate sast =
 
   in
   String.concat "" lib ^
-  gen_all_ctx_function ^
-  String.concat "" (List.map2 gen_find_function (gen_find_func_prototype_list finds) (List.rev finds)) ^
+  String.concat "\n" (List.map gen_function_for_one_ctx contexts) ^
+  String.concat "" (List.map2 gen_find_function (gen_findname_from_find 0 finds) finds) ^
   String.concat "" (gen_wrapped_find_func_prototype_list finds) ^
   "int main() {\n" ^
   String.concat "" (gen_find_func_call_list finds) ^

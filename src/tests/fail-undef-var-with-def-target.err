@@ -1,1 +1,1 @@
-Fatal error: exception Failure("variable not defined, "acres"")
+Fatal error: exception Failure("Unresolvable identifier, "acres" found while following "acres"'s dependency chain.")
