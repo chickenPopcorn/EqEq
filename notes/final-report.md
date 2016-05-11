@@ -10,9 +10,9 @@ EqualsEquals - "eqeq" for short - is a language designed for simple equation eva
 
 # Tutorial <!-- { DRI: Tianci -->
 ## Environment Setup
-The compiler has been built and tested on OS X El Capitan, Ubuntu (what other environment did you guys use?) 
+The compiler has been built and tested on OS X El Capitan, Ubuntu (what other environment did you guys use?)
 (what OCaml environment are we using?)
-After OPAM is initialized, go to the the directory where you want EqEq installed and clone the git repository: 
+After OPAM is initialized, go to the the directory where you want EqEq installed and clone the git repository:
 ```bash
 $ git clone https://github.com/rxie25/PLT2016Spring.git
 ```
@@ -26,15 +26,18 @@ This creates the complier for EqEq that takes in '.eq' files and complies them t
 ```
 $ ./eqeq.native [options] < [your file name]
 ```
-There are additional flags `-s` for printing the dependency table of the variables. 
+There are additional flags `-s` for printing the dependency table of the variables.
 ## Basics and Syntax
-###Primitives
-All primitive are declared with implicit types by an identification. 
-###Operators
-EqEq supports the fellowing binary operators and unary operators:
-1. Arithmetic (+, -, /, *, )
-2. 
+### Primitives
+All primitive are declared with implicit types by an identification.
+### Operators
+EqEq supports the fellowing operators:
+1. Arithmetic: `+, -, /, *, ^, %, sin, cos, tan, sqrt, log, | ID |`
+2. Conditional: `==, !=, <, <=, >, >=, &&, ||, !`
+3. Other: `range`
+
 ## Control Structures and Built-in Functions
+
 ## Example Programs
 
 <!-- Reference from the LRM { -->
