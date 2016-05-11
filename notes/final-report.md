@@ -747,31 +747,90 @@ the order of their precedence.
 
 # Project Plan <!-- { DRI: Jimmy -->
 ## Roles and Responsibilities
-## Planning
+We assigned four main roles ­ Manager(two), Language Guru, System
+Architect, Tester to each member on the team. As we developed our language,
+the role were not that clearly divided. The team would help each other when we
+ran into particularly difficult problems, and assign each other pull request
+to review before merge. The table below illustrates the main
+roles and one example of a part we contributed heavily in.
+
+| Name | Responsibilities|
+|------|-------|
+| Nam Nhat Hoang |  Language Guru,  Code Generation|
+| Tianci Zhong   | Manager,  Semantic Analysis, Code Generation |
+| Ruicong Xie    | Tester, Code Generation |
+| Lanting He     | Tester, Code Geneation |
+| Jonathan Zacsh | System Architect, Semantic Analysis |
+## Timeline
+| Time | Events|
+|------|-------|
+|Jan 25|First Commit|
+|Jan 25|Submitted Project Proposal|
+|Mar 7|Submitted Language Reference Manual|
+|Mar 27|First Travis CI Build|
+|Mar 31|Successfully Generated Code (“Hello World”)|
+|April 25|Major Language Features Complete|
+|May 7|Variable Dependency Resolved |
+|May 9|Presentation Presentation|
+|May 11|Project Submission|
 ## Specification
+At the beginning of the semester we had the idea to make a physics language. Later we
+realized  a lot of the problem we have to solve are just mathematical equations. That's when
+we had the idea to make EqEq, a mathematical language that solves equations. However we later
+found symbolic mathematical manipulate was too broad of a topic to tackle, so we scaled our compiler back
+to variable resolution in mathematical equation.
 ## Development
+We first worked together on `scanner.mll`, `parser.mly` and `ast.ml`,
+as no one on our team had any prior experience  with OCaml. Our first milestone
+was to make a very basic scanner, parser, and generator. We built up the basic
+pipeline for automated testing on Travis CI. Whenever we worked on a new feature,
+we would created a new branch and open a pull request to merge with master. No pull request
+was accepted unless it passed all of the tests and was review by one of the team member.
+Once we had simple hard coded version of `hell-world.eq` working with our compiler,
+we quickly decided to split into smaller groups to tackled some more difficult problems, like
+multiple-line equation, context resolution, variable dependency, etc.
+We initially added semantic analysis and naive version of variable mapping for scope and
+variable resolution. However we soon realized the the problem is more complex, and built
+`relation.ml` a variable dependency table to deal with the problem, in which we used DFS to detect
+cyclic reference.
 ## Testing
+While developing the code, we concurrently tested what we wrote. When we initially developing our language we had `debugtokenizer.ml` and `debug_frontend.py` to test the font end of our language. The first program splits out correct recognized tokens when fed with source code in eqeq, while the second one runs the tokens through `parser.ml` with `menhir`.   After we Finished the bulk of the front end of our compiler. We set up automated testing on Travis CI with `.travis.yml` to test if our language is compiling properly for each commit. All the testing suite and processes will be discussed in detail later in the testing section of this report.
 ## Software Development Environment
+**Programming Language Stack**
+- Git Repository Hosted on Github for version control which contains
+the compiler code and test suite
+- OCaml for scanning, parsing, and semantically checking eqeq source
+code and generation of C target code output
+- Bash Shell Scripts for running our program given an input eqeq file (.eqeq) and
+an output C file (.c) file, as well as automating testing
+- Makefile for all things compiling, linking, and test related
+
+
+**Tools**
+- Travis CI for automated continuous integration testing through Github to make
+sure no new code modifies the correct functionality of the language
+- Sublime, Atom, Vim for text editing, depending on each team member’s
+preference
+
 ## Programming Style Guide
+While programming, all group members followed these following style guidelines to
+ensure our project stayed consistent:
+- Lines of code should not be more than 80 characters
+- No tabs for indentation
+- Indentation is always 4 spaces
+- Naming consistency between the different program files
+- Newline at the end of each file
+- One line between each declaration block
+- White space for readability
+
 <!-- end project plan } -->
-
-# Translator Architecture <!-- { DRI: Nam -->
-## Scanner
-## Parser
-## Semantic Analyzer
-## Code Generator
-<!-- end translator architecture } -->
-
-# Test Plan <!-- { DRI: Jon -->
-## Testing Phases
-## Automation
-## Test Suites
-## Examples
-<!-- end test plan and scripts } -->
 
 # Lesson Learned <!-- { -->
 ## Tianci <!-- DRI: Tianci -->
 ## Jimmy <!-- DRI: Jimmy -->
+Importance of having a seamless workflow and communication when collaborating for large scale development.
+Also don't be afraid to tackle bigger problems.
+
 ## Jon <!-- DRI: Jon -->
 ## Nam <!-- DRI: Nam -->
 ## Lanting <!-- DRI: Lanting -->
