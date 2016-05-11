@@ -726,11 +726,11 @@ roles and one example of a part we contributed heavily in.
 
 | Name | Responsibilities|
 |------|-------|
-| Nam Nhat Hoang |  System Architect,  Code Generation|
-| Tianci Zhong   | Manager,  Code Generation|
-| Ruicong Xie    | Manager, Semantic Analysis|
-| Lanting He     | Tester, Semantic Analysis|
-| Jonathan Zacsh | Language Guru, Relation|
+| Nam Nhat Hoang |  Language Guru,  Code Generation|
+| Tianci Zhong   | Manager,  Semantic Analysis, Code Generation |
+| Ruicong Xie    | Tester, Code Generation |
+| Lanting He     | Tester, Code Geneation |
+| Jonathan Zacsh | System Architect, Semantic Analysis |
 ## Timeline
 | Time | Events|
 |------|-------|
