@@ -723,6 +723,7 @@ The role were not that clearly divided. The team would help each other when we
 ran into a particularly difficult problem, and assign each other pull request
 to review before merge. The table below illustrates the main
 roles and one example of a part we contributed heavily in.
+
 | name | Responsibilities|
 |------|-------|
 | Nam Nhat Hoang |  System Architect,  Code Generation|
