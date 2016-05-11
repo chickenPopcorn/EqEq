@@ -258,7 +258,7 @@ let findInitRelator (f : A.find_decl) (c : S.ctx_scopes) : (S.equation_relations
       let left : string list = List.sort String.compare originalDeps in
       let right : string list = List.sort String.compare newDeps in
 
-        left != right
+        left <> right
     in
 
     let (rangeRels, idx) =
