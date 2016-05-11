@@ -1,6 +1,9 @@
 # Introduction <!-- { DRI: Lanting -->
-## Background
-## Goals and Objectives
+## Background && Goals
+
+Current equation solving languages, such as R, Matlab, Mathematica, though powerful, still require users to have a basic understanding for programming. It is hard for young students in high school or college with no programming background to start using programming to solve the calculations from homework and textbooks. However, programming is extremely helpful when they have multiple variables and tens of equations when manually calculation is time consuming and error prone. Therefore, we truly think it will be great if we can create a 
+programming language that helps students solve tedious and lengthy mathematical equations with very simple and flexible syntax. Our language EqualEqual targets to be an educational tool for students so that students can move their equations on their whiteboard to a EqualEqual program with as little change as possible. We believe that using programming to solve questions should not be an obstacle for students in their studies, and thus have students enjoyed more with their studies. 
+
 ## Language Evolution
 
 <!-- Reference from the LRM { -->
@@ -775,6 +778,9 @@ the order of their precedence.
 <!-- } -->
 
 # Conclusions <!-- { DRI: Lanting -->
+
+As stated at the bigining, EqualEqual aims to provide students an easy tool to solve lengthy and error-prone mathematical equations. With all the features we mentioned above, we belive that EqualEqual has succeeded in becoming such a user-friendly and smart language. Due to the time manner, we are not able to have it been extremly powerful. However, We expect it to be more powerful, e.g: solve complex variable circular dependency functions,  in the future by using more sophisticated algorithms. 
+
 <!-- end conclusions } -->
 
 # Full Code Listing <!-- { DRI: Nam -->
