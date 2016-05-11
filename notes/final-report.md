@@ -717,14 +717,14 @@ the order of their precedence.
 
 # Project Plan <!-- { DRI: Jimmy -->
 ## Roles and Responsibilities
-we assigned four main roles ­ Manager(two), Language Guru, System
-Architect, Tester ­ to each member on the team. As we developed our language.
-The role were not that clearly divided. The team would help each other when we
-ran into a particularly difficult problem, and assign each other pull request
+We assigned four main roles ­ Manager(two), Language Guru, System
+Architect, Tester to each member on the team. As we developed our language,
+the role were not that clearly divided. The team would help each other when we
+ran into particularly difficult problems, and assign each other pull request
 to review before merge. The table below illustrates the main
 roles and one example of a part we contributed heavily in.
 
-| name | Responsibilities|
+| Name | Responsibilities|
 |------|-------|
 | Nam Nhat Hoang |  System Architect,  Code Generation|
 | Tianci Zhong   | Manager,  Code Generation|
@@ -747,7 +747,7 @@ roles and one example of a part we contributed heavily in.
 At the beginning of the semester we had the idea to make a physics language. Later we
 realized  a lot of the problem we have to solve are just mathematical equations. That's when
 we had the idea to make EqEq, a mathematical language that solves equations. However we later
-found symbolic mathematical manipulate was too broad of a topic to tackle, so we scaled back
+found symbolic mathematical manipulate was too broad of a topic to tackle, so we scaled our compiler back
 to variable resolution in mathematical equation.
 ## Development
 We first worked together on `scanner.mll`, `parser.mly` and `ast.ml`,
@@ -761,7 +761,7 @@ we quickly decided to split into smaller groups to tackled some more difficult p
 multiple-line equation, context resolution, variable dependency, etc.
 We initially added semantic analysis and naive version of variable mapping for scope and
 variable resolution. However we soon realized the the problem is more complex, and built
-`relation.ml` a variable dependency table to deal with the problem. We used DFS to detect
+`relation.ml` a variable dependency table to deal with the problem, in which we used DFS to detect
 cyclic reference.
 ## Testing
 While developing the code, we concurrently tested what we wrote. When we initially developing our language we had `debugtokenizer.ml` and `debug_frontend.py` to test the font end of our language. The first program splits out correct recognized tokens when fed with source code in eqeq, while the second one runs the tokens through `parser.ml` with `menhir`.   After we Finished the bulk of the front end of our compiler. We set up automated testing on Travis CI with `.travis.yml` to test if our language is compiling properly for each commit. All the testing suite and processes will be discussed in detail later in the testing section of this report.
