@@ -824,10 +824,50 @@ ensure our project stayed consistent:
 - White space for readability
 
 # Translator Architecture <!-- { DRI: Nam -->
+The compiler is, of course, built in OCaml. The architecture of the compiler is demonstrated in the block diagram below. Our compiler source code includes 7 files:
+- `eqeq.ml`: main module that calls other modules to produce the output
+- `ast.ml` AST (abstract syntax tree) representation of the language
+- `sast.ml` SAST (semantically checked AST) representation of the language
+- `scanner.ml` tokenizes a source file
+- `parser.ml` constructs an AST from the output tokens of the scanner
+- `semant.ml` checks the incoming AST to make sure that the AST is semanticallly correct, and produces a SAST
+- `codegen.ml` converts a SAST into a working C code
+
+![](img/2016-05-11_17:49:10.png)
+
+In summary, the source code is passed through the scanner and parser to create an Abstract Syntax Tree, which then went through the Semantic Analyzer to create an modified AST (aka. SAST). The C code is generated from the SAST using a code generator.
+
 ## Scanner
+The scanner tokenizes the input from the input file. Additionally, it discards unnecessary characters and check the syntax of the program.
+
 ## Parser
+The parser constructs an abstract syntax tree (AST) with the input token from the scanner. The highest level of the AST contains a global context block, all context blocks and all find blocks. The following figure demonstrates the main structure of the AST. The parser also further checks the syntax of the program. The combination of the parser and the scanner makes sure that the input program is syntactically correct.
+
+![](img/2016-05-11_17:49:51.png)
+
+<!-- ![](img/2016-05-11_17:50:13.png) -->
+
 ## Semantic Analyzer
+The semantic analyzer has two main jobs. The first one is to check for all the semantic errors of the program. The following semantic errors are checked in our compiler:
+- Illegal usage of reserved keyword, e.g: break
+- Illegal usage of duplicate context block
+- Illegal usage of mathematical equation, e.g: cos(3,4,5)
+- Lower case Context name
+- Bad syntax of if / if-elseif /if-else
+- Undeclared variables and undeclared context
+- Illegal use of build-in function (e.g: `print("%0.0f ", a)-print("%0.0f ", a)`; `range(3, 5, "abc")`)
+- Illegal return
+- Illegal find block declaration
+- Cyclic dependency
+
+The second job of the semantic analyzer is taking the parser's AST and producing an SAST. Our SAST contains the AST, a multi-equation dependency structure, a context variable map, and a library list.
+- **Multi-equation dependency structure** - At the high level, the multi-equation dependency structure can be understood as a structure of graphs where each node is a variable, and each edge is the dependency between two variables. The multi-equation dependency structure contains all the variables that are declared for each context block and its corresponding find blocks. The structure indicates whether a variable is dependent on other variables or not. If a variable `x` is independent of other variables, the structure shows the expression assigned to `x`. If a variable `y` is independent of other variables, the structure shows the list of variables that `y` depends on.
+- **Context variable map** - This is a structure that contains information of the variables for each context. The generator uses the information provided by the context variable map to generate definitions for variables (e.g. "double x;") and to match the name of the variables with the corresponding names in the generated code in C (e.g. a variable `a` in context `MyCtx` could be named as `MyCtx_a_<counter_number_to_avoid_duplicates>`).
+- **Library list** - blah blah blah. <!-- DRI: Lanting - 1 sentence about the library list -->
+
 ## Code Generator
+The code generator uses the SAST provided by the semantic analyzer to construct the `C` instructions for the `eqeq` program.
+<!-- TODO finish this section -->
 <!-- end translator architecture } -->
 
 # Test Plan <!-- { DRI: Jon -->
@@ -856,9 +896,9 @@ As stated at the beginning, EqualEqual aims to provide students an easy tool to 
 <!-- end conclusions } -->
 
 # Full Code Listing <!-- { DRI: Nam -->
-## Codes
 ## Commit summary
 ## Project Log
+## Codes
 <!-- end full code listing } -->
 
 
