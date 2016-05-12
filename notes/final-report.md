@@ -980,14 +980,15 @@ ensure our project stayed consistent:
 - White space for readability
 
 # Translator Architecture <!-- { DRI: Nam -->
-The compiler is, of course, built in OCaml. The architecture of the compiler is demonstrated in the block diagram below. Our compiler source code includes 7 files:
-- `eqeq.ml`: main module that calls other modules to produce the output
-- `ast.ml` AST (abstract syntax tree) representation of the language
-- `sast.ml` SAST (semantically checked AST) representation of the language
-- `scanner.ml` tokenizes a source file
-- `parser.ml` constructs an AST from the output tokens of the scanner
-- `semant.ml` checks the incoming AST to make sure that the AST is semanticallly correct, and produces a SAST
-- `codegen.ml` converts a SAST into a working C code
+The compiler is, of course, built in OCaml. The architecture of the compiler is demonstrated in the block diagram below. Our compiler source code includes 8 files:
+- `eqeq.ml` - main module that calls other modules to produce the output
+- `ast.ml` - AST (abstract syntax tree) representation of the language
+- `sast.ml` - SAST (semantically checked AST) representation of the language
+- `scanner.ml` - tokenizes a source file
+- `parser.ml` - constructs an AST from the output tokens of the scanner
+- `semant.ml` - checks the incoming AST to make sure that the AST is semanticallly correct, and produces a SAST
+- `relation.ml` - an extension of `semant.ml`, used to generate a large part of the SAST
+- `codegen.ml` - converts a SAST into a working C code
 
 ![](img/2016-05-11_17:49:10.png)
 
@@ -1001,7 +1002,7 @@ The parser constructs an abstract syntax tree (AST) with the input token from th
 
 ![](img/2016-05-11_17:49:51.png)
 
-<!-- ![](img/2016-05-11_17:50:13.png) -->
+![](img/2016-05-11_17:50:13.png)
 
 ## Semantic Analyzer
 The semantic analyzer has two main jobs. The first one is to check for all the semantic errors of the program. The following semantic errors are checked in our compiler:
@@ -1016,14 +1017,20 @@ The semantic analyzer has two main jobs. The first one is to check for all the s
 - Illegal find block declaration
 - Cyclic dependency
 
-The second job of the semantic analyzer is taking the parser's AST and producing an SAST. Our SAST contains the AST, a multi-equation dependency structure, a context variable map, and a library list.
-- **Multi-equation dependency structure** - At the high level, the multi-equation dependency structure can be understood as a structure of graphs where each node is a variable, and each edge is the dependency between two variables. The multi-equation dependency structure contains all the variables that are declared for each context block and its corresponding find blocks. The structure indicates whether a variable is dependent on other variables or not. If a variable `x` is independent of other variables, the structure shows the expression assigned to `x`. If a variable `y` is independent of other variables, the structure shows the list of variables that `y` depends on.
+The second job of the semantic analyzer is taking the parser's AST and producing an SAST. Our SAST contains the AST, a multi-line equation dependency structure, a context variable map, and a library list.
+- **Multi-line equation dependency structure** - At the high level, the multi-line equation dependency structure can be understood as a structure of graphs where each node is a variable, and each edge is the dependency between two variables. The multi-line equation dependency structure contains all the variables that are declared for each context block and its corresponding find blocks. The structure indicates whether a variable is dependent on other variables or not. If a variable `x` is independent of other variables, the structure shows the expression assigned to `x`. If a variable `y` is independent of other variables, the structure shows the list of variables that `y` depends on.
 - **Context variable map** - This is a structure that contains information of the variables for each context. The generator uses the information provided by the context variable map to generate definitions for variables (e.g. "double x;") and to match the name of the variables with the corresponding names in the generated code in C (e.g. a variable `a` in context `MyCtx` could be named as `MyCtx_a_<counter_number_to_avoid_duplicates>`).
-- **Library list** - blah blah blah. <!-- DRI: Lanting - 1 sentence about the library list -->
+- **Library list** - This is a list of strings that contains everthing in the running EqualEqual program that calls C library functions ( e.g: cos( ) will call math.h and print( ) will call stdio.h ). In Codegen.ml we will scan through this list and include the corresponding C libraries in the generated C code. 
 
 ## Code Generator
 The code generator uses the SAST provided by the semantic analyzer to construct the `C` instructions for the `eqeq` program.
-<!-- TODO finish this section -->
+- **Global context and context blocks** - Multi-line equations in both global context and context blocks are generated as functions in the output C program. The return value of a function will be the the result of the multi-line equation. To be unique, a function name includes the corresponding context name and a counter (e.g. `MyCtx_a_0()`).
+- **Find blocks** - Find blocks are generated as a function in the output C program (e.g. `find_MyCtx_1()`). In find blocks, variables that are defined and used locally will be assigned to the corresponding functions in global context (e.g. `a = MyCtx_a_0(b, d);`).
+- **Dependency Generation** - The multi-line equations are resolved when a new variable is declared. The functions needed to be regenerated will be generated using the multi-line equation dependency structure, as mentioned in the above section (Semantic Analyzer). Since efficiency is not a priority, the dependency generation might generate duplicated assignments.
+- **Range** - blah blah. Those functions will be called by `main()`. <!-- DRI: Jimmy - 1 sentence about codegen for range -->
+
+## Utilities
+The compiler can generate pretty-print strings for AST and SAST with flags `-a` and `-s`. The printed AST and SAST show us the output of the program through different phases and help debugging much faster.
 <!-- end translator architecture } -->
 
 # Test Plan <!-- { DRI: Jon -->
