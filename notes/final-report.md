@@ -10,8 +10,22 @@ EqualsEquals - "eqeq" for short - is a language designed for simple equation eva
 
 # Tutorial <!-- { DRI: Tianci -->
 ## Environment Setup
-The compiler has been built and tested on OS X El Capitan, Ubuntu (what other environment did you guys use?)
-(what OCaml environment are we using?)
+The compiler has been built and tested on OS X El Capitan, Ubuntu 15.10. The EqEq compiler Installation of Dependencies below:
+
+**Installation under Ubuntu 15.10**
+```bash
+$ sudo apt-get install -y ocaml m4 llvm opam
+$ opam init
+$ eval `opam config env`
+```
+
+**Installation under OS X**
+```bash
+$ brew install opam
+$ opam init
+$ eval `opam config env`
+```
+
 After OPAM is initialized, go to the the directory where you want EqEq installed and clone the git repository:
 ```bash
 $ git clone https://github.com/rxie25/PLT2016Spring.git
@@ -27,11 +41,151 @@ This creates the complier for EqEq that takes in '.eq' files and complies them t
 $ ./eqeq.native [options] < [your file name]
 ```
 There are additional flags `-s` for printing the dependency table of the variables.
+## Modifying and Testing the Compiler
+To run **all end-to-end checks**, simply: `make e2e`.
+- or just run `make lint` to see non-test checks
+- or just run `make test` to see input/output checks:
+
+```bash
+$ make test # or: `make TEST_OPTS=-h test` or any other options it takes
+
+#... {clean, build, etc.}-output snipped...
+
+Running 1 tests:
+        tests/test-helloworld.eq,
+[1] "test-helloworld"   asserting target\'s behavior             Result: PASS
+
+Summary: PASSED
+```
+
+### Faster Code & Test Cycle
+**tl;dr** make use of the `TEST_OPTS=...` flag of `make test`
+
+```bash
+$ time { make test; }
+
+# ... `make test` output snipped...
+
+Summary of 118 tests:   9 SKIPPED       109 PASSED [87%]
+
+real    0m10.697s
+user    0m1.660s
+sys     0m0.868s
+```
+**Problem**: With over a 100 tests, you might want to punt a full `make test`
+for later. When you're writing code, you might benefit from **just running your
+own tests** _(plus a few super-simple general tests you'd like to see break,
+immediately)_.
+
+**Solution**: say you're developing "cool feature" against two new test files,
+`fail-cool-feature.eq` and `test-cool-feature.eq` and you want to know
+*immediately* if you break `test-helloworld.eq`:
+
+```
+$ make TEST_OPTS='-v tests/*cool-feature*.eq tests/test-helloworld.eq' test
+Running 3 tests:
+  "cool feature"       "cool feature"
+  "helloworld"
+[ 1] "test-cool-feature"       asserting target's behavior      Result: PASS
+[ 2] "fail-cool-feature"       asserting compilation fails      Result: PASS
+[ 3] "test-helloworld"         asserting target's behavior      Result: PASS
+
+Summary of 3 tests:     3 PASSED [100%]
+```
+
+### Writing Tests
+So you wrote a feature, like... a `CrazyNewKeyword` that shuts down user's
+computer? Great! Do this:
+```sh
+$ $EDIT tests/test-crazynewkeyword.eq
+  # ... ideal case, capturing the complexity you've added (a correct program)
+
+$ $EDIT tests/test-crazynewkeyword.out
+  # ... what your example compiled eq C program should do (just the output)
+$ make test # ensure its result is "PASS"!
+
+$ $EDIT tests/fail-crazynewkeyword.eq
+  # ... any misuse you can think of (an incorrect program)
+$ $EDIT tests/fail-crazynewkeyword.err
+  # ... how our compiler should complain for your example eq source
+$ make test # ensure its result is "PASS"!
+```
+
+Note: currently we're trying to only test the behavior of our *compiled* C
+programs _(that is: we're not testing what our compiler outputs, but what its
+output programs do)_.
+
+### Debugging Compiler's Phases
+
+#### Scanner: Tokens We Generate
+To see what our scanner thinks of source programs, with `debugtokens` target:
+```sh
+$ make debugtokens && ./debugtokens.native < tests/test-helloworld.eq
+# .. snipped ...
+CTX
+ASSIGN
+LBRACE
+ID
+ASSIGN
+LBRACE
+# ... snipped ....
+ID
+LPAREN
+STRLIT
+COMMA
+ID
+RPAREN
+SEMI
+RBRACE
+```
+
+#### Parser: Our Grammar
+Interactive mode with menhir and our parser:
+```sh
+$ menhir --interpret --interpret-show-cst parser.mly # note missing ASSIGN
+CTX LBRACE ID ASSIGN LITERAL SEMI RBRACE
+
+REJECT
+```
+
+#### SAST: Our Semantically-Checked AST
+To see the output of our semantic analysis ([as of]):
+```bash
+make && ./eqeq.native -s < $YOUR_TEST_FILE
+```
+[as of]: https://github.com/rxie25/PLT2016Spring/commit/6e908c68afdec6fe183db3170f43dddd4c69d11c
+
+#### Codegen: EqualsEquals compiler itself
+To get the generated C code (ie. the output of code gen):
+```bash
+make && ./eqeq.native < $YOUR_TEST_FILE
+```
+
+### One-time Setup
+
+The above assumes you've done the one-time installation of dependencies for your
+machine, thoroughly documented in `./INSTALL`
+
+#### Quickstart
+
+Can't remember if you've done the one-time setup on your machine?
+
+1. Make sure `git status` shows you're in a clean copy of this repo
+2. If you can do the below with all tests passing _(obviously)_ then you
+  already setup your machine:
+```bash
+git checkout 1548af6bc79197445a203 &&
+  make test &&
+  make clean >/dev/null &&
+  git checkout master
+```
+
 ## Basics and Syntax
 ### Primitives
 All primitive are declared with implicit types by an identification.
 ### Operators
 EqEq supports the fellowing operators:
+
 1. Arithmetic: `+, -, /, *, ^, %, sin, cos, tan, sqrt, log, | ID |`
 2. Conditional: `==, !=, <, <=, >, >=, &&, ||, !`
 3. Other: `range`
