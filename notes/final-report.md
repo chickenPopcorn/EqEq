@@ -190,19 +190,21 @@ All primitive are declared with implicit types by an identification.
 EqEq supports the fellowing operators:
 
 1. Arithmetic: `+, -, /, *, ^, %, sin, cos, tan, sqrt, log, | ID |`
+
 2. Conditional: `==, !=, <, <=, >, >=, &&, ||, !`
 3. Other: `range`
 
 ## Control Structures and Built-in Functions
 
-## Example Programs
 
+# Example Programs
 <!-- Reference from the LRM { -->
 ## Definition of a Program
 
 The simplest - though contrived - valid program is:
 ```js
-find { printf("Hello, all %.0f readers!\n", 21 * 2); }
+a = 42;
+find a { printf("Hello, all %.0f readers!\n", a); }
 ```
 
 Which prints the following to standard out: `Hello, all 42 readers!`
@@ -901,8 +903,8 @@ the order of their precedence.
 
 # Project Plan <!-- { DRI: Jimmy -->
 ## Roles and Responsibilities
-We assigned four main roles ­ Manager(two), Language Guru, System
-Architect, Tester to each member on the team. As we developed our language,
+We assigned four main roles ­ Manager, Language Guru, System
+Architect, Testers to each member on the team. As we developed our language,
 the role were not that clearly divided. The team would help each other when we
 ran into particularly difficult problems, and assign each other pull request
 to review before merge. The table below illustrates the main
@@ -912,8 +914,8 @@ roles and one example of a part we contributed heavily in.
 |------|-------|
 | Nam Nhat Hoang |  Language Guru,  Code Generation|
 | Tianci Zhong   | Manager,  Semantic Analysis, Code Generation |
-| Ruicong Xie    | Tester, Code Generation |
-| Lanting He     | Tester, Code Geneation |
+| Ruicong Xie    | Tester, Semantic Analysis |
+| Lanting He     | Tester, Code Generation |
 | Jonathan Zacsh | System Architect, Semantic Analysis |
 ## Timeline
 | Time | Events|
