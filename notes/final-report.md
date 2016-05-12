@@ -1,6 +1,9 @@
 # Introduction <!-- { DRI: Lanting -->
-## Background
-## Goals and Objectives
+## Background && Goals
+
+Current equation solving languages, such as R, Matlab, Mathematica, though powerful, still require users to have a basic understanding for programming. It is hard for young students in high school or college with no programming background to start using programming to solve the calculations from homework and textbooks. However, programming is extremely helpful when they have multiple variables and tens of equations when manually calculation is time consuming and error prone. Therefore, we truly think it will be great if we can create a
+programming language that helps students solve tedious and lengthy mathematical equations with very simple and flexible syntax. Our language EqualEqual targets to be an educational tool for students so that students can move their equations on their whiteboard to a EqualEqual program with as little change as possible. We believe that using programming to solve questions should not be an obstacle for students in their studies, and thus have students enjoyed more with their studies.
+
 ## Language Evolution
 
 <!-- Reference from the LRM { -->
@@ -898,19 +901,127 @@ the order of their precedence.
 
 # Project Plan <!-- { DRI: Jimmy -->
 ## Roles and Responsibilities
-## Planning
+We assigned four main roles ­ Manager(two), Language Guru, System
+Architect, Tester to each member on the team. As we developed our language,
+the role were not that clearly divided. The team would help each other when we
+ran into particularly difficult problems, and assign each other pull request
+to review before merge. The table below illustrates the main
+roles and one example of a part we contributed heavily in.
+
+| Name | Responsibilities|
+|------|-------|
+| Nam Nhat Hoang |  Language Guru,  Code Generation|
+| Tianci Zhong   | Manager,  Semantic Analysis, Code Generation |
+| Ruicong Xie    | Tester, Code Generation |
+| Lanting He     | Tester, Code Geneation |
+| Jonathan Zacsh | System Architect, Semantic Analysis |
+## Timeline
+| Time | Events|
+|------|-------|
+|Jan 25|First Commit|
+|Jan 25|Submitted Project Proposal|
+|Mar 7|Submitted Language Reference Manual|
+|Mar 27|First Travis CI Build|
+|Mar 31|Successfully Generated Code (“Hello World”)|
+|April 25|Major Language Features Complete|
+|May 7|Variable Dependency Resolved |
+|May 9|Presentation Presentation|
+|May 11|Project Submission|
 ## Specification
+At the beginning of the semester we had the idea to make a physics language. Later we
+realized  a lot of the problem we have to solve are just mathematical equations. That's when
+we had the idea to make EqEq, a mathematical language that solves equations. However we later
+found symbolic mathematical manipulate was too broad of a topic to tackle, so we scaled our compiler back
+to variable resolution in mathematical equation.
 ## Development
+We first worked together on `scanner.mll`, `parser.mly` and `ast.ml`,
+as no one on our team had any prior experience  with OCaml. Our first milestone
+was to make a very basic scanner, parser, and generator. We built up the basic
+pipeline for automated testing on Travis CI. Whenever we worked on a new feature,
+we would created a new branch and open a pull request to merge with master. No pull request
+was accepted unless it passed all of the tests and was review by one of the team member.
+Once we had simple hard coded version of `hell-world.eq` working with our compiler,
+we quickly decided to split into smaller groups to tackled some more difficult problems, like
+multiple-line equation, context resolution, variable dependency, etc.
+We initially added semantic analysis and naive version of variable mapping for scope and
+variable resolution. However we soon realized the the problem is more complex, and built
+`relation.ml` a variable dependency table to deal with the problem, in which we used DFS to detect
+cyclic reference.
 ## Testing
+While developing the code, we concurrently tested what we wrote. When we initially developing our language we had `debugtokenizer.ml` and `debug_frontend.py` to test the font end of our language. The first program splits out correct recognized tokens when fed with source code in eqeq, while the second one runs the tokens through `parser.ml` with `menhir`.   After we Finished the bulk of the front end of our compiler. We set up automated testing on Travis CI with `.travis.yml` to test if our language is compiling properly for each commit. All the testing suite and processes will be discussed in detail later in the testing section of this report.
 ## Software Development Environment
+**Programming Language Stack**
+- Git Repository Hosted on Github for version control which contains
+the compiler code and test suite
+- OCaml for scanning, parsing, and semantically checking eqeq source
+code and generation of C target code output
+- Bash Shell Scripts for running our program given an input eqeq file (.eqeq) and
+an output C file (.c) file, as well as automating testing
+- Makefile for all things compiling, linking, and test related
+
+
+**Tools**
+- Travis CI for automated continuous integration testing through Github to make
+sure no new code modifies the correct functionality of the language
+- Sublime, Atom, Vim for text editing, depending on each team member’s
+preference
+
 ## Programming Style Guide
-<!-- end project plan } -->
+While programming, all group members followed these following style guidelines to
+ensure our project stayed consistent:
+- Lines of code should not be more than 80 characters
+- No tabs for indentation
+- Indentation is always 4 spaces
+- Naming consistency between the different program files
+- Newline at the end of each file
+- One line between each declaration block
+- White space for readability
 
 # Translator Architecture <!-- { DRI: Nam -->
+The compiler is, of course, built in OCaml. The architecture of the compiler is demonstrated in the block diagram below. Our compiler source code includes 7 files:
+- `eqeq.ml`: main module that calls other modules to produce the output
+- `ast.ml` AST (abstract syntax tree) representation of the language
+- `sast.ml` SAST (semantically checked AST) representation of the language
+- `scanner.ml` tokenizes a source file
+- `parser.ml` constructs an AST from the output tokens of the scanner
+- `semant.ml` checks the incoming AST to make sure that the AST is semanticallly correct, and produces a SAST
+- `codegen.ml` converts a SAST into a working C code
+
+![](img/2016-05-11_17:49:10.png)
+
+In summary, the source code is passed through the scanner and parser to create an Abstract Syntax Tree, which then went through the Semantic Analyzer to create an modified AST (aka. SAST). The C code is generated from the SAST using a code generator.
+
 ## Scanner
+The scanner tokenizes the input from the input file. Additionally, it discards unnecessary characters and check the syntax of the program.
+
 ## Parser
+The parser constructs an abstract syntax tree (AST) with the input token from the scanner. The highest level of the AST contains a global context block, all context blocks and all find blocks. The following figure demonstrates the main structure of the AST. The parser also further checks the syntax of the program. The combination of the parser and the scanner makes sure that the input program is syntactically correct.
+
+![](img/2016-05-11_17:49:51.png)
+
+<!-- ![](img/2016-05-11_17:50:13.png) -->
+
 ## Semantic Analyzer
+The semantic analyzer has two main jobs. The first one is to check for all the semantic errors of the program. The following semantic errors are checked in our compiler:
+- Illegal usage of reserved keyword, e.g: break
+- Illegal usage of duplicate context block
+- Illegal usage of mathematical equation, e.g: cos(3,4,5)
+- Lower case Context name
+- Bad syntax of if / if-elseif /if-else
+- Undeclared variables and undeclared context
+- Illegal use of build-in function (e.g: `print("%0.0f ", a)-print("%0.0f ", a)`; `range(3, 5, "abc")`)
+- Illegal return
+- Illegal find block declaration
+- Cyclic dependency
+
+The second job of the semantic analyzer is taking the parser's AST and producing an SAST. Our SAST contains the AST, a multi-equation dependency structure, a context variable map, and a library list.
+- **Multi-equation dependency structure** - At the high level, the multi-equation dependency structure can be understood as a structure of graphs where each node is a variable, and each edge is the dependency between two variables. The multi-equation dependency structure contains all the variables that are declared for each context block and its corresponding find blocks. The structure indicates whether a variable is dependent on other variables or not. If a variable `x` is independent of other variables, the structure shows the expression assigned to `x`. If a variable `y` is independent of other variables, the structure shows the list of variables that `y` depends on.
+- **Context variable map** - This is a structure that contains information of the variables for each context. The generator uses the information provided by the context variable map to generate definitions for variables (e.g. "double x;") and to match the name of the variables with the corresponding names in the generated code in C (e.g. a variable `a` in context `MyCtx` could be named as `MyCtx_a_<counter_number_to_avoid_duplicates>`).
+- **Library list** - blah blah blah. <!-- DRI: Lanting - 1 sentence about the library list -->
+
 ## Code Generator
+The code generator uses the SAST provided by the semantic analyzer to construct the `C` instructions for the `eqeq` program.
+<!-- TODO finish this section -->
 <!-- end translator architecture } -->
 
 # Test Plan <!-- { DRI: Jon -->
@@ -919,22 +1030,29 @@ the order of their precedence.
 ## Test Suites
 ## Examples
 <!-- end test plan and scripts } -->
+<!-- end project plan } -->
 
 # Lesson Learned <!-- { -->
 ## Tianci <!-- DRI: Tianci -->
 ## Jimmy <!-- DRI: Jimmy -->
+Importance of having a seamless workflow and communication when collaborating for large scale development.
+Also don't be afraid to tackle bigger problems.
+
 ## Jon <!-- DRI: Jon -->
 ## Nam <!-- DRI: Nam -->
 ## Lanting <!-- DRI: Lanting -->
 <!-- } -->
 
 # Conclusions <!-- { DRI: Lanting -->
+
+As stated at the beginning, EqualEqual aims to provide students an easy tool to solve lengthy and error-prone mathematical equations. With all the features we mentioned above, we belive that EqualEqual has succeeded in becoming such a user-friendly and smart language. Due to the time manner, we are not able to have it been extremly powerful. However, We expect it to be more powerful, e.g: solve complex variable circular dependency functions,  in the future by using more sophisticated algorithms.
+
 <!-- end conclusions } -->
 
 # Full Code Listing <!-- { DRI: Nam -->
-## Codes
 ## Commit summary
 ## Project Log
+## Codes
 <!-- end full code listing } -->
 
 
