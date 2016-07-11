@@ -25,9 +25,9 @@ Currently we're working towards a ["LRM feature complete" milestone][milestone];
  - [x] **fixed** ~~in issues #12 #15:~~
       - ~~make real phases~~
       - ~~replace [_hard-coded behaviour_][dummycodegen]~~
- - [ ] **adding new** [tests for each new feature](#writing-tests)
- - [ ] **more interesting**: [semantic analysis:#24][GH24] and [code generation:#14][GH14]
- - [ ] Unraveling [TODOs] and large [meta-issues]
+ - [x] **adding new** [tests for each new feature](#writing-tests)
+ - [x] **more interesting**: [semantic analysis:#24][GH24] and [code generation:#14][GH14]
+ - [x] Unraveling [TODOs] and large [meta-issues]
 
 ## Coding, Building, Testing
 
