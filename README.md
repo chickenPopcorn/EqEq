@@ -22,4 +22,3 @@ PDFs we've handed in. eg:
 | Lanting He     | lh2756@barnard.edu     | Tester           | lh2756  | [kekeleila](https://github.com/kekeleila)
 | Jonathan Zacsh | jz2648@columbia.edu    | Language Guru    | jz2648  | [jzacsh](https://github.com/jzacsh)
 
-[Availability chart](http://www.when2meet.com/?4146526­JMFYKY)
